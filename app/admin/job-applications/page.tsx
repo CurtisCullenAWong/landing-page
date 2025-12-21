@@ -48,7 +48,7 @@ import { PDFViewer } from '@/components/pdf-viewer';
 
 interface JobApplicant {
   id: string;
-  job_id: string;
+  job_id: string | null;
   first_name: string;
   last_name: string;
   email: string;
@@ -60,6 +60,7 @@ interface JobApplicant {
   status: 'pending' | 'reviewing' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
   applied_at: string | null;
   updated_at: string | null;
+  updated_by: string | null;
 }
 
 interface JobWithTitle {
@@ -87,7 +88,7 @@ export default function JobApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [sortField, setSortField] = useState<'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at'>('applied_at');
+  const [sortField, setSortField] = useState<'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at' | 'updated_by'>('applied_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [editingApplicant, setEditingApplicant] = useState<JobApplicant | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
@@ -325,7 +326,7 @@ export default function JobApplicationsPage() {
     return map;
   }, [jobs]);
 
-  // Filter and search applicants
+  // Filter, search, and sort applicants
   const filteredApplicants = useMemo(() => {
     let filtered = [...jobApplicants];
 
@@ -337,7 +338,7 @@ export default function JobApplicationsPage() {
         applicant.last_name.toLowerCase().includes(query) ||
         applicant.email.toLowerCase().includes(query) ||
         (applicant.phone && applicant.phone.toLowerCase().includes(query)) ||
-        (jobTitlesMap.get(applicant.job_id)?.toLowerCase().includes(query))
+        (applicant.job_id ? jobTitlesMap.get(applicant.job_id)?.toLowerCase().includes(query) : 'general application'.includes(query))
       );
     }
 
@@ -346,8 +347,51 @@ export default function JobApplicationsPage() {
       filtered = filtered.filter(applicant => applicant.status === filterStatus);
     }
 
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (sortField) {
+        case 'name':
+          aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
+          bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+          break;
+        case 'email':
+          aValue = a.email.toLowerCase();
+          bValue = b.email.toLowerCase();
+          break;
+        case 'phone':
+          aValue = (a.phone || '').toLowerCase();
+          bValue = (b.phone || '').toLowerCase();
+          break;
+        case 'job_title':
+          aValue = (a.job_id ? jobTitlesMap.get(a.job_id) || '' : 'General Application').toLowerCase();
+          bValue = (b.job_id ? jobTitlesMap.get(b.job_id) || '' : 'General Application').toLowerCase();
+          break;
+        case 'status':
+          aValue = a.status.toLowerCase();
+          bValue = b.status.toLowerCase();
+          break;
+        case 'applied_at':
+          aValue = a.applied_at ? new Date(a.applied_at).getTime() : 0;
+          bValue = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+          break;
+        case 'updated_by':
+          aValue = (a.updated_by || '').toLowerCase();
+          bValue = (b.updated_by || '').toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
     return filtered;
-  }, [jobApplicants, searchQuery, filterStatus, jobTitlesMap]);
+  }, [jobApplicants, searchQuery, filterStatus, sortField, sortDirection, jobTitlesMap]);
 
   // Paginate applicants
   const paginatedApplicants = useMemo(() => {
@@ -387,24 +431,90 @@ export default function JobApplicationsPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      
+      // Step 1: Get current user UUID
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('Error getting current user:', userError);
+        alert('Failed to get current user information. Please try again.');
+        return;
+      }
+
+      // Step 2: Get the UUID of the current user
+      const userId = user.id;
+      
+      // Step 3: Fetch email from auth based on that user UUID
+      // The getUser() already returns the email in the user object
+      let updatedBy: string | null = null;
+      
+      if (user.email) {
+        updatedBy = user.email;
+      } else {
+        // If email is not available, use UUID as fallback
+        console.warn('Email not available for user, using UUID:', userId);
+        updatedBy = userId;
+      }
+
+      if (!updatedBy) {
+        alert('Unable to identify current user. Please try again.');
+        return;
+      }
+
+      // Update the application status with the email
+      console.log('Updating application:', {
+        id: editingApplicant.id,
+        status: newStatus,
+        updated_by: updatedBy,
+      });
+
+      const { data, error } = await supabase
         .from('job_applicants')
         .update({
           status: newStatus,
           updated_at: new Date().toISOString(),
+          updated_by: updatedBy,
         })
-        .eq('id', editingApplicant.id);
+        .eq('id', editingApplicant.id)
+        .select();
 
       if (error) {
-        console.error('Error updating status:', error);
-        alert('Failed to update status. Please try again.');
+        console.error('Error updating status:', {
+          error,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        
+        // Check if it's an RLS policy error or column doesn't exist
+        if (error.code === '42501' || error.message?.includes('row-level security')) {
+          alert('Permission denied. Please check your database permissions.');
+        } else if (error.code === '42703' || error.message?.includes('updated_by')) {
+          alert('The updated_by column may not exist in the database. Please run the migration script.');
+        } else {
+          alert(`Failed to update status: ${error.message || 'Unknown error'}`);
+        }
+        return;
+      }
+
+      if (data && data.length > 0) {
+        console.log('Status updated successfully:', data[0]);
+        setStatusDialogOpen(false);
+        setEditingApplicant(null);
       } else {
+        console.warn('Update succeeded but no data returned');
         setStatusDialogOpen(false);
         setEditingApplicant(null);
       }
     } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Failed to update status. Please try again.');
+      console.error('Error updating status (catch block):', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to update status: ${errorMessage}`);
     }
   };
 
@@ -416,7 +526,7 @@ export default function JobApplicationsPage() {
     setPage(0);
   };
 
-  const handleSort = (field: 'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at') => {
+  const handleSort = (field: 'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at' | 'updated_by') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -627,13 +737,22 @@ export default function JobApplicationsPage() {
                         Applied At
                       </TableSortLabel>
                     </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'updated_by'}
+                        direction={sortField === 'updated_by' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('updated_by')}
+                      >
+                        Updated By
+                      </TableSortLabel>
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedApplicants.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                         <Typography variant="body1" color="text.secondary">
                           No job applicants found matching your criteria.
                         </Typography>
@@ -653,7 +772,7 @@ export default function JobApplicationsPage() {
                         <TableCell>{applicant.email}</TableCell>
                         <TableCell>{applicant.phone || 'N/A'}</TableCell>
                         <TableCell>
-                          {jobTitlesMap.get(applicant.job_id) || 'Unknown Job'}
+                          {applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || 'Unknown Job') : 'General Application'}
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -666,6 +785,9 @@ export default function JobApplicationsPage() {
                           {applicant.applied_at
                             ? new Date(applicant.applied_at).toLocaleDateString()
                             : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          {applicant.updated_by || 'N/A'}
                         </TableCell>
                         <TableCell>
                           <IconButton
@@ -694,7 +816,7 @@ export default function JobApplicationsPage() {
                     label="Sort By"
                     onChange={(e) => {
                       const [field, direction] = e.target.value.split('-');
-                      setSortField(field as 'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at');
+                      setSortField(field as 'name' | 'email' | 'phone' | 'job_title' | 'status' | 'applied_at' | 'updated_by');
                       setSortDirection(direction as 'asc' | 'desc');
                       setPage(0);
                     }}
@@ -707,6 +829,8 @@ export default function JobApplicationsPage() {
                     <MenuItem value="status-desc">Status (Z-A)</MenuItem>
                     <MenuItem value="applied_at-desc">Applied At (Newest)</MenuItem>
                     <MenuItem value="applied_at-asc">Applied At (Oldest)</MenuItem>
+                    <MenuItem value="updated_by-asc">Updated By (A-Z)</MenuItem>
+                    <MenuItem value="updated_by-desc">Updated By (Z-A)</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -749,7 +873,7 @@ export default function JobApplicationsPage() {
                             <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
                               Job Title:
                             </Typography>
-                            <Typography variant="body2">{jobTitlesMap.get(applicant.job_id) || 'Unknown Job'}</Typography>
+                            <Typography variant="body2">{applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || 'Unknown Job') : 'General Application'}</Typography>
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
@@ -761,6 +885,14 @@ export default function JobApplicationsPage() {
                                 : 'N/A'}
                             </Typography>
                           </Box>
+                          {applicant.updated_by && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                                Updated By:
+                              </Typography>
+                              <Typography variant="body2">{applicant.updated_by}</Typography>
+                            </Box>
+                          )}
                         </Stack>
                       </Box>
                       <CardActions sx={{ px: 2, pb: 2, pt: 0, justifyContent: 'flex-end' }}>
@@ -873,7 +1005,7 @@ export default function JobApplicationsPage() {
                   Applicant: {editingApplicant.first_name} {editingApplicant.last_name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Job: {jobTitlesMap.get(editingApplicant.job_id) || 'Unknown Job'}
+                  Job: {editingApplicant.job_id ? (jobTitlesMap.get(editingApplicant.job_id) || 'Unknown Job') : 'General Application'}
                 </Typography>
                 <FormControl fullWidth>
                   <InputLabel>Status</InputLabel>

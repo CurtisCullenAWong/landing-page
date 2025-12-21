@@ -37,7 +37,7 @@ import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
 
 interface JobApplicant {
   id: string;
-  job_id: string;
+  job_id: string | null;
   first_name: string;
   last_name: string;
   email: string;
@@ -49,6 +49,7 @@ interface JobApplicant {
   status: 'pending' | 'reviewing' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
   applied_at: string | null;
   updated_at: string | null;
+  updated_by: string | null;
 }
 
 interface JobWithTitle {
@@ -286,7 +287,7 @@ export default function AdminDashboardPage() {
         applicant.last_name.toLowerCase().includes(query) ||
         applicant.email.toLowerCase().includes(query) ||
         (applicant.phone && applicant.phone.toLowerCase().includes(query)) ||
-        (jobTitlesMap.get(applicant.job_id)?.toLowerCase().includes(query))
+        (applicant.job_id ? jobTitlesMap.get(applicant.job_id)?.toLowerCase().includes(query) : 'general application'.includes(query))
       );
     }
 
@@ -314,8 +315,8 @@ export default function AdminDashboardPage() {
           bValue = (b.phone || '').toLowerCase();
           break;
         case 'job_title':
-          aValue = (jobTitlesMap.get(a.job_id) || '').toLowerCase();
-          bValue = (jobTitlesMap.get(b.job_id) || '').toLowerCase();
+          aValue = (a.job_id ? jobTitlesMap.get(a.job_id) || '' : 'General Application').toLowerCase();
+          bValue = (b.job_id ? jobTitlesMap.get(b.job_id) || '' : 'General Application').toLowerCase();
           break;
         case 'status':
           aValue = a.status.toLowerCase();
@@ -410,6 +411,252 @@ export default function AdminDashboardPage() {
         </Box>
 
         <Grid container spacing={4}>
+
+          {/* Job Applicants Table */}
+          <Grid size={{ xs: 12 }}>
+            <Card>
+              <Box
+                sx={{
+                  px: 3,
+                  py: 2,
+                  bgcolor: isDark ? 'primary.dark' : 'primary.main',
+                  color: isDark ? 'text.primary' : 'primary.contrastText',
+                }}
+              >
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  Job Applicants ({filteredApplicants.length} of {jobApplicants.length})
+                </Typography>
+              </Box>
+
+              {/* Search and Filters */}
+              {jobApplicants.length > 0 && (
+                <Paper sx={{ p: 3, mb: 0, borderRadius: 0 }}>
+                  {/* Expandable Header */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                    onClick={() => setApplicantsFiltersExpanded(!applicantsFiltersExpanded)}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Search size={20} style={{ color: theme.palette.text.secondary }} />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
+                        Search & Filter
+                      </Typography>
+                      {(applicantsSearchQuery || applicantsFilterStatus !== 'all') && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            ml: 1,
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 1,
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {[
+                            applicantsSearchQuery ? 'Search' : null,
+                            applicantsFilterStatus !== 'all' ? 'Status' : null,
+                          ].filter(Boolean).length} active
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {(applicantsSearchQuery || applicantsFilterStatus !== 'all') && (
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleResetApplicantsFilters();
+                          }}
+                          startIcon={<X size={16} />}
+                          sx={{ mr: 1 }}
+                        >
+                          Reset
+                        </Button>
+                      )}
+                      {applicantsFiltersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </Box>
+                  </Box>
+
+                  {/* Expandable Content */}
+                  <Collapse in={applicantsFiltersExpanded}>
+                    <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
+                      <Grid container spacing={2} alignItems="flex-end">
+                        {/* Search */}
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <TextField
+                            fullWidth
+                            placeholder="Search by name, email, phone, or job title..."
+                            value={applicantsSearchQuery}
+                            onChange={(e) => {
+                              setApplicantsSearchQuery(e.target.value);
+                              setApplicantsPage(0);
+                            }}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Search size={20} />
+                                </InputAdornment>
+                              ),
+                            }}
+                            size="small"
+                          />
+                        </Grid>
+
+                        {/* Status Filter */}
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Status</InputLabel>
+                            <Select
+                              value={applicantsFilterStatus}
+                              label="Status"
+                              onChange={(e) => {
+                                setApplicantsFilterStatus(e.target.value);
+                                setApplicantsPage(0);
+                              }}
+                            >
+                              <MenuItem value="all">All Statuses</MenuItem>
+                              {STATUS_OPTIONS.map((status) => (
+                                <MenuItem key={status} value={status}>
+                                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Collapse>
+                </Paper>
+              )}
+
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'action.hover' }}>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'name'}
+                          direction={applicantsSortField === 'name' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('name')}
+                        >
+                          Name
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'email'}
+                          direction={applicantsSortField === 'email' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('email')}
+                        >
+                          Email
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'phone'}
+                          direction={applicantsSortField === 'phone' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('phone')}
+                        >
+                          Phone
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'job_title'}
+                          direction={applicantsSortField === 'job_title' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('job_title')}
+                        >
+                          Job Title
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'status'}
+                          direction={applicantsSortField === 'status' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('status')}
+                        >
+                          Status
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={applicantsSortField === 'applied_at'}
+                          direction={applicantsSortField === 'applied_at' ? applicantsSortDirection : 'asc'}
+                          onClick={() => handleApplicantsSort('applied_at')}
+                        >
+                          Applied At
+                        </TableSortLabel>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedApplicants.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                          <Typography variant="body1" color="text.secondary">
+                            No job applicants found.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedApplicants.map((applicant) => (
+                        <TableRow
+                          key={applicant.id}
+                          sx={{
+                            '&:hover': { bgcolor: 'action.hover' },
+                          }}
+                        >
+                          <TableCell>
+                            {applicant.first_name} {applicant.last_name}
+                          </TableCell>
+                          <TableCell>{applicant.email}</TableCell>
+                          <TableCell>{applicant.phone || 'N/A'}</TableCell>
+                          <TableCell>
+                            {applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || 'Unknown Job') : 'General Application'}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={applicant.status}
+                              size="small"
+                              color={getStatusColor(applicant.status) as any}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {applicant.applied_at
+                              ? new Date(applicant.applied_at).toLocaleDateString()
+                              : 'N/A'}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                component="div"
+                count={filteredApplicants.length}
+                page={applicantsPage}
+                onPageChange={(_, newPage) => setApplicantsPage(newPage)}
+                rowsPerPage={applicantsRowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setApplicantsRowsPerPage(parseInt(e.target.value, 10));
+                  setApplicantsPage(0);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                labelRowsPerPage="Rows per page:"
+              />
+            </Card>
+          </Grid>
+
           {/* Jobs Table */}
           <Grid size={{ xs: 12 }}>
             <Card>
@@ -708,251 +955,6 @@ export default function AdminDashboardPage() {
                 onRowsPerPageChange={(e) => {
                   setJobsRowsPerPage(parseInt(e.target.value, 10));
                   setJobsPage(0);
-                }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                labelRowsPerPage="Rows per page:"
-              />
-            </Card>
-          </Grid>
-
-          {/* Job Applicants Table */}
-          <Grid size={{ xs: 12 }}>
-            <Card>
-              <Box
-                sx={{
-                  px: 3,
-                  py: 2,
-                  bgcolor: isDark ? 'primary.dark' : 'primary.main',
-                  color: isDark ? 'text.primary' : 'primary.contrastText',
-                }}
-              >
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Job Applicants ({filteredApplicants.length} of {jobApplicants.length})
-                </Typography>
-              </Box>
-
-              {/* Search and Filters */}
-              {jobApplicants.length > 0 && (
-                <Paper sx={{ p: 3, mb: 0, borderRadius: 0 }}>
-                  {/* Expandable Header */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                    onClick={() => setApplicantsFiltersExpanded(!applicantsFiltersExpanded)}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Search size={20} style={{ color: theme.palette.text.secondary }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                        Search & Filter
-                      </Typography>
-                      {(applicantsSearchQuery || applicantsFilterStatus !== 'all') && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            ml: 1,
-                            px: 1,
-                            py: 0.25,
-                            borderRadius: 1,
-                            bgcolor: 'primary.main',
-                            color: 'primary.contrastText',
-                            fontWeight: 600,
-                          }}
-                        >
-                          {[
-                            applicantsSearchQuery ? 'Search' : null,
-                            applicantsFilterStatus !== 'all' ? 'Status' : null,
-                          ].filter(Boolean).length} active
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {(applicantsSearchQuery || applicantsFilterStatus !== 'all') && (
-                        <Button
-                          variant="text"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleResetApplicantsFilters();
-                          }}
-                          startIcon={<X size={16} />}
-                          sx={{ mr: 1 }}
-                        >
-                          Reset
-                        </Button>
-                      )}
-                      {applicantsFiltersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                    </Box>
-                  </Box>
-
-                  {/* Expandable Content */}
-                  <Collapse in={applicantsFiltersExpanded}>
-                    <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
-                      <Grid container spacing={2} alignItems="flex-end">
-                        {/* Search */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <TextField
-                            fullWidth
-                            placeholder="Search by name, email, phone, or job title..."
-                            value={applicantsSearchQuery}
-                            onChange={(e) => {
-                              setApplicantsSearchQuery(e.target.value);
-                              setApplicantsPage(0);
-                            }}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <Search size={20} />
-                                </InputAdornment>
-                              ),
-                            }}
-                            size="small"
-                          />
-                        </Grid>
-
-                        {/* Status Filter */}
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <FormControl fullWidth size="small">
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                              value={applicantsFilterStatus}
-                              label="Status"
-                              onChange={(e) => {
-                                setApplicantsFilterStatus(e.target.value);
-                                setApplicantsPage(0);
-                              }}
-                            >
-                              <MenuItem value="all">All Statuses</MenuItem>
-                              {STATUS_OPTIONS.map((status) => (
-                                <MenuItem key={status} value={status}>
-                                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Collapse>
-                </Paper>
-              )}
-
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'name'}
-                          direction={applicantsSortField === 'name' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('name')}
-                        >
-                          Name
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'email'}
-                          direction={applicantsSortField === 'email' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('email')}
-                        >
-                          Email
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'phone'}
-                          direction={applicantsSortField === 'phone' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('phone')}
-                        >
-                          Phone
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'job_title'}
-                          direction={applicantsSortField === 'job_title' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('job_title')}
-                        >
-                          Job Title
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'status'}
-                          direction={applicantsSortField === 'status' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('status')}
-                        >
-                          Status
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={applicantsSortField === 'applied_at'}
-                          direction={applicantsSortField === 'applied_at' ? applicantsSortDirection : 'asc'}
-                          onClick={() => handleApplicantsSort('applied_at')}
-                        >
-                          Applied At
-                        </TableSortLabel>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginatedApplicants.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                          <Typography variant="body1" color="text.secondary">
-                            No job applicants found.
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      paginatedApplicants.map((applicant) => (
-                        <TableRow
-                          key={applicant.id}
-                          sx={{
-                            '&:hover': { bgcolor: 'action.hover' },
-                          }}
-                        >
-                          <TableCell>
-                            {applicant.first_name} {applicant.last_name}
-                          </TableCell>
-                          <TableCell>{applicant.email}</TableCell>
-                          <TableCell>{applicant.phone || 'N/A'}</TableCell>
-                          <TableCell>
-                            {jobTitlesMap.get(applicant.job_id) || 'Unknown Job'}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={applicant.status}
-                              size="small"
-                              color={getStatusColor(applicant.status) as any}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {applicant.applied_at
-                              ? new Date(applicant.applied_at).toLocaleDateString()
-                              : 'N/A'}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                component="div"
-                count={filteredApplicants.length}
-                page={applicantsPage}
-                onPageChange={(_, newPage) => setApplicantsPage(newPage)}
-                rowsPerPage={applicantsRowsPerPage}
-                onRowsPerPageChange={(e) => {
-                  setApplicantsRowsPerPage(parseInt(e.target.value, 10));
-                  setApplicantsPage(0);
                 }}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 labelRowsPerPage="Rows per page:"

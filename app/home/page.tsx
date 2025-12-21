@@ -106,7 +106,7 @@ export default function HomePage() {
                 },
               }}
             >
-              Join Our Team
+              View Open Job Postings
             </Button>
             <Button
               component={Link}
@@ -177,7 +177,7 @@ export default function HomePage() {
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button
               component={Link}
-              href="/job-postings"
+              href="/why-us"
               variant="contained"
               size="large"
               sx={{
@@ -189,7 +189,7 @@ export default function HomePage() {
                 },
               }}
             >
-              View Open Positions
+              Why Choose Boss Cargo Express?
             </Button>
             <Button
               component={Link}

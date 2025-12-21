@@ -25,7 +25,7 @@ import { PDFViewer } from '@/components/pdf-viewer';
 
 interface JobApplicant {
   id: string;
-  job_id: string;
+  job_id: string | null;
   first_name: string;
   last_name: string;
   email: string;
@@ -137,21 +137,24 @@ export default function MyApplicationPage() {
         setApplication(applicationData);
 
         // Load job details
-        const { data: jobData, error: jobError } = await supabase
-          .from('jobs')
-          .select('id, title, department, location, type')
-          .eq('id', applicationData.job_id)
-          .single();
+        // Only fetch job data if job_id is not null
+        if (applicationData.job_id) {
+          const { data: jobData, error: jobError } = await supabase
+            .from('jobs')
+            .select('id, title, department, location, type')
+            .eq('id', applicationData.job_id)
+            .single();
 
-        if (jobError) {
-          console.error('Error loading job:', {
-            message: jobError?.message || 'Unknown error',
-            details: jobError?.details || null,
-            code: jobError?.code || null,
-            fullError: jobError,
-          });
-        } else if (jobData) {
-          setJob(jobData);
+          if (jobError) {
+            console.error('Error loading job:', {
+              message: jobError?.message || 'Unknown error',
+              details: jobError?.details || null,
+              code: jobError?.code || null,
+              fullError: jobError,
+            });
+          } else if (jobData) {
+            setJob(jobData);
+          }
         }
 
         // Set up realtime subscription for this specific application
@@ -341,7 +344,7 @@ export default function MyApplicationPage() {
             </Box>
 
             {/* Job Information */}
-            {job && (
+            {job ? (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Briefcase size={20} />
@@ -354,6 +357,22 @@ export default function MyApplicationPage() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {job.department} • {job.location} • {job.type}
+                  </Typography>
+                </Box>
+              </Box>
+            ) : (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Briefcase size={20} />
+                  Application Type
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    General Application
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    You submitted a general application for future opportunities.
                   </Typography>
                 </Box>
               </Box>

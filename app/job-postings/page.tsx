@@ -669,8 +669,8 @@ export default function JobPostingsPage() {
             and we'll keep you in mind for future opportunities.
           </Typography>
           <Button
-            component="a"
-            href="mailto:people@bosscargo.express?subject=Job Application"
+            component={Link}
+            href="/job-postings/apply"
             variant="contained"
             size="large"
             sx={{
@@ -682,7 +682,7 @@ export default function JobPostingsPage() {
               },
             }}
           >
-            Submit Job Application
+            Submit General Application
           </Button>
         </Paper>
       </Container>

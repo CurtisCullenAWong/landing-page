@@ -1,6 +1,7 @@
 'use client';
 
 import { Handshake, Briefcase, Package, Wrench, UtensilsCrossed, DollarSign, Store } from 'lucide-react';
+import Link from 'next/link';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
@@ -198,14 +199,17 @@ export default function PartnershipsPage() {
               We're always looking for innovative companies to join our network and create 
               mutually beneficial partnerships. Contact us to learn more about investment or partnership opportunities.
             </Typography>
-            <Button
-              component="a"
-              href="mailto:people@bosscargo.express"
-              variant="contained"
-              size="large"
-            >
-              Contact Us for Partnership Opportunities
-            </Button>
+            <Link href="/about-us" style={{ textDecoration: 'none' }}>
+              <Button variant="contained" size="large" sx={{
+                color: theme.palette.primary.contrastText,
+                '&:hover': {
+                  color: theme.palette.primary.contrastText,
+                  bgcolor: theme.palette.primary.main,
+                },
+              }}>
+                Contact Us for Partnership Opportunities
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </Container>
