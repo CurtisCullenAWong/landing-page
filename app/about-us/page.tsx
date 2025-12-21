@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, MapPin, Clock, User } from 'lucide-react';
+import { Mail, Phone, MapPin, User } from 'lucide-react';
 import { ImageWithFallback } from '../../components/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer, PageHeader, Section, ContentGrid } from '../../components/layout';
@@ -140,6 +140,15 @@ export default function AboutPage() {
               emails: ['aris@bosscargo.express', 'info@bosscargo.express'],
               website: 'www.bosscargo.express',
               address: 'Lot 6 unit B, Blk 3, A. Canaynay Ave. BF Martinville, Manuyo Dos, Las Pinas City.',
+            },
+            {
+              name: 'Curtis Cullen A. Wong',
+              title: 'KALMA! Testing palang ito!',
+              image: 'https://media.tenor.com/WX4TeHt4Xt8AAAAe/high-af-high.png', 
+              phones: ['+63 999 999 9999', '+63 999 999 9999'],
+              emails: ['testing@email.com', 'testing@email.com'],
+              website: 'www.bosscargo.express',
+              address: 'AHH',
             },
           ].map((official, index) => (
             <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4 }} key={index}>

@@ -46,8 +46,18 @@ export default function RootLayout({
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              :root { --splash-bg: #ffffff; --splash-text: #1a1a1a; --brand-color: #008080; }
-              .dark { --splash-bg: #0a0c10; --splash-text: #f0f0f0; --brand-color: #00ced1; }
+              :root { 
+                --splash-bg: #ffffff; 
+                --splash-text: #1a1a1a; 
+                --brand-color: #008080; 
+                --primary-color: #00A7A7;
+              }
+              .dark { 
+                --splash-bg: #0a0c10; 
+                --splash-text: #f0f0f0; 
+                --brand-color: #00ced1; 
+                --primary-color: #1ECAD3;
+              }
 
               #initial-loader {
                 position: fixed;
@@ -73,9 +83,13 @@ export default function RootLayout({
               }
 
               #initial-loader .favicon-loader {
-                width: 128px;
-                height: 128px;
+                width: 256px;
+                height: 256px;
                 animation: spin 1s linear infinite;
+                background-color: var(--primary-color);
+                border-radius: 50%;
+                padding: 16px;
+                box-sizing: border-box;
               }
 
               @keyframes spin {
@@ -92,15 +106,6 @@ export default function RootLayout({
           suppressHydrationWarning
           style={{ pointerEvents: 'none' }}
         >
-          <div style={{ 
-            fontFamily: 'sans-serif', 
-            fontWeight: 700, 
-            fontSize: '1.8rem', 
-            marginBottom: '20px', 
-            color: 'var(--splash-text)' 
-          }}>
-            Boss Cargo Express
-          </div>
           <img 
             src="/favicon.ico" 
             alt="Loading" 
