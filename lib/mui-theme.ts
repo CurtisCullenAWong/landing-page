@@ -6,51 +6,51 @@ import { ThemeOptions } from "@mui/material/styles";
 export const themeColors = {
   light: {
     primary: {
-      main: "#00A7A7",        // Brand teal
+      main: "#00A7A7", // Brand teal
       light: "#1ECAD3",
       dark: "#007C7C",
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#0F2A3D",        // Dark blue from logo
+      main: "#0F2A3D", // Navy
       light: "#1B3F5A",
       dark: "#091C2B",
       contrastText: "#ffffff",
     },
     background: {
       default: "#ffffff",
-      paper: "#f8fafc",
+      paper: "#F8FAFC",
     },
     text: {
       primary: "#0F2A3D",
       secondary: "#4B6B82",
     },
     error: {
-      main: "#D32F2F",
-      light: "#EF5350",
-      dark: "#B71C1C",
+      main: "#C44E4E",
+      light: "#E08A8A",
+      dark: "#9F3B3B",
     },
     warning: {
-      main: "#ED6C02",
-      light: "#FF9800",
-      dark: "#E65100",
+      main: "#ED8B2F",
+      light: "#F6B77A",
+      dark: "#C46A1A",
     },
     info: {
-      main: "#0288D1",
-      light: "#03A9F4",
-      dark: "#01579B",
+      main: "#2C8FA3", // Teal-leaning blue
+      light: "#6BB9C9",
+      dark: "#1E6D7F",
     },
     success: {
-      main: "#2E7D32",
-      light: "#4CAF50",
-      dark: "#1B5E20",
+      main: "#3E8E5A",
+      light: "#7BC59B",
+      dark: "#2F6F46",
     },
-    divider: "#E0E7EF",
+    divider: "#E6EDF3",
     action: {
-      hover: "rgba(15, 42, 61, 0.08)",
-      selected: "rgba(0, 167, 167, 0.12)",
-      disabled: "rgba(0, 0, 0, 0.26)",
-      disabledBackground: "rgba(0, 0, 0, 0.12)",
+      hover: "rgba(15, 42, 61, 0.06)",
+      selected: "rgba(0, 167, 167, 0.10)",
+      disabled: "rgba(0, 0, 0, 0.30)",
+      disabledBackground: "rgba(0, 0, 0, 0.10)",
     },
   },
 
@@ -62,10 +62,10 @@ export const themeColors = {
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#1ECAD3",
-      light: "#4FDDE3",
-      dark: "#00A7A7",
-      contrastText: "#0B0F14",
+      main: "#162F42",
+      light: "#234E6A",
+      dark: "#0B1E2B",
+      contrastText: "#ffffff",
     },
     background: {
       default: "#0B0F14",
@@ -76,31 +76,31 @@ export const themeColors = {
       secondary: "#B8C9D9",
     },
     error: {
-      main: "#F44336",
-      light: "#E57373",
-      dark: "#D32F2F",
+      main: "#E28B8B",
+      light: "#F0B4B4",
+      dark: "#C75C5C",
     },
     warning: {
-      main: "#FFA726",
-      light: "#FFB74D",
-      dark: "#F57C00",
+      main: "#F2A65A",
+      light: "#F6C48C",
+      dark: "#D47D1F",
     },
     info: {
-      main: "#29B6F6",
-      light: "#4FC3F7",
-      dark: "#0288D1",
+      main: "#6FB7C9",
+      light: "#9AD0DC",
+      dark: "#3F8FA3",
     },
     success: {
-      main: "#66BB6A",
-      light: "#81C784",
-      dark: "#388E3C",
+      main: "#81C784",
+      light: "#A5D6A7",
+      dark: "#4F9A65",
     },
-    divider: "#1E2A36",
+    divider: "#253342",
     action: {
-      hover: "rgba(255, 255, 255, 0.08)",
-      selected: "rgba(30, 202, 211, 0.16)",
-      disabled: "rgba(255, 255, 255, 0.26)",
-      disabledBackground: "rgba(255, 255, 255, 0.12)",
+      hover: "rgba(255, 255, 255, 0.06)",
+      selected: "rgba(30, 202, 211, 0.12)",
+      disabled: "rgba(255, 255, 255, 0.30)",
+      disabledBackground: "rgba(255, 255, 255, 0.10)",
     },
   },
 };
@@ -122,6 +122,7 @@ export const themeTypography = {
     '"Segoe UI Emoji"',
     '"Segoe UI Symbol"',
   ].join(","),
+
   h1: {
     fontSize: "2.5rem",
     fontWeight: 700,
@@ -180,7 +181,7 @@ export const themeTypography = {
 };
 
 /**
- * Shape configuration (border radius, etc.)
+ * Shape configuration
  */
 export const themeShape = {
   borderRadius: 8,
@@ -189,7 +190,7 @@ export const themeShape = {
 /**
  * Spacing configuration
  */
-export const themeSpacing = 8; // Base spacing unit in pixels
+export const themeSpacing = 8;
 
 /**
  * Creates MUI theme options based on mode
@@ -228,9 +229,10 @@ export const getThemeOptions = (mode: "light" | "dark"): ThemeOptions => {
         styleOverrides: {
           root: {
             borderRadius: themeShape.borderRadius * 1.5,
-            boxShadow: mode === "light" 
-              ? "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)"
-              : "0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4)",
+            boxShadow:
+              mode === "light"
+                ? "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.20)"
+                : "0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.45)",
           },
         },
       },
@@ -244,4 +246,3 @@ export const getThemeOptions = (mode: "light" | "dark"): ThemeOptions => {
     },
   };
 };
-

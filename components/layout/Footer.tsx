@@ -3,16 +3,26 @@
 import { Box, Container, Typography, Link as MuiLink, Grid } from '@mui/material';
 import Link from 'next/link';
 import { useTheme } from '@mui/material/styles';
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react';
+
+// Calculate year at module level (executed at build/import time)
+// This provides a consistent initial value for SSR and client
+const BUILD_YEAR = new Date().getFullYear();
 
 export function Footer() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const [currentYear, setCurrentYear] = useState<number | null>(null)
+  // Use useState with BUILD_YEAR as initial value to ensure consistency
+  // Update in useEffect to get the actual current year (handles year changes)
+  const [currentYear, setCurrentYear] = useState<number>(BUILD_YEAR);
 
   useEffect(() => {
-    setCurrentYear(new Date().getFullYear())
-  }, [])
+    // Update to actual year after mount (handles edge case of year change)
+    const actualYear = new Date().getFullYear();
+    if (actualYear !== BUILD_YEAR) {
+      setCurrentYear(actualYear);
+    }
+  }, []);
 
 
   const footerLinks = {
@@ -48,13 +58,15 @@ export function Footer() {
           {/* Brand Section */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <img 
-              src="/favicon.ico" 
-              alt="Boss Cargo Express" 
-              width={32} 
-              height={32}
-              className="object-contain"
-            />
+              <Box sx={{ backgroundColor: 'primary.main', p: 2, borderRadius: 1 }}>
+                <img 
+                  src="/favicon.ico" 
+                  alt="Boss Cargo Express" 
+                  width={32} 
+                  height={32}
+                  style={{ objectFit: 'contain' }}
+                />
+              </Box>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
                 Boss Cargo Express
               </Typography>

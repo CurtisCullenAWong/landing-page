@@ -90,11 +90,11 @@ export function ImageWithFallback({
   const borderRadius = typeof rounded === 'number' ? rounded : rounded ? 8 : 0
 
   // Shadow
-  const boxShadow = shadow
-    ? typeof shadow === 'number'
-      ? shadow
-      : theme.shadows[4]
-    : 'none'
+  const boxShadow: React.CSSProperties['boxShadow'] = shadow
+  ? typeof shadow === 'number'
+    ? theme.shadows[Math.min(shadow, theme.shadows.length - 1)]
+    : theme.shadows[4]
+  : 'none'
 
   // Container styles based on layout
   const getContainerStyles = () => {
