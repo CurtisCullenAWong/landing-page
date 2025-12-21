@@ -1,29 +1,76 @@
-import Link from "next/link";
-import { Button } from "./ui/button";
-import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
+'use client';
 
-export async function AuthButton() {
-  const supabase = await createClient();
+import { useState, useEffect, Suspense } from 'react';
+import { Button, Box, CircularProgress } from '@mui/material';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
-  // You can also use getUser() which will be slower.
-  const { data } = await supabase.auth.getClaims();
+function LogoutButton() {
+  const router = useRouter();
 
-  const user = data?.claims;
+  const logout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  };
+
+  return <Button onClick={logout} variant="outlined">Logout</Button>;
+}
+
+export function AuthButton() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", minWidth: 120, justifyContent: "center" }}>
+        <CircularProgress size={20} />
+      </Box>
+    );
+  }
 
   return user ? (
-    <div className="flex items-center gap-4">
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
       Hey, {user.email}!
       <LogoutButton />
-    </div>
+    </Box>
   ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
+    <Box sx={{ display: "flex", gap: 1 }}>
+      <Button component={Link} href="/auth/login" size="small" variant="outlined">
+        Sign in
       </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
+      <Button component={Link} href="/auth/sign-up" size="small" variant="contained">
+        Sign up
       </Button>
-    </div>
+    </Box>
   );
 }
+
+export function AuthButtonWithSuspense() {
+  return (
+    <Suspense fallback={
+      <Box sx={{ display: "flex", alignItems: "center", minWidth: 120, justifyContent: "center" }}>
+        <CircularProgress size={20} />
+      </Box>
+    }>
+      <AuthButton />
+    </Suspense>
+  );
+}
+

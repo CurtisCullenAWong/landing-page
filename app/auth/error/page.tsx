@@ -1,5 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, Typography } from "@mui/material";
 import { Suspense } from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Error | Boss Cargo Express",
+};
 
 async function ErrorContent({
   searchParams,
@@ -11,13 +16,13 @@ async function ErrorContent({
   return (
     <>
       {params?.error ? (
-        <p className="text-sm text-muted-foreground">
+        <Typography variant="body2" color="text.secondary">
           Code error: {params.error}
-        </p>
+        </Typography>
       ) : (
-        <p className="text-sm text-muted-foreground">
+        <Typography variant="body2" color="text.secondary">
           An unspecified error occurred.
-        </p>
+        </Typography>
       )}
     </>
   );
@@ -33,12 +38,10 @@ export default function Page({
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h4" component="h1" gutterBottom>
                 Sorry, something went wrong.
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </Typography>
               <Suspense>
                 <ErrorContent searchParams={searchParams} />
               </Suspense>

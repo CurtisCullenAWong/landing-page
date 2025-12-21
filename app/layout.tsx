@@ -1,17 +1,14 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+import { JobProvider } from "@/contexts/JobContext";
 import "./globals.css";
-
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
-};
+import { Suspense } from 'react';
+import { Box, CircularProgress } from "@mui/material";
+import { MuiThemeProviderWrapper } from "@/components/mui-theme-provider";
+import { Footer } from "@/components/layout";
+import { Header } from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +24,45 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
+        <NextThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-        </ThemeProvider>
+          <MuiThemeProviderWrapper>
+            <JobProvider>
+              <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Suspense fallback={
+                  <Box 
+                    component="header"
+                    className="bg-background border-b border-border shadow-md sticky top-0 z-50"
+                    sx={{ 
+                      height: 64,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <CircularProgress size={24} />
+                  </Box>
+                }>
+                  <Header />
+                </Suspense>
+                <Box component="main" sx={{ flexGrow: 1 }}>
+                  <Suspense fallback={
+                    <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CircularProgress size={48} />
+                    </Box>
+                  }>
+                    {children}
+                  </Suspense>
+                </Box>
+                <Footer />
+              </Box>
+            </JobProvider>
+          </MuiThemeProviderWrapper>
+        </NextThemeProvider>
       </body>
     </html>
   );
