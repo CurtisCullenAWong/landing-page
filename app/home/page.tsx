@@ -1,7 +1,7 @@
 'use client';
 
 import { Truck, Globe, Users, Award } from 'lucide-react';
-import { ImageWithFallback } from '../../components/ImageWithFallback';
+import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
   Box,
@@ -29,35 +29,67 @@ export default function HomePage() {
         sx={{
           position: 'relative',
           overflow: 'hidden',
-          py: { xs: 10, md: 15 },
+          py: { xs: 10, md: 40 },
           background: isDark
             ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-            : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
+            : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
           color: isDark ? 'text.primary' : 'primary.contrastText',
         }}
       >
+        {/* Background Image */}
         <Box
           sx={{
             position: 'absolute',
             inset: 0,
             opacity: 0.2,
             zIndex: 0,
+            width: '100%',
+            height: '100%',
           }}
         >
           <ImageWithFallback
-            src={IMAGE_URLS.HERO_CARGO_CONTAINERS}
-            alt={getImageMetadata(IMAGE_URLS.HERO_CARGO_CONTAINERS).alt}
+            src={IMAGE_URLS.HERO_BACKGROUND.src}
+            alt={getImageMetadata(IMAGE_URLS.HERO_BACKGROUND).alt}
             layout="fill"
+            objectFit="cover"
             priority
           />
         </Box>
+
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <Typography variant="h1" sx={{ mb: 3, fontWeight: 700 }}>
+          {/* Main Heading */}
+          <Typography
+            variant="h1"
+            sx={{
+              mb: 3,
+              fontWeight: 800,
+              fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
+              lineHeight: 1.2,
+              letterSpacing: '-0.5px',
+            }}
+          >
             Synergy beyond compare
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4, maxWidth: '800px', mx: 'auto' }}>
-            Boss Cargo Express is focused on building partnerships that inspire growth. We at Boss Cargo Express take pride in what we do and we will always be there when you need and where you need us the most. Our goal is to help you grow your business and we provide you with this by working holistically with our partners and our team. Success is a moving target. To stay ahead, we're always thinking, sharing and debating.
+
+          {/* Subheading / Description */}
+          <Typography
+            variant="h3"
+            sx={{
+              mb: 4,
+              fontWeight: 400,
+              fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+              lineHeight: 1.6,
+              maxWidth: '750px',
+              mx: 'auto',
+              opacity: 0.85,
+            }}
+          >
+            Boss Cargo Express is focused on building partnerships that inspire growth.  
+            We take pride in what we do and are always there when you need us the most.  
+            Our goal is to help you grow your business by working holistically with our partners and our team.
           </Typography>
+
+          {/* Buttons */}
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button
               component={Link}
@@ -67,6 +99,7 @@ export default function HomePage() {
               sx={{
                 bgcolor: 'background.paper',
                 color: isDark ? 'text.primary' : 'primary.main',
+                fontWeight: 600,
                 '&:hover': {
                   bgcolor: isDark ? 'action.hover' : 'action.selected',
                   color: isDark ? 'text.primary' : 'primary.main',
@@ -83,6 +116,7 @@ export default function HomePage() {
               sx={{
                 borderColor: isDark ? 'text.primary' : 'primary.contrastText',
                 color: isDark ? 'text.primary' : 'primary.contrastText',
+                fontWeight: 600,
                 '&:hover': {
                   borderColor: isDark ? 'text.primary' : 'primary.contrastText',
                   bgcolor: 'action.hover',
@@ -94,7 +128,6 @@ export default function HomePage() {
           </Box>
         </Container>
       </Box>
-
       {/* Boss Cargo Philosophy Section */}
       <Box sx={{ py: 8, bgcolor: 'background.default' }}>
         <Container maxWidth="lg">
@@ -116,10 +149,9 @@ export default function HomePage() {
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <ImageWithFallback
-                src={IMAGE_URLS.HOME_TEAM_COLLABORATION}
+                src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
                 alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
                 layout="responsive"
-                aspectRatio="4:3"
                 rounded={8}
                 shadow={2}
               />
@@ -184,26 +216,40 @@ export default function HomePage() {
           <Typography variant="h2" sx={{ textAlign: 'center', mb: 6, fontWeight: 600 }}>
             Our Services
           </Typography>
-          <Grid container spacing={4} sx={{ mb: 4 }}>
+
+          {/* Top Section: Featured Image & Description */}
+          {/* alignItems="stretch" ensures the Image and Text Box are the same height */}
+          <Grid container spacing={4} sx={{ mb: 8 }} alignItems="stretch">
             <Grid size={{ xs: 12, md: 6 }}>
-              <ImageWithFallback
-                src={IMAGE_URLS.HOME_LOGISTICS_SERVICES}
-                alt={getImageMetadata(IMAGE_URLS.HOME_LOGISTICS_SERVICES).alt}
-                layout="responsive"
-                aspectRatio="16:9"
-                rounded={8}
-                shadow={2}
-              />
+              {/* Replaced the 'scale(2)' div with a Box that handles the image fit properly */}
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  minHeight: { xs: 300, md: 400 }, // Ensures height on mobile
+                  position: 'relative',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow: 2,
+                }}
+              >
+                <ImageWithFallback
+                  src={IMAGE_URLS.HOME_LOGISTICS_SERVICES.src}
+                  alt={getImageMetadata(IMAGE_URLS.HOME_LOGISTICS_SERVICES).alt}
+                />
+              </Box>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
+                elevation={1}
                 sx={{
                   p: 4,
-                  height: '100%',
-                  bgcolor: isDark ? 'action.hover' : 'action.selected',
+                  height: '100%', // Fills the grid height
+                  bgcolor: isDark ? 'action.hover' : 'background.default',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
+                  borderRadius: 2,
                 }}
               >
                 <Typography variant="body1" color="text.primary" sx={{ mb: 3, fontSize: '1.1rem', lineHeight: 1.8 }}>
@@ -215,59 +261,29 @@ export default function HomePage() {
               </Paper>
             </Grid>
           </Grid>
+
+          {/* Bottom Section: Service Cards */}
           <Grid container spacing={4}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Truck size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    International Freight
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Air freight, sea freight (FCL & LCL), and brokerage services
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Globe size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    Customs Clearance
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Import/export clearance, trade classification, and PEZA facilitation
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Users size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    Domestic Services
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Air, land, and sea freight across the Philippine archipelago
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Award size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                  <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                    Value-Added Services
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Packing, crating, warehousing, and specialized permits
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            {[
+              { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },
+              { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
+              { icon: Users, title: 'Domestic Services', desc: 'Air, land, and sea freight across the Philippine archipelago' },
+              { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' }
+            ].map((service, index) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: '0.3s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 } }}>
+                  <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                    <service.icon size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, fontSize: '1.25rem' }}>
+                      {service.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {service.desc}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
         </Container>
       </Box>

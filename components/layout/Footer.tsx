@@ -61,12 +61,12 @@ export function Footer() {
                 <img 
                   src="/favicon.ico" 
                   alt="Logo" 
-                  width={32} 
-                  height={32} 
+                  width={48} 
+                  height={48} 
                   className="brightness-0 invert transition-transform group-hover:scale-105" 
                 />
                 <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1, color: footerStyles.text }}>
-                  BOSS CARGO
+                  BOSS CARGO EXPRESS
                 </Typography>
               </Link>
               <Typography variant="body2" sx={{ color: footerStyles.secondaryText, lineHeight: 1.7 }}>
@@ -106,18 +106,59 @@ export function Footer() {
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, textTransform: 'uppercase', color: footerStyles.text }}>
               Careers
             </Typography>
-            <MuiLink 
-              component={Link} 
-              href="/job-postings" 
-              sx={{ 
-                color: footerStyles.secondaryText, 
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                '&:hover': { color: theme.palette.common.white } 
-              }}
-            >
-              Job Postings
-            </MuiLink>
+            <Stack spacing={1.5}>
+              <MuiLink 
+                component={Link} 
+                href="/job-postings" 
+                sx={{ 
+                  color: footerStyles.secondaryText, 
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': { color: theme.palette.common.white } 
+                }}
+              >
+                Job Postings
+              </MuiLink>
+              <MuiLink 
+                href="https://www.linkedin.com/company/boss-cargo-express/?originalSubdomain=ph" 
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ 
+                  color: footerStyles.secondaryText, 
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': { color: theme.palette.common.white } 
+                }}
+              >
+                LinkedIn
+              </MuiLink>
+              <MuiLink 
+                href="https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs" 
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ 
+                  color: footerStyles.secondaryText, 
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': { color: theme.palette.common.white } 
+                }}
+              >
+                Indeed
+              </MuiLink>
+              <MuiLink 
+                href="https://www.facebook.com/ikawangbossko20" 
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ 
+                  color: footerStyles.secondaryText, 
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': { color: theme.palette.common.white } 
+                }}
+              >
+                Facebook
+              </MuiLink>
+            </Stack>
           </Grid>
 
           {/* Contact Section */}

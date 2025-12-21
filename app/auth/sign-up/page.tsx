@@ -17,7 +17,20 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { usePageTitle } from "@/lib/usePageTitle";
 
+// Toggle this to enable/disable the Sign Up page
+const SIGN_UP_ENABLED = false;
+
 export default function Page() {
+  if (!SIGN_UP_ENABLED) {
+    return (
+      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+        <Typography variant="h5" color="text.secondary">
+          Sign Up is currently disabled.
+        </Typography>
+      </div>
+    );
+  }
+
   usePageTitle('Sign Up');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

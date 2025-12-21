@@ -52,7 +52,7 @@ export function Section({
         return (theme: any) =>
           theme.palette.mode === 'dark'
             ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-            : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)';
+            : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`;
       default:
         return 'background.default';
     }

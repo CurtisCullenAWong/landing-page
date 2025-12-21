@@ -123,7 +123,7 @@ export default function Page() {
               </Box>
               <Box sx={{ mt: 2, textAlign: "center" }}>
                 <Typography variant="body2">
-                  Don&apos;t have an account?{" "}
+                  Don't have an account?{" "}
                   <Link href="/auth/sign-up" style={{ textDecoration: "underline" }}>
                     Sign up
                   </Link>

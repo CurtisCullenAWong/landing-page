@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageWithFallback } from '../../components/ImageWithFallback';
+import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
   Box,
@@ -173,7 +173,7 @@ export default function HistoryPage() {
             textAlign: 'center',
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg,rgb(53, 196, 215) 0%,rgb(22, 102, 109) 100%)',
+              : `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >

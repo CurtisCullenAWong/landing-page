@@ -3,8 +3,8 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useJobs, Job } from '../../../../contexts/JobContext';
-import { MapPin, Briefcase, Clock, Calendar, ArrowLeft, Banknote } from 'lucide-react';
-import { ImageWithFallback } from '../../../../components/ImageWithFallback';
+import { MapPin, Briefcase, Clock, Calendar, ArrowLeft, Banknote, Mail, Search, FileText } from 'lucide-react';
+import { ImageWithFallback } from '../../../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../../../constants/images';
 import {
   Box,
@@ -18,6 +18,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  TextField,
+  Alert,
+  InputAdornment,
+  CircularProgress,
 } from '@mui/material';
 import { JobDetailsSkeleton } from '@/components/loading';
 import { createClient } from '@/lib/supabase/client';
@@ -30,6 +34,11 @@ export default function JobDetailsPage() {
   const { getJobById, isLoading: contextLoading } = useJobs();
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [checkEmail, setCheckEmail] = useState('');
+  const [checkApplicationId, setCheckApplicationId] = useState('');
+  const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
+  const [isCheckingApplication, setIsCheckingApplication] = useState(false);
+  const [checkMode, setCheckMode] = useState<'email' | 'id'>('email');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -158,6 +167,53 @@ export default function JobDetailsPage() {
       supabase.removeChannel(channel);
     };
   }, [id, getJobById, contextLoading]);
+
+  // Check for existing application by email or ID
+  const handleCheckApplication = async () => {
+    if (checkMode === 'email' && !checkEmail.trim()) {
+      return;
+    }
+    if (checkMode === 'id' && !checkApplicationId.trim()) {
+      return;
+    }
+
+    if (checkMode === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(checkEmail.trim())) {
+        return;
+      }
+    }
+
+    setIsCheckingApplication(true);
+    try {
+      const supabase = createClient();
+      let query = supabase
+        .from('job_applicants')
+        .select('id, status');
+
+      if (checkMode === 'email') {
+        query = query
+          .eq('job_id', id)
+          .eq('email', checkEmail.trim().toLowerCase());
+      } else {
+        query = query.eq('id', checkApplicationId.trim());
+      }
+
+      const { data, error } = await query.maybeSingle();
+
+      if (error) {
+        console.error('Error checking application:', error);
+      } else if (data) {
+        setExistingApplicationId(data.id);
+      } else {
+        setExistingApplicationId(null);
+      }
+    } catch (error) {
+      console.error('Error checking application:', error);
+    } finally {
+      setIsCheckingApplication(false);
+    }
+  };
 
   usePageTitle(job ? job.title : 'Job Details');
 
@@ -291,6 +347,122 @@ export default function JobDetailsPage() {
           </CardContent>
         </Card>
 
+        {/* Check Application Status Section */}
+        <Card sx={{ mb: 4 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+              Check Your Application Status
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Enter your email address or application ID to check your application status.
+            </Typography>
+            
+            {/* Mode Toggle */}
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <Button
+                variant={checkMode === 'email' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => {
+                  setCheckMode('email');
+                  setCheckApplicationId('');
+                  setExistingApplicationId(null);
+                }}
+              >
+                By Email
+              </Button>
+              <Button
+                variant={checkMode === 'id' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => {
+                  setCheckMode('id');
+                  setCheckEmail('');
+                  setExistingApplicationId(null);
+                }}
+              >
+                By Application ID
+              </Button>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+              {checkMode === 'email' ? (
+                <TextField
+                  fullWidth
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={checkEmail}
+                  onChange={(e) => {
+                    setCheckEmail(e.target.value);
+                    setExistingApplicationId(null);
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Mail size={20} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCheckApplication();
+                    }
+                  }}
+                />
+              ) : (
+                <TextField
+                  fullWidth
+                  placeholder="Application ID (UUID)"
+                  value={checkApplicationId}
+                  onChange={(e) => {
+                    setCheckApplicationId(e.target.value);
+                    setExistingApplicationId(null);
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FileText size={20} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCheckApplication();
+                    }
+                  }}
+                />
+              )}
+              <Button
+                variant="outlined"
+                onClick={handleCheckApplication}
+                disabled={isCheckingApplication || (checkMode === 'email' ? !checkEmail.trim() : !checkApplicationId.trim())}
+                startIcon={isCheckingApplication ? <CircularProgress size={16} /> : <Search size={20} />}
+                sx={{ minWidth: { xs: '100%', sm: 150 } }}
+              >
+                {isCheckingApplication ? 'Checking...' : 'Check Status'}
+              </Button>
+            </Box>
+            {existingApplicationId && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Application found!
+                </Typography>
+                <Button
+                  component={Link}
+                  href={`/my-application/${existingApplicationId}`}
+                  variant="outlined"
+                  size="small"
+                >
+                  View Application Status
+                </Button>
+              </Alert>
+            )}
+            {(checkEmail || checkApplicationId) && !existingApplicationId && !isCheckingApplication && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                No application found. You can apply using the button below.
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Apply Section */}
         <Paper
           sx={{
@@ -299,7 +471,7 @@ export default function JobDetailsPage() {
             mb: 4,
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
+              : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >
@@ -319,24 +491,53 @@ export default function JobDetailsPage() {
             shadow={2}
           />
         </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: 2, alignItems: 'center' }}>
+          {job.application_url && (
+            <Button
+              component="a"
+              href={job.application_url}
+              variant="contained"
+              size="large"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                bgcolor: 'background.default',
+                color: isDark ? 'text.primary' : 'text.secondary',
+                '&:hover': {
+                  bgcolor: isDark ? 'action.hover' : 'action.hover',
+                  color: isDark ? 'text.secondary' : 'text.primary',
+                },
+                '&:disabled': {
+                  bgcolor: 'action.disabledBackground',
+                  color: 'action.disabled',
+                },
+              }}
+            >
+              Apply via External Link
+            </Button>
+          )}
           <Button
-            component="a"
-            href={job.application_url || `mailto:people@bosscargo.express?subject=Job Application for ${encodeURIComponent(job.title)}&body=I am interested in applying for the ${encodeURIComponent(job.title)} position.`}
+            component={Link}
+            href={`/job-postings/job-details/${id}/apply`}
             variant="contained"
             size="large"
-            target={job.application_url ? '_blank' : undefined}
-            rel={job.application_url ? 'noopener noreferrer' : undefined}
+            disabled={!!existingApplicationId}
             sx={{
               bgcolor: 'background.default',
               color: isDark ? 'text.primary' : 'text.secondary',
               '&:hover': {
-                bgcolor: isDark ? 'action.hover' : 'action.hover', // or use 'action.selected' if you want a more noticeable change
+                bgcolor: isDark ? 'action.hover' : 'action.hover',
                 color: isDark ? 'text.secondary' : 'text.primary',
+              },
+              '&:disabled': {
+                bgcolor: 'action.disabledBackground',
+                color: 'action.disabled',
               },
             }}
           >
-            Apply Now
+            {existingApplicationId ? 'Already Applied' : 'Apply Now'}
           </Button>
+        </Box>
         </Paper>
 
         {/* Additional Info */}

@@ -9,7 +9,7 @@ import {
   Paper,
   useTheme,
 } from '@mui/material';
-import { ImageWithFallback } from '../../components/ImageWithFallback';
+import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer, PageHeader, Section, ContentGrid } from '../../components/layout';
 import { SECTION_SPACING } from '../../constants/layout';
@@ -127,6 +127,39 @@ export default function WhyBossCargo() {
             ))}
         </ContentGrid>
       </Section>
+
+      {/* Featured Video Section */}
+      {/* <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          mb: SECTION_SPACING.xlarge,
+          px: 2 // Padding to ensure it doesn't touch screen edges on mobile
+        }}
+      >
+        <Box
+          sx={{
+            borderRadius: 2,
+            overflow: 'hidden',
+            boxShadow: 4,
+            width: 560, // Match iframe width
+            maxWidth: '100%', // Responsive constraint
+            lineHeight: 0, // Removes bottom gap for inline elements
+            bgcolor: 'black'
+          }}
+        >
+          <iframe 
+            src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1203741278359082%2F&show_text=false&width=560&t=0" 
+            width="560" 
+            height="314" 
+            style={{ border: 'none', overflow: 'hidden', maxWidth: '100%' }} 
+            scrolling="no" 
+            frameBorder="0" 
+            allowFullScreen={true} 
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          />
+        </Box>
+      </Box> */}
 
       {/* Corporate Culture */}
       <Section>

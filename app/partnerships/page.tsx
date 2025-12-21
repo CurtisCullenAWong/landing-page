@@ -1,7 +1,7 @@
 'use client';
 
-import { Handshake } from 'lucide-react';
-import { ImageWithFallback } from '../../components/ImageWithFallback';
+import { Handshake, Briefcase, Package, Wrench, UtensilsCrossed, DollarSign, Store } from 'lucide-react';
+import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
   Box,
@@ -22,26 +22,32 @@ export default function PartnershipsPage() {
   const isDark = theme.palette.mode === 'dark';
 
   const industries = [
-    'Business Process Outsourcing',
-    'Fast-moving Consumer Goods',
-    'Engineering Services',
-    'Food Services',
-    'Financial Services',
-    'Retail'
+    { name: 'Business Process Outsourcing', icon: Briefcase },
+    { name: 'Fast-moving Consumer Goods', icon: Package },
+    { name: 'Engineering Services', icon: Wrench },
+    { name: 'Food Services', icon: UtensilsCrossed },
+    { name: 'Financial Services', icon: DollarSign },
+    { name: 'Retail', icon: Store }
   ];
 
   const memberships = [
     {
       name: 'Supply Chain Management Association of the Philippines (SCMAP)',
-      description: 'Active member of the premier supply chain and logistics association in the Philippines.'
+      description: 'Active member of the premier supply chain and logistics association in the Philippines.',
+      image: IMAGE_URLS.MEMBERSHIP_SCMAP,
+      imageAlt: getImageMetadata(IMAGE_URLS.MEMBERSHIP_SCMAP).alt
     },
     {
       name: 'Philippine Economic Zone Authority (PEZA)',
-      description: 'Accredited partner for PEZA facilitation services, supporting economic zone operations.'
+      description: 'Accredited partner for PEZA facilitation services, supporting economic zone operations.',
+      image: IMAGE_URLS.MEMBERSHIP_PEZA,
+      imageAlt: getImageMetadata(IMAGE_URLS.MEMBERSHIP_PEZA).alt
     },
     {
       name: 'JCtrans Network-International Freight Forwarders Network',
-      description: 'Premium Member of the international freight forwarders network, connecting us to global logistics partners.'
+      description: 'Premium Member of the international freight forwarders network, connecting us to global logistics partners.',
+      image: IMAGE_URLS.MEMBERSHIP_JCTRANS,
+      imageAlt: getImageMetadata(IMAGE_URLS.MEMBERSHIP_JCTRANS).alt
     }
   ];
 
@@ -66,7 +72,7 @@ export default function PartnershipsPage() {
             overflow: 'hidden',
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
+              : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >
@@ -100,17 +106,33 @@ export default function PartnershipsPage() {
             Industries That We Serve
           </Typography>
           <Grid container spacing={3}>
-            {industries.map((industry, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                <Card>
-                  <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      {industry}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {industries.map((industry, index) => {
+              const IconComponent = industry.icon;
+              return (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                  <Card sx={{ height: '100%', transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 } }}>
+                    <CardContent sx={{ p: 3, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{
+                          p: 2,
+                          borderRadius: 2,
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <IconComponent size={32} />
+                      </Box>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        {industry.name}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
           </Grid>
         </Box>
 
@@ -122,12 +144,21 @@ export default function PartnershipsPage() {
           <Grid container spacing={4}>
             {memberships.map((membership, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent sx={{ p: 3 }}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Box sx={{ p: 2, pb: 0 }}>
+                    <ImageWithFallback
+                      src={membership.image}
+                      alt={membership.imageAlt}
+                      layout="responsive"
+                      aspectRatio="auto"
+                      objectFit="contain"
+                    />
+                  </Box>
+                  <CardContent sx={{ p: 3, pt: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
                       {membership.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
                       {membership.description}
                     </Typography>
                   </CardContent>

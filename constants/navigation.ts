@@ -6,6 +6,12 @@ export const NAV_LINKS = [
     { name: 'Partnerships', href: '/partnerships' },
     { name: 'Careers', href: '/job-postings' },
   ];
+
+export const ADMIN_NAV_LINKS = [
+    { name: 'Dashboard', href: '/admin' },
+    { name: 'Job Postings', href: '/admin/job-postings' },
+    { name: 'Job Applications', href: '/admin/job-applications' },
+  ];
   
   export const CONTACT_INFO = {
     general: { label: 'General: info@bosscargo.express', href: 'mailto:info@bosscargo.express' },

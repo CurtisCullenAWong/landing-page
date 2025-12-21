@@ -18,3 +18,7 @@ export type { ContentGridProps } from './ContentGrid';
 
 export { Footer } from './Footer';
 
+export { AdminHeader } from './AdminHeader';
+export { UserHeader } from './UserHeader';
+export { ConditionalHeader } from './ConditionalHeader';
+

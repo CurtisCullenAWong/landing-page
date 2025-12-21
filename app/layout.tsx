@@ -6,7 +6,7 @@ import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { JobProvider } from "@/contexts/JobContext";
 import { MuiThemeProviderWrapper } from "@/components/mui-theme-provider";
 import { Footer } from "@/components/layout";
-import { Header } from "@/components/layout/Header";
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
 import { Box } from "@mui/material";
@@ -126,7 +126,7 @@ export default function RootLayout({
 
               <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <Suspense fallback={<HeaderSkeleton />}>
-                  <Header />
+                  <ConditionalHeader />
                 </Suspense>
                 <Box component="main" sx={{ flexGrow: 1 }}>
                   {children}

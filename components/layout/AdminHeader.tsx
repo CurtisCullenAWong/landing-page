@@ -1,28 +1,27 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { NAV_LINKS } from '@/constants/navigation';
+import { ADMIN_NAV_LINKS } from '@/constants/navigation';
 import { ThemeSwitcher } from '../theme-switcher';
 import { AuthButton } from '../auth-button';
 
-export function Header() {
+export function AdminHeader() {
   const pathname = usePathname() ?? '';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isAdminPage = pathname.startsWith('/admin');
-
-  // Filtered navigation based on context
-  const navigation = useMemo(() => 
-    isAdminPage 
-      ? NAV_LINKS.filter(item => ['Home', 'Careers'].includes(item.name)) 
-      : NAV_LINKS, 
-  [isAdminPage]);
-
-  const isActive = (href: string) => 
-    href === '/' ? pathname === '/' || pathname === '/home' : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    // Exact match
+    if (pathname === href) return true;
+    
+    // For base /admin route, only match exactly (not child routes)
+    if (href === '/admin') return pathname === '/admin';
+    
+    // For other routes, match exact or child routes
+    return pathname.startsWith(href + '/');
+  };
 
   const navItemClasses = (href: string) => `
     px-3 py-2 rounded-md text-sm font-medium transition-all
@@ -37,18 +36,19 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           
           {/* Brand Logo */}
-          <Link href="/" className="group flex items-center gap-2 outline-none">
+          <Link href="/admin" className="group flex items-center gap-2 outline-none">
             <img 
               src="/favicon.ico" 
               alt="Boss Cargo Express" 
-              className="h-8 w-8 object-contain brightness-0 invert transition-transform group-hover:scale-105" 
+              className="h-12 w-12 object-contain brightness-0 invert transition-transform group-hover:scale-105" 
             />
             <span className="text-xl font-bold tracking-tight text-white">Boss Cargo Express</span>
+            <span className="text-sm font-medium text-white/60 ml-2">Admin</span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden items-center gap-1 md:flex">
-            {navigation.map((item) => (
+            {ADMIN_NAV_LINKS.map((item) => (
               <Link key={item.name} href={item.href} className={navItemClasses(item.href)}>
                 {item.name}
               </Link>
@@ -75,7 +75,7 @@ export function Header() {
         {/* Mobile Nav Menu */}
         {isMobileMenuOpen && (
           <div className="space-y-1 border-t border-white/10 pb-4 pt-2 md:hidden">
-            {navigation.map((item) => (
+            {ADMIN_NAV_LINKS.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -96,3 +96,4 @@ export function Header() {
     </header>
   );
 }
+
