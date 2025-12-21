@@ -173,7 +173,7 @@ export default function HistoryPage() {
             textAlign: 'center',
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              : 'linear-gradient(135deg,rgb(53, 196, 215) 0%,rgb(22, 102, 109) 100%)',
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >

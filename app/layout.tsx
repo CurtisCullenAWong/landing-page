@@ -1,14 +1,16 @@
 "use client";
 
+import { Suspense } from "react";
 import { Geist } from "next/font/google";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { JobProvider } from "@/contexts/JobContext";
-import "./globals.css";
-import { Suspense } from 'react';
-import { Box, CircularProgress } from "@mui/material";
 import { MuiThemeProviderWrapper } from "@/components/mui-theme-provider";
 import { Footer } from "@/components/layout";
-import { Header } from "@/components/header";
+import { Header } from "@/components/layout/Header";
+import { HeaderSkeleton } from "@/components/loading";
+import { SplashScreen } from "@/components/splash-screen";
+import { Box } from "@mui/material";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +25,89 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* 1. INSTANT THEME DETECTION: Prevents white flash in dark mode */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const stored = localStorage.getItem('theme');
+                  const isDark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  document.documentElement.classList.toggle('dark', isDark);
+                  document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+
+        {/* 2. CRITICAL CSS: Renders the splash screen instantly */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root { --splash-bg: #ffffff; --splash-text: #1a1a1a; --brand-color: #008080; }
+              .dark { --splash-bg: #0a0c10; --splash-text: #f0f0f0; --brand-color: #00ced1; }
+
+              #initial-loader {
+                position: fixed;
+                inset: 0;
+                background-color: var(--splash-bg);
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: opacity 0.5s ease-in-out;
+                pointer-events: none;
+              }
+
+              #initial-loader.fade-out {
+                opacity: 0;
+                pointer-events: none;
+              }
+
+              #initial-loader.hidden {
+                display: none;
+                pointer-events: none;
+              }
+
+              #initial-loader .favicon-loader {
+                width: 128px;
+                height: 128px;
+                animation: spin 1s linear infinite;
+              }
+
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={`${geistSans.className} antialiased`}>
+        {/* 3. Create splash screen immediately - outside React tree to avoid hydration issues */}
+        <div 
+          id="initial-loader" 
+          suppressHydrationWarning
+          style={{ pointerEvents: 'none' }}
+        >
+          <div style={{ 
+            fontFamily: 'sans-serif', 
+            fontWeight: 700, 
+            fontSize: '1.8rem', 
+            marginBottom: '20px', 
+            color: 'var(--splash-text)' 
+          }}>
+            Boss Cargo Express
+          </div>
+          <img 
+            src="/favicon.ico" 
+            alt="Loading" 
+            className="favicon-loader"
+          />
+        </div>
+
         <NextThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -32,31 +116,15 @@ export default function RootLayout({
         >
           <MuiThemeProviderWrapper>
             <JobProvider>
+              {/* 4. THE MANAGER: Handles the exit of the loader above */}
+              <SplashScreen />
+
               <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                <Suspense fallback={
-                  <Box 
-                    component="header"
-                    className="bg-background border-b border-border shadow-md sticky top-0 z-50"
-                    sx={{ 
-                      height: 64,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <CircularProgress size={24} />
-                  </Box>
-                }>
+                <Suspense fallback={<HeaderSkeleton />}>
                   <Header />
                 </Suspense>
                 <Box component="main" sx={{ flexGrow: 1 }}>
-                  <Suspense fallback={
-                    <Box sx={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CircularProgress size={48} />
-                    </Box>
-                  }>
-                    {children}
-                  </Suspense>
+                  {children}
                 </Box>
                 <Footer />
               </Box>

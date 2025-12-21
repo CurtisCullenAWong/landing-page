@@ -10,14 +10,13 @@ const ThemeSwitcher = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { theme, setTheme, resolvedTheme } = useTheme();
 
-  // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
     return (
-      <IconButton size="small" disabled>
+      <IconButton size="small" disabled sx={{ color: "rgba(255, 255, 255, 0.5)" }}>
         <Sun size={16} />
       </IconButton>
     );
@@ -64,9 +63,11 @@ const ThemeSwitcher = () => {
           size="small"
           aria-label="Toggle theme"
           sx={{
-            color: "text.primary",
+            // CHANGED: Force color to white to be visible on Primary background
+            color: "white", 
             "&:hover": {
-              backgroundColor: "action.hover",
+              // CHANGED: Subtle white overlay for hover effect
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
             },
           }}
         >
@@ -89,6 +90,9 @@ const ThemeSwitcher = () => {
           sx: {
             mt: 1,
             minWidth: 150,
+            bgcolor: "background.paper",
+            color: "text.primary",
+            boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
           },
         }}
       >
@@ -125,4 +129,3 @@ const ThemeSwitcher = () => {
 };
 
 export { ThemeSwitcher };
-

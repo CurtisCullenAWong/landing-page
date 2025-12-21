@@ -32,7 +32,7 @@ export default function HomePage() {
           py: { xs: 10, md: 15 },
           background: isDark
             ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-            : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+            : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
           color: isDark ? 'text.primary' : 'primary.contrastText',
         }}
       >
@@ -127,7 +127,57 @@ export default function HomePage() {
           </Grid>
         </Container>
       </Box>
-
+      {/* CTA Section */}
+      <Box
+        sx={{
+          py: 8,
+          bgcolor: isDark ? 'primary.dark' : 'primary.main',
+          color: isDark ? 'text.primary' : 'primary.contrastText',
+        }}
+      >
+        <Container maxWidth="lg" sx={{ textAlign: 'center'}}>
+          <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
+            Partner with Boss Cargo Express
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 4 }}>
+            We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button
+              component={Link}
+              href="/job-postings"
+              variant="contained"
+              size="large"
+              sx={{
+                bgcolor: 'background.paper',
+                color: isDark ? 'text.primary' : 'primary.main',
+                '&:hover': {
+                  bgcolor: isDark ? 'action.hover' : 'action.selected',
+                  color: isDark ? 'text.primary' : 'primary.main',
+                },
+              }}
+            >
+              View Open Positions
+            </Button>
+            <Button
+              component={Link}
+              href="/partnerships"
+              variant="outlined"
+              size="large"
+              sx={{
+                borderColor: isDark ? 'text.primary' : 'primary.contrastText',
+                color: isDark ? 'text.primary' : 'primary.contrastText',
+                '&:hover': {
+                  borderColor: isDark ? 'text.primary' : 'primary.contrastText',
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              Partnership Opportunities
+            </Button>
+          </Box>
+        </Container>
+      </Box>
       {/* Services Overview Section */}
       <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
         <Container maxWidth="lg">
@@ -219,58 +269,6 @@ export default function HomePage() {
               </Card>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
-
-      {/* CTA Section */}
-      <Box
-        sx={{
-          py: 8,
-          bgcolor: isDark ? 'primary.dark' : 'primary.main',
-          color: isDark ? 'text.primary' : 'primary.contrastText',
-        }}
-      >
-        <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-          <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
-            Partner with Boss Cargo Express
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4 }}>
-            We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
-              component={Link}
-              href="/job-postings"
-              variant="contained"
-              size="large"
-              sx={{
-                bgcolor: 'background.paper',
-                color: isDark ? 'text.primary' : 'primary.main',
-                '&:hover': {
-                  bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  color: isDark ? 'text.primary' : 'primary.main',
-                },
-              }}
-            >
-              View Open Positions
-            </Button>
-            <Button
-              component={Link}
-              href="/partnerships"
-              variant="outlined"
-              size="large"
-              sx={{
-                borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                color: isDark ? 'text.primary' : 'primary.contrastText',
-                '&:hover': {
-                  borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                  bgcolor: 'action.hover',
-                },
-              }}
-            >
-              Partnership Opportunities
-            </Button>
-          </Box>
         </Container>
       </Box>
     </Box>

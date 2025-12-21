@@ -34,6 +34,10 @@ import {
   TableSortLabel,
   InputAdornment,
   Collapse,
+  useMediaQuery,
+  Stack,
+  Divider,
+  CardActions,
 } from '@mui/material';
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../lib/usePageTitle';
@@ -41,7 +45,7 @@ import { usePageTitle } from '../../lib/usePageTitle';
 type SortField = 'title' | 'department' | 'location' | 'postedDate' | 'status';
 type SortDirection = 'asc' | 'desc';
 
-const MAX_JOB_ENTRIES = 25;
+const MAX_JOB_ENTRIES = 10;
 
 type JobFormData = {
   id: string;
@@ -54,6 +58,7 @@ type JobFormData = {
   requirements: string;
   salary: string;
   status: 'active' | 'closed';
+  application_url: string;
   expanded: boolean;
 };
 
@@ -76,11 +81,13 @@ export default function AdminPage() {
       requirements: '',
       salary: '',
       status: 'active',
+      application_url: '',
       expanded: false,
     }
   ]);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Search, filter, sort, and pagination state
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,6 +99,7 @@ export default function AdminPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   // Filter out any null jobs
   const validJobs = jobs.filter(job => job !== null && job !== undefined);
@@ -248,6 +256,7 @@ export default function AdminPage() {
       requirements: '',
       salary: '',
       status: 'active',
+      application_url: '',
       expanded: false,
     }]);
   };
@@ -281,7 +290,8 @@ export default function AdminPage() {
         responsibilities: entry.responsibilities.split('\n').filter(r => r.trim()),
         requirements: entry.requirements.split('\n').filter(r => r.trim()),
         salary: entry.salary,
-        status: entry.status
+        status: entry.status,
+        application_url: entry.application_url.trim() || undefined,
       };
       updateJob(editingJob.id, jobData);
       setEditingJob(null);
@@ -299,7 +309,8 @@ export default function AdminPage() {
           responsibilities: entry.responsibilities.split('\n').filter(r => r.trim()),
           requirements: entry.requirements.split('\n').filter(r => r.trim()),
           salary: entry.salary,
-          status: 'active' as 'active' | 'closed'
+          status: 'active' as 'active' | 'closed',
+          application_url: entry.application_url.trim() || undefined,
         }));
 
       if (jobsToAdd.length > 0) {
@@ -322,6 +333,7 @@ export default function AdminPage() {
       requirements: job.requirements.join('\n'),
       salary: job.salary,
       status: job.status,
+      application_url: job.application_url || '',
       expanded: true,
     }]);
     setIsFormOpen(true);
@@ -352,6 +364,7 @@ export default function AdminPage() {
       requirements: '',
       salary: '',
       status: 'active',
+      application_url: '',
       expanded: false,
     }]);
     setIsFormOpen(false);
@@ -359,7 +372,7 @@ export default function AdminPage() {
   };
 
   return (
-    <Box sx={{ py: 8 }}>
+    <Box sx={{ pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ 
@@ -401,12 +414,25 @@ export default function AdminPage() {
         {/* Job Form */}
         {isFormOpen && (
           <Card sx={{ mb: 4 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 2, sm: 0 },
+                mb: 2 
+              }}>
+                <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {editingJob ? 'Edit Job Posting' : `Create Job Postings (${jobEntries.length})`}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 1, 
+                  alignItems: 'center',
+                  width: { xs: '100%', sm: 'auto' },
+                  justifyContent: { xs: 'space-between', sm: 'flex-end' }
+                }}>
                   {!editingJob && (
                     <>
                       <Button
@@ -415,121 +441,41 @@ export default function AdminPage() {
                         startIcon={<Plus size={16} />}
                         onClick={handleAddEntry}
                         disabled={jobEntries.length >= MAX_JOB_ENTRIES}
+                        sx={{ flex: { xs: 1, sm: 'none' } }}
                       >
-                        Add Row
+                        {isMobile ? 'Add' : 'Add Row'}
                       </Button>
-                      <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ 
+                        ml: { xs: 0, sm: 1 },
+                        display: { xs: 'none', sm: 'block' }
+                      }}>
                         ({jobEntries.length}/{MAX_JOB_ENTRIES})
                       </Typography>
+                      {isMobile && (
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                          {jobEntries.length}/{MAX_JOB_ENTRIES}
+                        </Typography>
+                      )}
                     </>
                   )}
-                  <IconButton onClick={resetForm} size="small">
+                  <IconButton onClick={resetForm} size="small" sx={{ ml: { xs: 0, sm: 'auto' } }}>
                     <X size={20} />
                   </IconButton>
                 </Box>
               </Box>
 
               <form onSubmit={handleSubmit}>
-                <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'action.hover' }}>
-                        <TableCell sx={{ width: 40, p: 1 }}></TableCell>
-                        <TableCell sx={{ fontWeight: 600, p: 1 }}>Title</TableCell>
-                        <TableCell sx={{ fontWeight: 600, p: 1 }}>Department</TableCell>
-                        <TableCell sx={{ fontWeight: 600, p: 1 }}>Location</TableCell>
-                        <TableCell sx={{ fontWeight: 600, p: 1 }}>Type</TableCell>
-                        <TableCell sx={{ fontWeight: 600, p: 1 }}>Salary</TableCell>
-                        {editingJob && <TableCell sx={{ fontWeight: 600, p: 1 }}>Status</TableCell>}
-                        <TableCell sx={{ width: 50, p: 1 }}></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {jobEntries.map((entry, index) => (
-                        <React.Fragment key={entry.id}>
-                          <TableRow>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleToggleExpand(entry.id)}
-                                sx={{ p: 0.5 }}
-                              >
-                                {entry.expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                              </IconButton>
-                            </TableCell>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Job Title"
-                                value={entry.title}
-                                onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
-                                required
-                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                              />
-                            </TableCell>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Department"
-                                value={entry.department}
-                                onChange={(e) => handleInputChange(entry.id, 'department', e.target.value)}
-                                required
-                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                              />
-                            </TableCell>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Location"
-                                value={entry.location}
-                                onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
-                                required
-                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                              />
-                            </TableCell>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <FormControl fullWidth size="small" required>
-                                <Select
-                                  value={entry.type}
-                                  onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
-                                  sx={{ fontSize: '0.875rem' }}
-                                >
-                                  <MenuItem value="Full-time">Full-time</MenuItem>
-                                  <MenuItem value="Part-time">Part-time</MenuItem>
-                                  <MenuItem value="Contract">Contract</MenuItem>
-                                  <MenuItem value="Temporary">Temporary</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </TableCell>
-                            <TableCell sx={{ p: 0.5 }}>
-                              <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="₱50k - ₱70k"
-                                value={entry.salary}
-                                onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
-                                required
-                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                              />
-                            </TableCell>
-                            {editingJob && (
-                              <TableCell sx={{ p: 0.5 }}>
-                                <FormControl fullWidth size="small" required>
-                                  <Select
-                                    value={entry.status}
-                                    onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
-                                    sx={{ fontSize: '0.875rem' }}
-                                  >
-                                    <MenuItem value="active">Active</MenuItem>
-                                    <MenuItem value="closed">Closed</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-                            )}
-                            <TableCell sx={{ p: 0.5 }}>
+                {isMobile ? (
+                  /* Mobile Card View */
+                  <Stack spacing={2} sx={{ mb: 2 }}>
+                    {jobEntries.map((entry, index) => (
+                      <Card key={entry.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              Job {index + 1} {jobEntries.length > 1 && !editingJob && `(${jobEntries.length} total)`}
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                               {jobEntries.length > 1 && !editingJob && (
                                 <IconButton
                                   size="small"
@@ -537,73 +483,326 @@ export default function AdminPage() {
                                   color="error"
                                   sx={{ p: 0.5 }}
                                 >
-                                  <Trash2 size={16} />
+                                  <Trash2 size={18} />
                                 </IconButton>
                               )}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell colSpan={editingJob ? 8 : 7} sx={{ py: 0, px: 1, border: 0 }}>
-                              <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
-                                <Box sx={{ py: 2, px: 1 }}>
-                                  <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12 }}>
-                                      <TextField
-                                        fullWidth
-                                        size="small"
-                                        label="Job Description"
-                                        value={entry.description}
-                                        onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
-                                        required
-                                        multiline
-                                        rows={3}
-                                        sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                      />
+                              <IconButton
+                                size="small"
+                                onClick={() => handleToggleExpand(entry.id)}
+                                sx={{ p: 0.5 }}
+                              >
+                                {entry.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                              </IconButton>
+                            </Box>
+                          </Box>
+                          <Stack spacing={2}>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              label="Job Title"
+                              placeholder="Job Title"
+                              value={entry.title}
+                              onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
+                              required
+                            />
+                            <TextField
+                              fullWidth
+                              size="small"
+                              label="Department"
+                              placeholder="Department"
+                              value={entry.department}
+                              onChange={(e) => handleInputChange(entry.id, 'department', e.target.value)}
+                              required
+                            />
+                            <TextField
+                              fullWidth
+                              size="small"
+                              label="Location"
+                              placeholder="Location"
+                              value={entry.location}
+                              onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
+                              required
+                            />
+                            <FormControl fullWidth size="small" required>
+                              <InputLabel>Type</InputLabel>
+                              <Select
+                                value={entry.type}
+                                label="Type"
+                                onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
+                              >
+                                <MenuItem value="Full-time">Full-time</MenuItem>
+                                <MenuItem value="Part-time">Part-time</MenuItem>
+                                <MenuItem value="Contract">Contract</MenuItem>
+                                <MenuItem value="Temporary">Temporary</MenuItem>
+                              </Select>
+                            </FormControl>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              label="Salary"
+                              placeholder="₱50k - ₱70k"
+                              value={entry.salary}
+                              onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
+                              required
+                            />
+                            {editingJob && (
+                              <FormControl fullWidth size="small" required>
+                                <InputLabel>Status</InputLabel>
+                                <Select
+                                  value={entry.status}
+                                  label="Status"
+                                  onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
+                                >
+                                  <MenuItem value="active">Active</MenuItem>
+                                  <MenuItem value="closed">Closed</MenuItem>
+                                </Select>
+                              </FormControl>
+                            )}
+                          </Stack>
+                          <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
+                            <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                              <Stack spacing={2}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Job Description"
+                                  value={entry.description}
+                                  onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
+                                  required
+                                  multiline
+                                  rows={3}
+                                />
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Responsibilities (one per line)"
+                                  value={entry.responsibilities}
+                                  onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
+                                  required
+                                  multiline
+                                  rows={4}
+                                  placeholder="Enter each responsibility on a new line"
+                                />
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Requirements (one per line)"
+                                  value={entry.requirements}
+                                  onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
+                                  required
+                                  multiline
+                                  rows={4}
+                                  placeholder="Enter each requirement on a new line"
+                                />
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  label="Application URL (optional)"
+                                  value={entry.application_url}
+                                  onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
+                                  placeholder="https://example.com/apply"
+                                />
+                              </Stack>
+                            </Box>
+                          </Collapse>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Stack>
+                ) : (
+                  /* Desktop Table View */
+                  <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: 'action.hover' }}>
+                          <TableCell sx={{ width: 40, p: 1 }}></TableCell>
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Title</TableCell>
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Department</TableCell>
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Location</TableCell>
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Type</TableCell>
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Salary</TableCell>
+                          {editingJob && <TableCell sx={{ fontWeight: 600, p: 1 }}>Status</TableCell>}
+                          <TableCell sx={{ width: 50, p: 1 }}></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {jobEntries.map((entry, index) => (
+                          <React.Fragment key={entry.id}>
+                            <TableRow>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleToggleExpand(entry.id)}
+                                  sx={{ p: 0.5 }}
+                                >
+                                  {entry.expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                </IconButton>
+                              </TableCell>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="Job Title"
+                                  value={entry.title}
+                                  onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
+                                  required
+                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                />
+                              </TableCell>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="Department"
+                                  value={entry.department}
+                                  onChange={(e) => handleInputChange(entry.id, 'department', e.target.value)}
+                                  required
+                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                />
+                              </TableCell>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="Location"
+                                  value={entry.location}
+                                  onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
+                                  required
+                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                />
+                              </TableCell>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <FormControl fullWidth size="small" required>
+                                  <Select
+                                    value={entry.type}
+                                    onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
+                                    sx={{ fontSize: '0.875rem' }}
+                                  >
+                                    <MenuItem value="Full-time">Full-time</MenuItem>
+                                    <MenuItem value="Part-time">Part-time</MenuItem>
+                                    <MenuItem value="Contract">Contract</MenuItem>
+                                    <MenuItem value="Temporary">Temporary</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              </TableCell>
+                              <TableCell sx={{ p: 0.5 }}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  placeholder="₱50k - ₱70k"
+                                  value={entry.salary}
+                                  onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
+                                  required
+                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                />
+                              </TableCell>
+                              {editingJob && (
+                                <TableCell sx={{ p: 0.5 }}>
+                                  <FormControl fullWidth size="small" required>
+                                    <Select
+                                      value={entry.status}
+                                      onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
+                                      sx={{ fontSize: '0.875rem' }}
+                                    >
+                                      <MenuItem value="active">Active</MenuItem>
+                                      <MenuItem value="closed">Closed</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </TableCell>
+                              )}
+                              <TableCell sx={{ p: 0.5 }}>
+                                {jobEntries.length > 1 && !editingJob && (
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleRemoveEntry(entry.id)}
+                                    color="error"
+                                    sx={{ p: 0.5 }}
+                                  >
+                                    <Trash2 size={16} />
+                                  </IconButton>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell colSpan={editingJob ? 8 : 7} sx={{ py: 0, px: 1, border: 0 }}>
+                                <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
+                                  <Box sx={{ py: 2, px: 1 }}>
+                                    <Grid container spacing={2}>
+                                      <Grid size={{ xs: 12 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Job Description"
+                                          value={entry.description}
+                                          onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
+                                          required
+                                          multiline
+                                          rows={3}
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Responsibilities (one per line)"
+                                          value={entry.responsibilities}
+                                          onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
+                                          required
+                                          multiline
+                                          rows={4}
+                                          placeholder="Enter each responsibility on a new line"
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Requirements (one per line)"
+                                          value={entry.requirements}
+                                          onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
+                                          required
+                                          multiline
+                                          rows={4}
+                                          placeholder="Enter each requirement on a new line"
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Application URL (optional)"
+                                          value={entry.application_url}
+                                          onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
+                                          placeholder="https://example.com/apply"
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
                                     </Grid>
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                      <TextField
-                                        fullWidth
-                                        size="small"
-                                        label="Responsibilities (one per line)"
-                                        value={entry.responsibilities}
-                                        onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
-                                        required
-                                        multiline
-                                        rows={4}
-                                        placeholder="Enter each responsibility on a new line"
-                                        sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                      />
-                                    </Grid>
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                      <TextField
-                                        fullWidth
-                                        size="small"
-                                        label="Requirements (one per line)"
-                                        value={entry.requirements}
-                                        onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
-                                        required
-                                        multiline
-                                        rows={4}
-                                        placeholder="Enter each requirement on a new line"
-                                        sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                      />
-                                    </Grid>
-                                  </Grid>
-                                </Box>
-                              </Collapse>
-                            </TableCell>
-                          </TableRow>
-                        </React.Fragment>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                                  </Box>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
 
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column-reverse', sm: 'row' },
+                  gap: 2, 
+                  justifyContent: 'flex-end'
+                }}>
                   <Button
                     type="button"
                     variant="outlined"
                     onClick={resetForm}
+                    fullWidth={isMobile}
                   >
                     Cancel
                   </Button>
@@ -611,6 +810,7 @@ export default function AdminPage() {
                     type="submit"
                     variant="contained"
                     startIcon={<Save size={20} />}
+                    fullWidth={isMobile}
                   >
                     {editingJob ? 'Update Job' : `Create ${jobEntries.length} Job${jobEntries.length > 1 ? 's' : ''}`}
                   </Button>
@@ -636,238 +836,443 @@ export default function AdminPage() {
           </Box>
 
           {/* Search and Filters */}
-          <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
-            <Grid container spacing={2} alignItems="center">
-              {/* Search */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
+          <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: 1, borderColor: 'divider' }}>
+            {/* Search - Always visible */}
+            <Box sx={{ mb: isMobile ? 2 : 0 }}>
+              <TextField
+                fullWidth
+                placeholder="Search jobs..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(0);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                size="small"
+              />
+            </Box>
+
+            {/* Filters - Collapsible on mobile */}
+            {isMobile ? (
+              <>
+                <Button
                   fullWidth
-                  placeholder="Search jobs..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setPage(0);
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search size={20} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  size="small"
-                />
-              </Grid>
-
-              {/* Status Filter */}
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={filterStatus}
-                    label="Status"
-                    onChange={(e) => {
-                      setFilterStatus(e.target.value);
-                      setPage(0);
-                    }}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    <MenuItem value="active">Active</MenuItem>
-                    <MenuItem value="closed">Closed</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Department Filter */}
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Department</InputLabel>
-                  <Select
-                    value={filterDepartment}
-                    label="Department"
-                    onChange={(e) => {
-                      setFilterDepartment(e.target.value);
-                      setPage(0);
-                    }}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {uniqueDepartments.map((dept) => (
-                      <MenuItem key={dept} value={dept}>
-                        {dept}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Type Filter */}
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Type</InputLabel>
-                  <Select
-                    value={filterType}
-                    label="Type"
-                    onChange={(e) => {
-                      setFilterType(e.target.value);
-                      setPage(0);
-                    }}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {uniqueTypes.map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Location Filter */}
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Location</InputLabel>
-                  <Select
-                    value={filterLocation}
-                    label="Location"
-                    onChange={(e) => {
-                      setFilterLocation(e.target.value);
-                      setPage(0);
-                    }}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {uniqueLocations.map((location) => (
-                      <MenuItem key={location} value={location}>
-                        {location}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Reset Filters Button */}
-              {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
-                <Grid size={{ xs: 12, md: 12 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={handleResetFilters}
-                    startIcon={<X size={16} />}
-                  >
-                    Reset Filters
-                  </Button>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    <TableSortLabel
-                      active={sortField === 'title'}
-                      direction={sortField === 'title' ? sortDirection : 'asc'}
-                      onClick={() => handleSort('title')}
-                    >
-                      Title
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    <TableSortLabel
-                      active={sortField === 'department'}
-                      direction={sortField === 'department' ? sortDirection : 'asc'}
-                      onClick={() => handleSort('department')}
-                    >
-                      Department
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    <TableSortLabel
-                      active={sortField === 'location'}
-                      direction={sortField === 'location' ? sortDirection : 'asc'}
-                      onClick={() => handleSort('location')}
-                    >
-                      Location
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    <TableSortLabel
-                      active={sortField === 'status'}
-                      direction={sortField === 'status' ? sortDirection : 'asc'}
-                      onClick={() => handleSort('status')}
-                    >
-                      Status
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    <TableSortLabel
-                      active={sortField === 'postedDate'}
-                      direction={sortField === 'postedDate' ? sortDirection : 'asc'}
-                      onClick={() => handleSort('postedDate')}
-                    >
-                      Posted
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedJobs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        No job postings found matching your criteria.
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedJobs.map((job) => (
-                    <TableRow
-                      key={job.id}
-                      sx={{
-                        '&:hover': { bgcolor: 'action.hover' },
+                  variant="outlined"
+                  onClick={() => setFiltersExpanded(!filtersExpanded)}
+                  endIcon={filtersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  sx={{ mt: 2, mb: filtersExpanded ? 2 : 0 }}
+                >
+                  {filtersExpanded ? 'Hide Filters' : 'Show Filters'}
+                </Button>
+                <Collapse in={filtersExpanded}>
+                  <Grid container spacing={2} sx={{ mt: 1 }}>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          value={filterStatus}
+                          label="Status"
+                          onChange={(e) => {
+                            setFilterStatus(e.target.value);
+                            setPage(0);
+                          }}
+                        >
+                          <MenuItem value="all">All</MenuItem>
+                          <MenuItem value="active">Active</MenuItem>
+                          <MenuItem value="closed">Closed</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Department</InputLabel>
+                        <Select
+                          value={filterDepartment}
+                          label="Department"
+                          onChange={(e) => {
+                            setFilterDepartment(e.target.value);
+                            setPage(0);
+                          }}
+                        >
+                          <MenuItem value="all">All</MenuItem>
+                          {uniqueDepartments.map((dept) => (
+                            <MenuItem key={dept} value={dept}>
+                              {dept}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Type</InputLabel>
+                        <Select
+                          value={filterType}
+                          label="Type"
+                          onChange={(e) => {
+                            setFilterType(e.target.value);
+                            setPage(0);
+                          }}
+                        >
+                          <MenuItem value="all">All</MenuItem>
+                          {uniqueTypes.map((type) => (
+                            <MenuItem key={type} value={type}>
+                              {type}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Location</InputLabel>
+                        <Select
+                          value={filterLocation}
+                          label="Location"
+                          onChange={(e) => {
+                            setFilterLocation(e.target.value);
+                            setPage(0);
+                          }}
+                        >
+                          <MenuItem value="all">All</MenuItem>
+                          {uniqueLocations.map((location) => (
+                            <MenuItem key={location} value={location}>
+                              {location}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
+                      <Grid size={{ xs: 12 }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={handleResetFilters}
+                          startIcon={<X size={16} />}
+                          fullWidth
+                        >
+                          Reset Filters
+                        </Button>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Collapse>
+              </>
+            ) : (
+              <Grid container spacing={2} alignItems="center" sx={{ mt: 2 }}>
+                <Grid size={{ xs: 12, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={filterStatus}
+                      label="Status"
+                      onChange={(e) => {
+                        setFilterStatus(e.target.value);
+                        setPage(0);
                       }}
                     >
-                      <TableCell>{job.title}</TableCell>
-                      <TableCell>{job.department}</TableCell>
-                      <TableCell>{job.location}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={job.status}
-                          size="small"
-                          color={job.status === 'active' ? 'success' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {new Date(job.postedDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <IconButton
-                            onClick={() => handleEdit(job)}
-                            size="small"
-                            color="primary"
-                            title="Edit"
-                          >
-                            <Edit2 size={18} />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => handleDeleteClick(job.id)}
-                            size="small"
-                            color="error"
-                            title="Delete"
-                          >
-                            <Trash2 size={18} />
-                          </IconButton>
-                        </Box>
+                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="active">Active</MenuItem>
+                      <MenuItem value="closed">Closed</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Department</InputLabel>
+                    <Select
+                      value={filterDepartment}
+                      label="Department"
+                      onChange={(e) => {
+                        setFilterDepartment(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueDepartments.map((dept) => (
+                        <MenuItem key={dept} value={dept}>
+                          {dept}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Type</InputLabel>
+                    <Select
+                      value={filterType}
+                      label="Type"
+                      onChange={(e) => {
+                        setFilterType(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Location</InputLabel>
+                    <Select
+                      value={filterLocation}
+                      label="Location"
+                      onChange={(e) => {
+                        setFilterLocation(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueLocations.map((location) => (
+                        <MenuItem key={location} value={location}>
+                          {location}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={handleResetFilters}
+                      startIcon={<X size={16} />}
+                    >
+                      Reset Filters
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+            )}
+          </Box>
+
+          {/* Desktop Table View */}
+          {!isMobile ? (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'action.hover' }}>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'title'}
+                        direction={sortField === 'title' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('title')}
+                      >
+                        Title
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'department'}
+                        direction={sortField === 'department' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('department')}
+                      >
+                        Department
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'location'}
+                        direction={sortField === 'location' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('location')}
+                      >
+                        Location
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'status'}
+                        direction={sortField === 'status' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('status')}
+                      >
+                        Status
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      <TableSortLabel
+                        active={sortField === 'postedDate'}
+                        direction={sortField === 'postedDate' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('postedDate')}
+                      >
+                        Posted
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedJobs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                        <Typography variant="body1" color="text.secondary">
+                          No job postings found matching your criteria.
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  ) : (
+                    paginatedJobs.map((job) => (
+                      <TableRow
+                        key={job.id}
+                        sx={{
+                          '&:hover': { bgcolor: 'action.hover' },
+                        }}
+                      >
+                        <TableCell>{job.title}</TableCell>
+                        <TableCell>{job.department}</TableCell>
+                        <TableCell>{job.location}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={job.status}
+                            size="small"
+                            color={job.status === 'active' ? 'success' : 'default'}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {new Date(job.postedDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <IconButton
+                              onClick={() => handleEdit(job)}
+                              size="small"
+                              color="primary"
+                              title="Edit"
+                            >
+                              <Edit2 size={18} />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleDeleteClick(job.id)}
+                              size="small"
+                              color="error"
+                              title="Delete"
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            /* Mobile Card View */
+            <Box sx={{ p: 2 }}>
+              {/* Mobile Sort Selector */}
+              <Box sx={{ mb: 2 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Sort By</InputLabel>
+                  <Select
+                    value={`${sortField}-${sortDirection}`}
+                    label="Sort By"
+                    onChange={(e) => {
+                      const [field, direction] = e.target.value.split('-');
+                      setSortField(field as SortField);
+                      setSortDirection(direction as SortDirection);
+                      setPage(0);
+                    }}
+                  >
+                    <MenuItem value="title-asc">Title (A-Z)</MenuItem>
+                    <MenuItem value="title-desc">Title (Z-A)</MenuItem>
+                    <MenuItem value="department-asc">Department (A-Z)</MenuItem>
+                    <MenuItem value="department-desc">Department (Z-A)</MenuItem>
+                    <MenuItem value="location-asc">Location (A-Z)</MenuItem>
+                    <MenuItem value="location-desc">Location (Z-A)</MenuItem>
+                    <MenuItem value="status-asc">Status (A-Z)</MenuItem>
+                    <MenuItem value="status-desc">Status (Z-A)</MenuItem>
+                    <MenuItem value="postedDate-desc">Posted (Newest)</MenuItem>
+                    <MenuItem value="postedDate-asc">Posted (Oldest)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              {paginatedJobs.length === 0 ? (
+                <Box sx={{ py: 4, textAlign: 'center' }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No job postings found matching your criteria.
+                  </Typography>
+                </Box>
+              ) : (
+                <Stack spacing={2}>
+                  {paginatedJobs.map((job) => (
+                    <Card key={job.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', flex: 1, mr: 1 }}>
+                            {job.title}
+                          </Typography>
+                          <Chip
+                            label={job.status}
+                            size="small"
+                            color={job.status === 'active' ? 'success' : 'default'}
+                            sx={{ minWidth: 70 }}
+                          />
+                        </Box>
+                        <Divider sx={{ my: 1.5 }} />
+                        <Stack spacing={1.5}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                              Department:
+                            </Typography>
+                            <Typography variant="body2">{job.department}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                              Location:
+                            </Typography>
+                            <Typography variant="body2">{job.location}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                              Posted:
+                            </Typography>
+                            <Typography variant="body2">
+                              {new Date(job.postedDate).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </CardContent>
+                      <CardActions sx={{ px: 2, pb: 2, pt: 0, justifyContent: 'flex-end', gap: 1 }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<Edit2 size={16} />}
+                          onClick={() => handleEdit(job)}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          startIcon={<Trash2 size={16} />}
+                          onClick={() => handleDeleteClick(job.id)}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Delete
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  ))}
+                </Stack>
+              )}
+            </Box>
+          )}
 
           {/* Pagination */}
           <TablePagination

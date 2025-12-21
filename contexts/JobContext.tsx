@@ -15,6 +15,7 @@ export interface Job {
   salary: string;
   postedDate: string;
   status: 'active' | 'closed';
+  application_url?: string;
 }
 
 // Database job type (snake_case)
@@ -30,6 +31,7 @@ interface DatabaseJob {
   salary: string;
   posted_date: string | null;
   status: 'active' | 'closed';
+  application_url?: string | null;
   created_at?: string;
 }
 
@@ -69,6 +71,7 @@ function mapDatabaseJobToJob(dbJob: DatabaseJob): Job {
     salary: dbJob.salary,
     postedDate,
     status: dbJob.status,
+    application_url: dbJob.application_url || undefined,
   };
 }
 
@@ -164,6 +167,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
           salary: job.salary,
           status: job.status || 'active',
           posted_date: new Date().toISOString(),
+          application_url: job.application_url || null,
         })
         .select()
         .single();
@@ -201,6 +205,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
         salary: job.salary,
         status: job.status || 'active',
         posted_date: now,
+        application_url: job.application_url || null,
       }));
 
       const { data, error } = await supabase
@@ -238,6 +243,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
       if (updatedJob.salary !== undefined) updateData.salary = updatedJob.salary;
       if (updatedJob.status !== undefined) updateData.status = updatedJob.status;
       if (updatedJob.postedDate !== undefined) updateData.posted_date = updatedJob.postedDate;
+      if (updatedJob.application_url !== undefined) updateData.application_url = updatedJob.application_url || null;
 
       const { data, error } = await supabase
         .from('jobs')

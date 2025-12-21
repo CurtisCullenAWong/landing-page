@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Box, CircularProgress } from '@mui/material';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -12,10 +12,26 @@ function LogoutButton() {
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push('/auth/login');
   };
 
-  return <Button onClick={logout} variant="outlined">Logout</Button>;
+  return (
+    <Button 
+      onClick={logout} 
+      variant="outlined" 
+      size="small"
+      sx={{
+        color: 'primary.contrastText',
+        borderColor: 'primary.contrastText',
+        '&:hover': {
+          borderColor: 'primary.contrastText',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        }
+      }}
+    >
+      Logout
+    </Button>
+  );
 }
 
 export function AuthButton() {
@@ -24,14 +40,17 @@ export function AuthButton() {
 
   useEffect(() => {
     const supabase = createClient();
-    
+
+    // Initial check
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setLoading(false);
     });
 
+    // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -39,38 +58,35 @@ export function AuthButton() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", alignItems: "center", minWidth: 120, justifyContent: "center" }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 120, justifyContent: 'center' }}>
         <CircularProgress size={20} />
       </Box>
     );
   }
 
   return user ? (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      Hey, {user.email}!
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <span style={{ color: 'white' }}>Hey, {user.email}!</span>
       <LogoutButton />
     </Box>
   ) : (
-    <Box sx={{ display: "flex", gap: 1 }}>
-      <Button component={Link} href="/auth/login" size="small" variant="outlined">
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      <Button 
+        component={Link} 
+        href="/auth/login" 
+        size="small" 
+        variant="outlined"
+        sx={{
+          color: 'primary.contrastText',
+          borderColor: 'primary.contrastText',
+          '&:hover': {
+            borderColor: 'primary.contrastText',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          }
+        }}
+      >
         Sign in
-      </Button>
-      <Button component={Link} href="/auth/sign-up" size="small" variant="contained">
-        Sign up
       </Button>
     </Box>
   );
 }
-
-export function AuthButtonWithSuspense() {
-  return (
-    <Suspense fallback={
-      <Box sx={{ display: "flex", alignItems: "center", minWidth: 120, justifyContent: "center" }}>
-        <CircularProgress size={20} />
-      </Box>
-    }>
-      <AuthButton />
-    </Suspense>
-  );
-}
-

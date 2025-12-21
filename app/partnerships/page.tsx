@@ -66,7 +66,7 @@ export default function PartnershipsPage() {
             overflow: 'hidden',
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >

@@ -89,6 +89,7 @@ export default function JobDetailsPage() {
             salary: data.salary,
             postedDate,
             status: data.status,
+            application_url: data.application_url || undefined,
           };
           setJob(mappedJob);
         } else {
@@ -142,6 +143,7 @@ export default function JobDetailsPage() {
               salary: payload.new.salary,
               postedDate,
               status: payload.new.status,
+              application_url: payload.new.application_url || undefined,
             };
             setJob(updatedJob);
           } else if (payload.eventType === 'DELETE') {
@@ -297,7 +299,7 @@ export default function JobDetailsPage() {
             mb: 4,
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >
@@ -319,15 +321,17 @@ export default function JobDetailsPage() {
         </Box>
           <Button
             component="a"
-            href={`mailto:people@bosscargo.express?subject=Job Application for ${encodeURIComponent(job.title)}&body=I am interested in applying for the ${encodeURIComponent(job.title)} position.`}
+            href={job.application_url || `mailto:people@bosscargo.express?subject=Job Application for ${encodeURIComponent(job.title)}&body=I am interested in applying for the ${encodeURIComponent(job.title)} position.`}
             variant="contained"
             size="large"
+            target={job.application_url ? '_blank' : undefined}
+            rel={job.application_url ? 'noopener noreferrer' : undefined}
             sx={{
-              bgcolor: 'background.paper',
-              color: isDark ? 'text.primary' : 'primary.main',
+              bgcolor: 'background.default',
+              color: isDark ? 'text.primary' : 'text.secondary',
               '&:hover': {
-                bgcolor: isDark ? 'action.hover' : 'action.selected',
-                color: isDark ? 'text.primary' : 'primary.main',
+                bgcolor: isDark ? 'action.hover' : 'action.hover', // or use 'action.selected' if you want a more noticeable change
+                color: isDark ? 'text.secondary' : 'text.primary',
               },
             }}
           >

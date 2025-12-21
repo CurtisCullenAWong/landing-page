@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, User } from 'lucide-react';
 import { ImageWithFallback } from '../../components/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer, PageHeader, Section, ContentGrid } from '../../components/layout';
@@ -13,6 +13,8 @@ import {
   CardContent,
   Paper,
   useTheme,
+  Stack,
+  Divider,
 } from '@mui/material';
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
@@ -115,40 +117,48 @@ export default function AboutPage() {
 
       {/* Company Officials */}
       <Section bottomSpacing="large">
+        {/* Centered the header text */}
         <PageHeader
           title="Company Officials"
           titleVariant="h3"
           bottomSpacing={SECTION_SPACING.medium}
+          align="center"
         />
-        <ContentGrid spacing="medium">
+        
+        {/* Added justifyContent center to handle 1, 2, or 3 officials gracefully */}
+        <Grid 
+          container 
+          spacing={4} 
+          justifyContent="center"
+        >
           {[
             {
               name: 'Aris Delos Reyes',
               title: 'Founder, CEO',
-              image: '', // Placeholder for future image
+              image: '', 
               phones: ['09171360195', '09999900195'],
               emails: ['aris@bosscargo.express', 'info@bosscargo.express'],
               website: 'www.bosscargo.express',
               address: 'Lot 6 unit B, Blk 3, A. Canaynay Ave. BF Martinville, Manuyo Dos, Las Pinas City.',
             },
-            // Future company officials can be added here
-            // {
-            //   name: 'Name',
-            //   title: 'Position',
-            //   image: null,
-            //   phones: ['phone1', 'phone2'],
-            //   emails: ['email1', 'email2'],
-            //   website: 'website',
-            //   address: 'address',
-            // },
           ].map((official, index) => (
-            <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4 }} key={index}>
+              <Card 
+                sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  maxWidth: 450, // Prevents card from becoming too wide on single item layouts
+                  mx: 'auto',    // Centers the card itself in the grid item
+                  transition: 'transform 0.2s ease-in-out',
+                  '&:hover': { transform: 'translateY(-4px)' }
+                }}
+              >
                 {/* Image Placeholder */}
                 <Box
                   sx={{
                     width: '100%',
-                    height: 280,
+                    height: 320, // Slightly taller for better portrait hierarchy
                     bgcolor: isDark ? 'action.hover' : 'grey.100',
                     display: 'flex',
                     alignItems: 'center',
@@ -162,27 +172,37 @@ export default function AboutPage() {
                       src={official.image}
                       alt={official.name}
                       layout="fill"
-                      objectFit="cover"
+                      style={{ objectFit: 'cover' }}
                     />
                   ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      Image Placeholder
-                    </Typography>
+                    <Stack alignItems="center" spacing={1}>
+                        <User size={48} color={theme.palette.text.disabled} />
+                        <Typography variant="caption" color="text.disabled">
+                        NO IMAGE AVAILABLE
+                      </Typography>
+                    </Stack>
                   )}
                 </Box>
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                    {official.name}
-                  </Typography>
-                  <Typography variant="body1" color="primary.main" sx={{ mb: 3, fontWeight: 500 }}>
-                    {official.title}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {official.phones && official.phones.length > 0 && (
+
+                <CardContent sx={{ flexGrow: 1, p: 4 }}>
+                  {/* Centered Name and Title */}
+                  <Box sx={{ textAlign: 'center', mb: 3 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                      {official.name}
+                    </Typography>
+                    <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      {official.title}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ mb: 3, opacity: 0.6 }} />
+
+                  {/* Contact Info - Kept Left Aligned for readability of long strings */}
+                  <Stack spacing={2.5}>
+                    {official.phones && (
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Phone size={16} />
-                          Phone
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <Phone size={14} /> Contact Numbers
                         </Typography>
                         {official.phones.map((phone, idx) => (
                           <Typography
@@ -191,11 +211,10 @@ export default function AboutPage() {
                             component="a"
                             href={`tel:${phone.replace(/\s/g, '')}`}
                             sx={{
-                              fontSize: '0.875rem',
-                              ml: 2.5,
                               display: 'block',
                               color: 'text.primary',
                               textDecoration: 'none',
+                              fontWeight: 500,
                               '&:hover': { color: 'primary.main' },
                             }}
                           >
@@ -204,11 +223,11 @@ export default function AboutPage() {
                         ))}
                       </Box>
                     )}
-                    {official.emails && official.emails.length > 0 && (
+
+                    {official.emails && (
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Mail size={16} />
-                          Email
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <Mail size={14} /> Email Addresses
                         </Typography>
                         {official.emails.map((email, idx) => (
                           <Typography
@@ -217,11 +236,10 @@ export default function AboutPage() {
                             component="a"
                             href={`mailto:${email}`}
                             sx={{
-                              fontSize: '0.875rem',
-                              ml: 2.5,
                               display: 'block',
                               color: 'text.primary',
                               textDecoration: 'none',
+                              wordBreak: 'break-all',
                               '&:hover': { color: 'primary.main' },
                             }}
                           >
@@ -230,54 +248,23 @@ export default function AboutPage() {
                         ))}
                       </Box>
                     )}
-                    {official.website && (
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          Website
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          component="a"
-                          href={`https://${official.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          sx={{
-                            fontSize: '0.875rem',
-                            ml: 2.5,
-                            display: 'block',
-                            color: 'text.primary',
-                            textDecoration: 'none',
-                            '&:hover': { color: 'primary.main' },
-                          }}
-                        >
-                          {official.website}
-                        </Typography>
-                      </Box>
-                    )}
+
                     {official.address && (
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                          <MapPin size={16} style={{ marginTop: 2, flexShrink: 0 }} />
-                          Address
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <MapPin size={14} /> Office Address
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontSize: '0.875rem',
-                            ml: 2.5,
-                            color: 'text.secondary',
-                          }}
-                        >
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                           {official.address}
                         </Typography>
                       </Box>
                     )}
-                  </Box>
+                  </Stack>
                 </CardContent>
               </Card>
             </Grid>
           ))}
-        </ContentGrid>
+        </Grid>
       </Section>
 
       {/* Contact Information */}
@@ -404,7 +391,7 @@ export default function AboutPage() {
             textAlign: 'center',
             background: isDark
               ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              : 'linear-gradient(135deg,rgb(15, 106, 103) 0%,rgb(50, 139, 139) 100%)',
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >
