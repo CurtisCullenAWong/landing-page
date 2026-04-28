@@ -94,7 +94,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
           schema: 'public',
           table: 'jobs',
         },
-        (payload) => {
+        (payload: { eventType: string; new: DatabaseJob; old: { id: string; }; }) => {
           console.log('Realtime event received:', payload.eventType, payload);
           
           if (payload.eventType === 'INSERT') {

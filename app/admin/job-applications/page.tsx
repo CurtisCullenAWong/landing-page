@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import {
   Box,
   Container,
@@ -230,11 +231,11 @@ export default function JobApplicationsPage() {
           schema: 'public',
           table: 'job_applicants',
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           console.log('Realtime event received for job_applicants:', payload.eventType, payload);
           
           if (payload.eventType === 'INSERT') {
-            const newApplicant = payload.new as JobApplicant;
+            const newApplicant = payload.new as unknown as JobApplicant;
             setJobApplicants((prevApplicants) => {
               // Check if applicant already exists (avoid duplicates)
               if (prevApplicants.find(applicant => applicant.id === newApplicant.id)) {
@@ -248,7 +249,7 @@ export default function JobApplicationsPage() {
               });
             });
           } else if (payload.eventType === 'UPDATE') {
-            const updatedApplicant = payload.new as JobApplicant;
+            const updatedApplicant = payload.new as unknown as JobApplicant;
             setJobApplicants((prevApplicants) =>
               prevApplicants.map((applicant) =>
                 applicant.id === updatedApplicant.id ? updatedApplicant : applicant
@@ -259,7 +260,7 @@ export default function JobApplicationsPage() {
               prev && prev.id === updatedApplicant.id ? updatedApplicant : prev
             );
           } else if (payload.eventType === 'DELETE') {
-            const deletedId = payload.old.id;
+            const deletedId = (payload.old as { id: string }).id;
             setJobApplicants((prevApplicants) =>
               prevApplicants.filter((applicant) => applicant.id !== deletedId)
             );
@@ -282,7 +283,7 @@ export default function JobApplicationsPage() {
           schema: 'public',
           table: 'jobs',
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           console.log('Realtime event received for jobs:', payload.eventType, payload);
           
           if (payload.eventType === 'INSERT') {
@@ -301,7 +302,7 @@ export default function JobApplicationsPage() {
               )
             );
           } else if (payload.eventType === 'DELETE') {
-            const deletedId = payload.old.id;
+            const deletedId = (payload.old as { id: string }).id;
             setJobs((prevJobs) =>
               prevJobs.filter((job) => job.id !== deletedId)
             );

@@ -168,7 +168,7 @@ export default function MyApplicationPage() {
               table: 'job_applicants',
               filter: `id=eq.${id}`,
             },
-            (payload) => {
+            (payload: { new: JobApplicant; }) => {
               console.log('Realtime event received for application:', payload);
               if (payload.new) {
                 setApplication(payload.new as JobApplicant);

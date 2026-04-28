@@ -126,7 +126,7 @@ export default function JobDetailsPage() {
           table: 'jobs',
           filter: `id=eq.${id}`,
         },
-        (payload) => {
+        (payload: { eventType: string; new: { posted_date: string | number | Date; id: any; title: any; department: any; location: any; type: any; description: any; responsibilities: any; requirements: any; salary: any; status: any; application_url: any; }; }) => {
           console.log('Realtime event received for job:', payload.eventType, payload);
           
           if (payload.eventType === 'UPDATE' && payload.new) {

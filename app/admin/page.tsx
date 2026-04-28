@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useJobs } from '../../contexts/JobContext';
 import { createClient } from '@/lib/supabase/client';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import {
   Box,
   Container,
@@ -129,7 +130,7 @@ export default function AdminDashboardPage() {
           schema: 'public',
           table: 'job_applicants',
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<JobApplicant>) => {
           console.log('Realtime event received for job_applicants:', payload.eventType, payload);
           
           if (payload.eventType === 'INSERT') {
