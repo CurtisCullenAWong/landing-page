@@ -9,7 +9,8 @@ const ERROR_IMG_SRC =
 export type ImageLayout = 'fill' | 'responsive' | 'fixed' | 'intrinsic'
 export type ImageAspectRatio = '16:9' | '4:3' | '1:1' | '21:9' | 'auto'
 
-export interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+export interface ImageWithFallbackProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+  src: any
   /**
    * Layout mode for the image
    * - fill: Fills parent container
@@ -233,7 +234,7 @@ export function ImageWithFallback({
       )}
       <Box
         component="img"
-        src={src}
+        src={typeof src === 'string' ? src : (src as any)?.src}
         alt={alt || 'Image'}
         loading={lazy && !priority ? 'lazy' : 'eager'}
         sx={getImageStyles()}

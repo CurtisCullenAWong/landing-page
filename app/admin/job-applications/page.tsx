@@ -46,6 +46,8 @@ import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { Search, Edit, Eye, FileText, MoreVertical, Trash2, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { PDFViewer } from '@/components/pdf-viewer';
+import { formatStatus } from '@/lib/utils';
+
 
 interface JobApplicant {
   id: string;
@@ -777,7 +779,7 @@ export default function JobApplicationsPage() {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={applicant.status}
+                            label={formatStatus(applicant.status)}
                             size="small"
                             color={getStatusColor(applicant.status) as any}
                           />
@@ -856,7 +858,7 @@ export default function JobApplicationsPage() {
                             </Typography>
                           </Box>
                           <Chip
-                            label={applicant.status}
+                            label={formatStatus(applicant.status)}
                             size="small"
                             color={getStatusColor(applicant.status) as any}
                             sx={{ minWidth: 80 }}
@@ -998,7 +1000,17 @@ export default function JobApplicationsPage() {
 
         {/* Status Update Dialog */}
         <Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Update Application Status</DialogTitle>
+          <DialogTitle>
+            Update Application Status
+            {editingApplicant && (
+              <Chip
+                label={formatStatus(editingApplicant.status)}
+                size="small"
+                color={getStatusColor(editingApplicant.status) as any}
+                sx={{ ml: 2, verticalAlign: 'middle' }}
+              />
+            )}
+          </DialogTitle>
           <DialogContent>
             {editingApplicant && (
               <Box sx={{ pt: 2 }}>

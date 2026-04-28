@@ -35,6 +35,8 @@ import {
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { formatStatus } from '@/lib/utils';
+
 
 interface JobApplicant {
   id: string;
@@ -626,7 +628,7 @@ export default function AdminDashboardPage() {
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={applicant.status}
+                              label={formatStatus(applicant.status)}
                               size="small"
                               color={getStatusColor(applicant.status) as any}
                             />
@@ -933,7 +935,7 @@ export default function AdminDashboardPage() {
                           <TableCell>{job.type}</TableCell>
                           <TableCell>
                             <Chip
-                              label={job.status}
+                              label={formatStatus(job.status)}
                               size="small"
                               color={job.status === 'active' ? 'success' : 'default'}
                             />

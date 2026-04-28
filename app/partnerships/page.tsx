@@ -42,7 +42,8 @@ export default function PartnershipsPage() {
       name: 'Philippine Economic Zone Authority (PEZA)',
       description: 'Accredited partner for PEZA facilitation services, supporting economic zone operations.',
       image: IMAGE_URLS.MEMBERSHIP_PEZA,
-      imageAlt: getImageMetadata(IMAGE_URLS.MEMBERSHIP_PEZA).alt
+      imageAlt: getImageMetadata(IMAGE_URLS.MEMBERSHIP_PEZA).alt,
+      whiteBackground: true
     },
     {
       name: 'JCtrans Network-International Freight Forwarders Network',
@@ -94,8 +95,9 @@ export default function PartnershipsPage() {
                 alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
                 layout="responsive"
                 aspectRatio="4:3"
+                objectFit="contain"
                 rounded={8}
-                shadow={2}
+                shadow={false}
               />
             </Grid>
           </Grid>
@@ -146,11 +148,26 @@ export default function PartnershipsPage() {
             {memberships.map((membership, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ p: 2, pb: 0 }}>
+                  <Box 
+                    sx={{ 
+                      p: (membership as any).whiteBackground ? 3 : 2, 
+                      pb: (membership as any).whiteBackground ? 3 : 0,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      position: 'relative',
+                      ...( (membership as any).whiteBackground && {
+                        bgcolor: 'white',
+                        borderRadius: 2,
+                        m: 2,
+                        aspectRatio: '1/1',
+                      })
+                    }}
+                  >
                     <ImageWithFallback
                       src={membership.image}
                       alt={membership.imageAlt}
-                      layout="responsive"
+                      layout={(membership as any).whiteBackground ? "fill" : "responsive"}
                       aspectRatio="auto"
                       objectFit="contain"
                     />

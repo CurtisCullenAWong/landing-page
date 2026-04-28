@@ -29,7 +29,9 @@ export default function HomePage() {
         sx={{
           position: 'relative',
           overflow: 'hidden',
-          py: { xs: 10, md: 40 },
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
           background: isDark
             ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
             : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
@@ -41,7 +43,7 @@ export default function HomePage() {
           sx={{
             position: 'absolute',
             inset: 0,
-            opacity: 0.2,
+            opacity: 0.25,
             zIndex: 0,
             width: '100%',
             height: '100%',
@@ -56,16 +58,21 @@ export default function HomePage() {
           />
         </Box>
 
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <Container 
+          maxWidth="lg" 
+          className="animate-fade-in-up"
+          sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 0 } }}
+        >
           {/* Main Heading */}
           <Typography
             variant="h1"
             sx={{
               mb: 3,
               fontWeight: 800,
-              fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
-              lineHeight: 1.2,
-              letterSpacing: '-0.5px',
+              fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem' },
+              lineHeight: 1.1,
+              letterSpacing: '-1px',
+              textShadow: '0 2px 10px rgba(0,0,0,0.1)',
             }}
           >
             Synergy beyond compare
@@ -75,13 +82,13 @@ export default function HomePage() {
           <Typography
             variant="h3"
             sx={{
-              mb: 4,
+              mb: 5,
               fontWeight: 400,
-              fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+              fontSize: { xs: '1.1rem', sm: '1.3rem', md: '1.6rem' },
               lineHeight: 1.6,
-              maxWidth: '750px',
+              maxWidth: '800px',
               mx: 'auto',
-              opacity: 0.85,
+              opacity: 0.9,
             }}
           >
             Boss Cargo Express is focused on building partnerships that inspire growth.  
@@ -97,13 +104,20 @@ export default function HomePage() {
               variant="contained"
               size="large"
               sx={{
-                bgcolor: 'background.paper',
-                color: isDark ? 'text.primary' : 'primary.main',
-                fontWeight: 600,
+                px: 4,
+                py: 1.5,
+                bgcolor: 'white',
+                color: 'primary.main',
+                fontWeight: 700,
+                fontSize: '1rem',
+                borderRadius: '50px',
+                boxShadow: '0 4px 14px 0 rgba(0,0,0,0.1)',
                 '&:hover': {
-                  bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  color: isDark ? 'text.primary' : 'primary.main',
+                  bgcolor: 'rgba(255,255,255,0.9)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
                 },
+                transition: 'all 0.3s ease',
               }}
             >
               View Open Job Postings
@@ -114,13 +128,20 @@ export default function HomePage() {
               variant="outlined"
               size="large"
               sx={{
-                borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                color: isDark ? 'text.primary' : 'primary.contrastText',
-                fontWeight: 600,
+                px: 4,
+                py: 1.5,
+                borderColor: 'white',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1rem',
+                borderRadius: '50px',
+                borderWidth: '2px',
                 '&:hover': {
-                  borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                  bgcolor: 'action.hover',
+                  borderColor: 'white',
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  transform: 'translateY(-2px)',
                 },
+                transition: 'all 0.3s ease',
               }}
             >
               Learn More
@@ -236,6 +257,7 @@ export default function HomePage() {
                 <ImageWithFallback
                   src={IMAGE_URLS.HOME_LOGISTICS_SERVICES.src}
                   alt={getImageMetadata(IMAGE_URLS.HOME_LOGISTICS_SERVICES).alt}
+                  layout="fill"
                 />
               </Box>
             </Grid>

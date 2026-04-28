@@ -22,6 +22,8 @@ import {
 import { JobDetailsSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { PDFViewer } from '@/components/pdf-viewer';
+import { formatStatus } from '@/lib/utils';
+
 
 interface JobApplicant {
   id: string;
@@ -288,7 +290,7 @@ export default function MyApplicationPage() {
           sx={{ mb: 4 }}
         >
           <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-            Status: <Chip label={application.status} size="small" color={getStatusColor(application.status) as any} sx={{ ml: 1 }} />
+            Status: <Chip label={formatStatus(application.status)} size="small" color={getStatusColor(application.status) as any} sx={{ ml: 1 }} />
           </Typography>
           <Typography variant="body2">{getStatusMessage(application.status)}</Typography>
         </Alert>

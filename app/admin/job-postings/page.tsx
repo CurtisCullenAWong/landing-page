@@ -41,6 +41,8 @@ import {
 } from '@mui/material';
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../../lib/usePageTitle';
+import { formatStatus } from '@/lib/utils';
+
 
 type SortField = 'title' | 'department' | 'location' | 'postedDate' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -1087,7 +1089,7 @@ export default function AdminPage() {
                         <TableCell>{job.location}</TableCell>
                         <TableCell>
                           <Chip
-                            label={job.status}
+                            label={formatStatus(job.status)}
                             size="small"
                             color={job.status === 'active' ? 'success' : 'default'}
                           />
@@ -1167,7 +1169,7 @@ export default function AdminPage() {
                             {job.title}
                           </Typography>
                           <Chip
-                            label={job.status}
+                            label={formatStatus(job.status)}
                             size="small"
                             color={job.status === 'active' ? 'success' : 'default'}
                             sx={{ minWidth: 70 }}

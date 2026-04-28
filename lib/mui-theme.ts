@@ -6,7 +6,7 @@ import { ThemeOptions } from "@mui/material/styles";
 export const themeColors = {
   light: {
     primary: {
-      main: "##00A59A", // Brand teal
+      main: "#00A59A", // Brand teal
       light: "#1ECAD3",
       dark: "#007C7C",
       contrastText: "#ffffff",
