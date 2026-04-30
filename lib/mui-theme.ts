@@ -1,4 +1,21 @@
-import { ThemeOptions } from "@mui/material/styles";
+import { ThemeOptions, PaletteColorOptions } from "@mui/material/styles";
+
+// 1. TypeScript Augmentation for custom 'tertiary' color
+declare module '@mui/material/styles' {
+  interface Palette {
+    tertiary: Palette['primary'];
+  }
+  interface PaletteOptions {
+    tertiary?: PaletteColorOptions;
+  }
+}
+
+// Optional: Allow components like Button or Chip to use color="tertiary"
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    tertiary: true;
+  }
+}
 
 /**
  * Color palette configuration for MUI theme
@@ -6,24 +23,30 @@ import { ThemeOptions } from "@mui/material/styles";
 export const themeColors = {
   light: {
     primary: {
-      main: "#00A59A", // Brand teal
-      light: "#1ECAD3",
-      dark: "#007C7C",
+      main: "#00A39D", // PANTONE 3272 C
+      light: "#00A796", // PANTONE 3275 U
+      dark: "#007A76",
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#0F2A3D", // Navy
-      light: "#1B3F5A",
-      dark: "#091C2B",
+      main: "#202945", // PANTONE 533 C
+      light: "#434867", // PANTONE 282 U
+      dark: "#111626",
       contrastText: "#ffffff",
+    },
+    tertiary: {
+      main: "#FCE200", // PANTONE 102 C
+      light: "#FFEB2B", // PANTONE 102 U
+      dark: "#C9B400",
+      contrastText: "#202945", // Dark text for legibility on yellow
     },
     background: {
       default: "#ffffff",
       paper: "#F8FAFC",
     },
     text: {
-      primary: "#0F2A3D",
-      secondary: "#4B6B82",
+      primary: "#202945",
+      secondary: "#434867",
     },
     error: {
       main: "#C44E4E",
@@ -31,12 +54,12 @@ export const themeColors = {
       dark: "#9F3B3B",
     },
     warning: {
-      main: "#ED8B2F",
+      main: "#ED8B2F", // Restored original warning
       light: "#F6B77A",
       dark: "#C46A1A",
     },
     info: {
-      main: "#2C8FA3", // Teal-leaning blue
+      main: "#2C8FA3",
       light: "#6BB9C9",
       dark: "#1E6D7F",
     },
@@ -47,8 +70,8 @@ export const themeColors = {
     },
     divider: "#E6EDF3",
     action: {
-      hover: "rgba(15, 42, 61, 0.06)",
-      selected: "rgba(0, 167, 167, 0.10)",
+      hover: "rgba(32, 41, 69, 0.06)",
+      selected: "rgba(0, 163, 157, 0.10)",
       disabled: "rgba(0, 0, 0, 0.30)",
       disabledBackground: "rgba(0, 0, 0, 0.10)",
     },
@@ -56,16 +79,22 @@ export const themeColors = {
 
   dark: {
     primary: {
-      main: "#1ECAD3",
-      light: "#4FDDE3",
-      dark: "#00A7A7",
+      main: "#00A796", // PANTONE 3275 U
+      light: "#33B8AA",
+      dark: "#00A39D", // PANTONE 3272 C
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#162F42",
-      light: "#234E6A",
-      dark: "#0B1E2B",
+      main: "#434867", // PANTONE 282 U
+      light: "#6A7091",
+      dark: "#202945", // PANTONE 533 C
       contrastText: "#ffffff",
+    },
+    tertiary: {
+      main: "#FFEB2B", // PANTONE 102 U
+      light: "#FFF166",
+      dark: "#FCE200", // PANTONE 102 C
+      contrastText: "#0B0F14",
     },
     background: {
       default: "#0B0F14",
@@ -81,7 +110,7 @@ export const themeColors = {
       dark: "#C75C5C",
     },
     warning: {
-      main: "#F2A65A",
+      main: "#F2A65A", // Restored original warning
       light: "#F6C48C",
       dark: "#D47D1F",
     },
@@ -98,7 +127,7 @@ export const themeColors = {
     divider: "#253342",
     action: {
       hover: "rgba(255, 255, 255, 0.06)",
-      selected: "rgba(30, 202, 211, 0.12)",
+      selected: "rgba(0, 167, 150, 0.12)",
       disabled: "rgba(255, 255, 255, 0.30)",
       disabledBackground: "rgba(255, 255, 255, 0.10)",
     },
@@ -123,61 +152,17 @@ export const themeTypography = {
     '"Segoe UI Symbol"',
   ].join(","),
 
-  h1: {
-    fontSize: "2.5rem",
-    fontWeight: 700,
-    lineHeight: 1.2,
-    letterSpacing: "-0.02em",
-  },
-  h2: {
-    fontSize: "2rem",
-    fontWeight: 700,
-    lineHeight: 1.3,
-    letterSpacing: "-0.01em",
-  },
-  h3: {
-    fontSize: "1.75rem",
-    fontWeight: 600,
-    lineHeight: 1.4,
-  },
-  h4: {
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    lineHeight: 1.4,
-  },
-  h5: {
-    fontSize: "1.25rem",
-    fontWeight: 600,
-    lineHeight: 1.5,
-  },
-  h6: {
-    fontSize: "1rem",
-    fontWeight: 600,
-    lineHeight: 1.5,
-  },
-  body1: {
-    fontSize: "1rem",
-    lineHeight: 1.6,
-  },
-  body2: {
-    fontSize: "0.875rem",
-    lineHeight: 1.6,
-  },
-  button: {
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    textTransform: "none" as const,
-  },
-  caption: {
-    fontSize: "0.75rem",
-    lineHeight: 1.5,
-  },
-  overline: {
-    fontSize: "0.75rem",
-    fontWeight: 500,
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.1em",
-  },
+  h1: { fontSize: "2.5rem", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em" },
+  h2: { fontSize: "2rem", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.01em" },
+  h3: { fontSize: "1.75rem", fontWeight: 600, lineHeight: 1.4 },
+  h4: { fontSize: "1.5rem", fontWeight: 600, lineHeight: 1.4 },
+  h5: { fontSize: "1.25rem", fontWeight: 600, lineHeight: 1.5 },
+  h6: { fontSize: "1rem", fontWeight: 600, lineHeight: 1.5 },
+  body1: { fontSize: "1rem", lineHeight: 1.6 },
+  body2: { fontSize: "0.875rem", lineHeight: 1.6 },
+  button: { fontSize: "0.875rem", fontWeight: 500, textTransform: "none" as const },
+  caption: { fontSize: "0.75rem", lineHeight: 1.5 },
+  overline: { fontSize: "0.75rem", fontWeight: 500, textTransform: "uppercase" as const, letterSpacing: "0.1em" },
 };
 
 /**
@@ -203,6 +188,7 @@ export const getThemeOptions = (mode: "light" | "dark"): ThemeOptions => {
       mode,
       primary: colors.primary,
       secondary: colors.secondary,
+      tertiary: colors.tertiary, // 2. Map tertiary into the generated palette
       background: colors.background,
       text: colors.text,
       error: colors.error,

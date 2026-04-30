@@ -60,6 +60,28 @@ let isProgrammaticScrolling = false;
 let scrollTimeout: NodeJS.Timeout;
 
 /**
+ * Custom hook to keep the pathname in sync with manual history state updates (replaceState).
+ */
+export const useSyncPathname = () => {
+  const pathname = usePathname();
+  const [syncedPath, setSyncedPath] = useState(pathname || '/');
+
+  useEffect(() => {
+    if (pathname) setSyncedPath(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleSync = (e: any) => {
+      if (e.detail?.href) setSyncedPath(e.detail.href);
+    };
+    window.addEventListener('nav-sync', handleSync);
+    return () => window.removeEventListener('nav-sync', handleSync);
+  }, []);
+
+  return syncedPath;
+};
+
+/**
  * Smoothly scrolls to the section corresponding to the given href.
  * @param href The href of the section to scroll to.
  * @returns boolean indicating if the scroll was handled.
@@ -74,13 +96,20 @@ export const scrollToHref = (href: string) => {
 
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Update URL without jumping
-    window.history.pushState(null, '', href);
+    // Modern way to detect end of smooth scroll
+    const handleScrollEnd = () => {
+      isProgrammaticScrolling = false;
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      window.removeEventListener('scrollend', handleScrollEnd);
+    };
 
-    // Reset the flag after smooth scroll completes
+    window.addEventListener('scrollend', handleScrollEnd, { once: true });
+
+    // Fallback for browsers that don't support scrollend
     scrollTimeout = setTimeout(() => {
       isProgrammaticScrolling = false;
-    }, 1000);
+      window.removeEventListener('scrollend', handleScrollEnd);
+    }, 2500); 
 
     return true;
   }
@@ -102,11 +131,16 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
 
   useEffect(() => {
     setMounted(true);
+    (window as any).__isNavigatingAway = false;
   }, []);
 
   // Handle initial scroll on deep link
   useEffect(() => {
     if (!mounted || !isMainSequence) return;
+
+    // Reset navigating away flag when entering or navigating within the main sequence
+    (window as any).__isNavigatingAway = false;
+    initialScrollDone.current = false;
 
     // Small delay to ensure rendering is complete
     const timer = setTimeout(() => {
@@ -114,7 +148,7 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
       // Ensure we don't trigger route updates until the initial scroll has had time to settle
       setTimeout(() => {
         initialScrollDone.current = true;
-      }, 1000);
+      }, 2000);
     }, 500);
 
     return () => clearTimeout(timer);
@@ -125,8 +159,8 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Skip updates if we are scrolling programmatically (from a click) or still performing initial scroll
-        if (isProgrammaticScrolling || !initialScrollDone.current) return;
+        // Skip updates if we are navigating away or still performing initial scroll
+        if (!initialScrollDone.current || (window as any).__isNavigatingAway) return;
 
         entries.forEach(entry => {
           // Trigger when the section enters the detection window
@@ -134,6 +168,7 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
             const href = entry.target.getAttribute('data-href');
             if (href && window.location.pathname !== href) {
               window.history.replaceState(null, '', href);
+              window.dispatchEvent(new CustomEvent('nav-sync', { detail: { href } }));
               const link = NAV_LINKS.find(l => l.href === href);
               if (link) {
                 document.title = `${link.name} | Boss Cargo Express`;
@@ -144,11 +179,29 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
         });
       },
       {
-        // Use a 5% detection band at 20% of the viewport height
+        // Use a broader detection window (from 15% to 50% of the viewport height)
+        // to ensure the route sync triggers reliably even during fast scrolling.
         threshold: 0,
-        rootMargin: '-20% 0px -75% 0px'
+        rootMargin: '-15% 0px -50% 0px'
       }
     );
+
+    const handleScroll = () => {
+      if (!initialScrollDone.current || (window as any).__isNavigatingAway) return;
+      
+      // If we're at the very top, ensure we're on the home route
+      if (window.scrollY < 50 && window.location.pathname !== '/') {
+        window.history.replaceState(null, '', '/');
+        window.dispatchEvent(new CustomEvent('nav-sync', { detail: { href: '/' } }));
+        const link = NAV_LINKS.find(l => l.href === '/');
+        if (link) {
+          document.title = `${link.name} | Boss Cargo Express`;
+          (window as any).__disablePageTitleHook = true;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Observe all modules in the sequence
     MAIN_SEQUENCE.forEach(href => {
@@ -157,7 +210,10 @@ export const InfiniteScrollLoader = ({ children }: { children?: React.ReactNode 
       if (el) observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [mounted, isMainSequence]);
 
   if (!mounted) return null;

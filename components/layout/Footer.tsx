@@ -13,15 +13,14 @@ import {
 import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { NAV_LINKS, CONTACT_INFO, scrollToHref, MAIN_SEQUENCE } from '@/constants/navigation';
+import { NAV_LINKS, CONTACT_INFO, scrollToHref, MAIN_SEQUENCE, useSyncPathname } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
-import { usePathname } from 'next/navigation';
 
 const BUILD_YEAR = new Date().getFullYear();
 
 export function Footer() {
   const theme = useTheme();
-  const pathname = usePathname();
+  const pathname = useSyncPathname();
   const [currentYear, setCurrentYear] = useState<number>(BUILD_YEAR);
 
   useEffect(() => {
@@ -33,6 +32,9 @@ export function Footer() {
       if (scrollToHref(href)) {
         e.preventDefault();
       }
+    } else if (MAIN_SEQUENCE.includes(pathname) && !MAIN_SEQUENCE.includes(href)) {
+      // If we are leaving the landing page, signal to stop scroll synchronization
+      (window as any).__isNavigatingAway = true;
     }
   };
 
@@ -74,11 +76,13 @@ export function Footer() {
                 className="flex items-center group outline-none"
                 onClick={(e) => handleNavClick(e, '/')}
               >
-                <img 
-                  src={IMAGE_URLS.LOGO.src} 
-                  alt="Logo" 
-                  className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
-                />
+                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-2 backdrop-blur-md transition-all duration-300 group-hover:from-white/30 group-hover:to-white/10 border border-white/10 shadow-lg group-hover:shadow-white/10 group-hover:scale-[1.02]">
+                  <img 
+                    src={IMAGE_URLS.LOGO.src} 
+                    alt="Logo" 
+                    className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+                  />
+                </div>
               </Link>
               <Typography variant="body2" sx={{ color: footerStyles.secondaryText, lineHeight: 1.7 }}>
                 Delivering excellence across the Philippines with world-class logistics 

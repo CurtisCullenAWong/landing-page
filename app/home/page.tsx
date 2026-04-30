@@ -54,7 +54,7 @@ export default function HomePage() {
             layout="fill"
             objectFit="cover"
             style={{
-              objectPosition: 'center 1%',
+              objectPosition: 'left 1%',
             }}
             priority
           />

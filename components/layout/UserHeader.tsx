@@ -4,12 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ClipboardList } from 'lucide-react';
-import { NAV_LINKS, scrollToHref, MAIN_SEQUENCE } from '@/constants/navigation';
+import { NAV_LINKS, scrollToHref, MAIN_SEQUENCE, useSyncPathname } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
 import { ThemeSwitcher } from '../theme-switcher';
 
 export function UserHeader() {
-  const pathname = usePathname() ?? '';
+  const pathname = useSyncPathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (href: string) => 
@@ -22,6 +22,9 @@ export function UserHeader() {
         e.preventDefault();
         setIsMobileMenuOpen(false);
       }
+    } else if (MAIN_SEQUENCE.includes(pathname) && !MAIN_SEQUENCE.includes(href)) {
+      // If we are leaving the landing page, signal to stop scroll synchronization
+      (window as any).__isNavigatingAway = true;
     }
   };
 
@@ -43,11 +46,13 @@ export function UserHeader() {
             className="group flex items-center outline-none"
             onClick={(e) => handleNavClick(e, '/')}
           >
-            <img 
-              src={IMAGE_URLS.LOGO.src} 
-              alt="Boss Cargo Express" 
-              className="h-14 w-auto object-contain transition-transform group-hover:scale-105" 
-            />
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-2 backdrop-blur-md transition-all duration-300 group-hover:from-white/30 group-hover:to-white/10 border border-white/10 shadow-lg group-hover:shadow-white/10 group-hover:scale-[1.02]">
+              <img 
+                src={IMAGE_URLS.LOGO.src} 
+                alt="Boss Cargo Express" 
+                className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+              />
+            </div>
           </Link>
 
           {/* Desktop Nav */}
