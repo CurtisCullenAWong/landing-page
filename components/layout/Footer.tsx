@@ -69,19 +69,48 @@ export function Footer() {
           {/* Brand Section */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack spacing={2}>
-              <Link
+              <Box
+                component={Link}
                 href="/"
-                className="flex items-center group outline-none"
-                onClick={(e) => handleNavClick(e, '/')}
+                onClick={(e: any) => handleNavClick(e, '/')}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  outline: 'none',
+                  textDecoration: 'none',
+                  '&:hover .logo-container': {
+                    background: alpha(theme.palette.common.white, 0.3),
+                    transform: 'scale(1.02)',
+                  }
+                }}
               >
-                <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-2 backdrop-blur-md transition-all duration-300 group-hover:from-white/30 group-hover:to-white/10 border border-white/10 shadow-lg group-hover:shadow-white/10 group-hover:scale-[1.02]">
-                  <img
+                <Box
+                  className="logo-container"
+                  sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: '12px',
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
+                    p: 1,
+                    border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <Box
+                    component="img"
                     src={IMAGE_URLS.LOGO.src}
                     alt="Logo"
-                    className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+                    sx={{
+                      h: 40,
+                      width: 'auto',
+                      display: 'block',
+                      transition: 'transform 0.3s ease',
+                      '.logo-container:hover &': { transform: 'scale(1.05)' }
+                    }}
                   />
-                </div>
-              </Link>
+                </Box>
+              </Box>
               <Typography variant="body2" sx={{ color: footerStyles.secondaryText, lineHeight: 1.7 }}>
                 Delivering excellence across the Philippines with world-class logistics
                 solutions since 2014.

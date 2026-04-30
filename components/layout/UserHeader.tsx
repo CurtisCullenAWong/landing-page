@@ -6,9 +6,22 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, ClipboardList } from 'lucide-react';
 import { NAV_LINKS, scrollToHref, useActiveSection } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
+import {
+  Box,
+  Container,
+  Stack,
+  IconButton,
+  useTheme,
+  alpha,
+  Link as MuiLink,
+  useMediaQuery,
+  Collapse
+} from '@mui/material';
 import { ThemeSwitcher } from '../theme-switcher';
 
 export function UserHeader() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const pathname = usePathname() || '/';
   const activeSection = useActiveSection();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,12 +33,12 @@ export function UserHeader() {
     // 2. Handle hash links (like /#careers)
     if (href.startsWith('/#')) {
       const section = href.replace('/#', '');
-      
+
       // On the home page, we use scroll-based active section
       if (pathname === '/') {
         return activeSection === section;
       }
-      
+
       // On other pages, we check if the current path matches the section name
       // e.g., on /careers or /careers/apply, the Careers link (/#careers) should be active
       return pathname === `/${section}` || pathname.startsWith(`/${section}/`);
@@ -34,7 +47,7 @@ export function UserHeader() {
     // 3. Handle standard links (like /my-application)
     // Avoid matching '/' to everything
     if (href === '/') return pathname === '/';
-    
+
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -49,107 +62,203 @@ export function UserHeader() {
     setIsMobileMenuOpen(false);
   };
 
-  const navItemClasses = (href: string) => `
-    px-3 py-2 rounded-md text-sm font-medium transition-all
-    ${isActive(href) 
-      ? 'bg-white text-primary shadow-sm' 
-      : 'text-white/80 hover:bg-white/10 hover:text-white'}
-  `;
+  const navItemStyles = (href: string) => ({
+    px: 2,
+    py: 1,
+    borderRadius: 1,
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    textDecoration: 'none',
+    transition: theme.transitions.create(['background-color', 'color', 'box-shadow']),
+    display: 'flex',
+    alignItems: 'center',
+    ...(isActive(href)
+      ? {
+        bgcolor: 'common.white',
+        color: 'primary.main',
+        boxShadow: theme.shadows[1],
+      }
+      : {
+        color: alpha(theme.palette.common.white, 0.8),
+        '&:hover': {
+          bgcolor: alpha(theme.palette.common.white, 0.1),
+          color: 'common.white',
+        },
+      }),
+  });
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-white/10 bg-primary text-primary-foreground shadow-md backdrop-blur-md">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          
+    <Box
+      component="header"
+      sx={{
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: theme.zIndex.appBar,
+        width: '100%',
+        borderBottom: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+        bgcolor: 'primary.main',
+        color: 'primary.contrastText',
+        boxShadow: theme.shadows[3],
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box sx={{ display: 'flex', height: 80, alignItems: 'center', justifyContent: 'space-between' }}>
+
           {/* Brand Logo */}
-          <Link 
-            href="/" 
-            className="group flex items-center outline-none"
-            onClick={(e) => handleNavClick(e, '/')}
+          <Box
+            component={Link}
+            href="/"
+            onClick={(e: any) => handleNavClick(e, '/')}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              outline: 'none',
+              textDecoration: 'none',
+              '&:hover .logo-container': {
+                background: alpha(theme.palette.common.white, 0.3),
+                transform: 'scale(1.02)',
+              }
+            }}
           >
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-2 backdrop-blur-md transition-all duration-300 group-hover:from-white/30 group-hover:to-white/10 border border-white/10 shadow-lg group-hover:shadow-white/10 group-hover:scale-[1.02]">
-              <img 
-                src={IMAGE_URLS.LOGO.src} 
-                alt="Boss Cargo Express" 
-                className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
+            <Box
+              className="logo-container"
+              sx={{
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
+                p: 1,
+                border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+                boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <Box
+                component="img"
+                src={IMAGE_URLS.LOGO.src}
+                alt="Boss Cargo Express"
+                sx={{
+                  height: 40,
+                  width: 'auto',
+                  display: 'block',
+                  transition: 'transform 0.3s ease',
+                  '.logo-container:hover &': { transform: 'scale(1.05)' }
+                }}
               />
-            </div>
-          </Link>
+            </Box>
+          </Box>
 
           {/* Desktop Nav */}
-          <div className="hidden items-center gap-1 md:flex">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}
+          >
             {NAV_LINKS.map((item) => {
               const isApplication = item.name === 'My Application';
               return (
-                <Link 
-                  key={item.name} 
-                  href={item.href} 
-                  className={`${navItemClasses(item.href)} flex items-center group/nav transition-all duration-300 ${isApplication ? 'gap-0 hover:gap-2' : ''}`}
-                  onClick={(e) => handleNavClick(e, item.href)}
+                <Box
+                  key={item.name}
+                  component={Link}
+                  href={item.href}
+                  onClick={(e: any) => handleNavClick(e, item.href)}
+                  className="nav-item"
+                  sx={{
+                    ...navItemStyles(item.href),
+                    gap: isApplication ? 0 : 1,
+                    overflow: 'hidden',
+                    '&:hover': isApplication ? { gap: 1 } : {},
+                  }}
                 >
-                  {isApplication && <ClipboardList size={18} className="shrink-0" />}
-                  <span className={`
-                    overflow-hidden transition-all duration-300 whitespace-nowrap
-                    ${isApplication 
-                      ? 'max-w-0 opacity-0 group-hover/nav:max-w-[150px] group-hover/nav:opacity-100 group-hover/nav:ml-1' 
-                      : ''}
-                  `}>
+                  {isApplication && <ClipboardList size={18} style={{ flexShrink: 0 }} />}
+                  <Box
+                    component="span"
+                    sx={{
+                      transition: 'all 0.3s ease',
+                      whiteSpace: 'nowrap',
+                      ...(isApplication && {
+                        maxWidth: 0,
+                        opacity: 0,
+                        '.nav-item:hover &': {
+                          maxWidth: 150,
+                          opacity: 1,
+                          ml: 1
+                        }
+                      })
+                    }}
+                  >
                     {item.name}
-                  </span>
-                </Link>
+                  </Box>
+                </Box>
               );
             })}
-            <div className="ml-4 flex items-center gap-2 border-l border-white/20 pl-4">
+            <Box sx={{ ml: 2, pl: 2, borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, display: 'flex', alignItems: 'center', gap: 2 }}>
               <ThemeSwitcher />
-            </div>
-          </div>
+            </Box>
+          </Stack>
 
           {/* Mobile Toggle */}
-          <div className="flex items-center gap-2 md:hidden">
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
             <ThemeSwitcher />
-            <button
+            <IconButton
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 hover:bg-white/10"
-              aria-expanded={isMobileMenuOpen}
+              sx={{ color: 'common.white', '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) } }}
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
+            </IconButton>
+          </Box>
+        </Box>
 
         {/* Mobile Nav Menu */}
-        {isMobileMenuOpen && (
-          <div className="space-y-1 border-t border-white/10 pb-4 pt-2 md:hidden">
-            {NAV_LINKS.map((item) => {
-              const isApplication = item.name === 'My Application';
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`flex items-center gap-3 rounded-md px-4 py-3 text-base font-medium transition-colors ${
-                    isActive(item.href) 
-                      ? 'bg-white text-primary' 
-                      : 'text-white hover:bg-white/10'
-                  }`}
-                >
-                  {isApplication ? (
-                    <ClipboardList size={20} className="shrink-0" />
-                  ) : (
-                    <div className="w-5 h-5 flex items-center justify-center">
-                      <div className={`w-1.5 h-1.5 rounded-full ${isActive(item.href) ? 'bg-primary' : 'bg-white/40'}`} />
-                    </div>
-                  )}
-                  {item.name}
-                </Link>
-              );
-            })}
-            <div className="mt-4 border-t border-white/10 pt-4 px-3">
-            </div>
-          </div>
-        )}
-      </nav>
-    </header>
+        <Collapse in={isMobileMenuOpen}>
+          <Box sx={{ pb: 2, borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}` }}>
+            <Stack spacing={1} sx={{ pt: 2 }}>
+              {NAV_LINKS.map((item) => {
+                const isApplication = item.name === 'My Application';
+                const active = isActive(item.href);
+                return (
+                  <Box
+                    key={item.name}
+                    component={Link}
+                    href={item.href}
+                    onClick={(e: any) => handleNavClick(e, item.href)}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      px: 2,
+                      py: 1.5,
+                      borderRadius: 1,
+                      textDecoration: 'none',
+                      // color: 'common.white',
+                      transition: 'background-color 0.2s',
+                      ...(active
+                        ? { bgcolor: 'common.white', color: 'primary.main' }
+                        : { '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) } }
+                      )
+                    }}
+                  >
+                    {isApplication ? (
+                      <ClipboardList size={20} style={{ flexShrink: 0 }} />
+                    ) : (
+                      <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: active ? 'primary.main' : alpha(theme.palette.common.white, 0.4) }} />
+                      </Box>
+                    )}
+                    <Box component="span" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                      {item.name}
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
+        </Collapse>
+      </Container>
+    </Box>
   );
 }
 

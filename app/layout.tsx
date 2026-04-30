@@ -24,9 +24,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isSequencePage = pathname === '/';
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={isSequencePage ? 'scroll-lock-active' : ''}>
       <head>
         {/* 1. INSTANT THEME DETECTION: Prevents white flash in dark mode */}
         <script
@@ -153,7 +155,11 @@ function MainContainer({ children }: { children: React.ReactNode }) {
   return (
     <Box 
       component="main" 
-      sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
+      sx={{ 
+        flexGrow: 1, 
+        scrollSnapAlign: pathname === '/' ? 'start' : 'none', 
+        minHeight: '100vh' 
+      }}
       data-initial-module="true"
       data-href={pathname}
       suppressHydrationWarning

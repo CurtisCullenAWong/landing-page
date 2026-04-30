@@ -4,12 +4,16 @@
 
 html {
   scroll-padding-top: 80px;
+}
+
+/* Applied conditionally to sequences pages */
+.scroll-lock-active {
   scroll-snap-type: y mandatory;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
 
-html::-webkit-scrollbar {
+.scroll-lock-active::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
 
