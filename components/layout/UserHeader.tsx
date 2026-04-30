@@ -9,16 +9,31 @@ import { IMAGE_URLS } from '@/constants/images';
 import { ThemeSwitcher } from '../theme-switcher';
 
 export function UserHeader() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
   const activeSection = useActiveSection();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (href: string) => {
+    // 1. If it's an exact match, it's definitely active
+    if (pathname === href) return true;
+
+    // 2. Handle hash links (like /#job-postings)
     if (href.startsWith('/#')) {
       const section = href.replace('/#', '');
-      return activeSection === section && pathname === '/';
+      
+      // On the home page, we use scroll-based active section
+      if (pathname === '/') {
+        return activeSection === section;
+      }
+      
+      // On other pages, we check if the path matches the section name
+      // e.g., on /job-postings, the Careers link (/#job-postings) should be active
+      return pathname === `/${section}` || pathname.startsWith(`/${section}/`);
     }
-    return pathname.startsWith(href);
+
+    // 3. Handle standard links (like /my-application)
+    // Check for exact match or if we're on a sub-page of that link
+    return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {

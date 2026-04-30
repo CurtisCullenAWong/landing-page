@@ -59,14 +59,25 @@ export const useActiveSection = () => {
       const sections = ['home', 'about-us', 'why-us', 'history', 'partnerships', 'job-postings'];
       let current = 'home';
       
-      // Find the section that is currently most visible in the viewport
-      for (const id of sections) {
-        const element = document.getElementById(id);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          // If the top of the section is above the middle of the screen
-          if (rect.top <= window.innerHeight / 3) {
-            current = id;
+      // Check if we're near the bottom of the page
+      // This is important for the last section (job-postings) which might not be tall enough 
+      // to reach the top 1/3 threshold
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const totalHeight = document.documentElement.scrollHeight;
+      const isAtBottom = scrollPosition >= totalHeight - 100;
+
+      if (isAtBottom) {
+        current = sections[sections.length - 1];
+      } else {
+        // Find the section that is currently most visible in the viewport
+        for (const id of sections) {
+          const element = document.getElementById(id);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            // If the top of the section is above the middle of the screen
+            if (rect.top <= window.innerHeight / 3) {
+              current = id;
+            }
           }
         }
       }

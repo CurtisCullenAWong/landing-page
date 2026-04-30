@@ -22,8 +22,15 @@ export default function MyApplicationSection() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (applicationId.trim()) {
-      router.push(`/my-application/${applicationId.trim()}`);
+    const id = applicationId.trim();
+    if (id) {
+      // Basic UUID validation
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        alert('Invalid Application ID format. Please enter a valid UUID.');
+        return;
+      }
+      router.push(`/my-application/${id}`);
     }
   };
 

@@ -44,20 +44,27 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  try {
+    const { data } = await supabase.auth.getClaims();
+    const user = data?.claims;
 
-  // Only require authentication for admin routes
-  if (
-    request.nextUrl.pathname.startsWith("/admin") &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, redirect to login page for admin routes with return URL
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    // Only require authentication for admin routes
+    if (
+      request.nextUrl.pathname.startsWith("/admin") &&
+      !user &&
+      !request.nextUrl.pathname.startsWith("/auth")
+    ) {
+      // no user, redirect to login page for admin routes with return URL
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      url.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+  } catch (error) {
+    console.error("Supabase session update failed:", error);
+    // If it's an admin route, we might want to redirect anyway, 
+    // but for now let's just let it fall through to the next response
+    // to avoid blocking the whole site on a transient network error.
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -109,6 +109,15 @@ export default function MyApplicationPage() {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const loadApplication = async () => {
+      // Validate UUID format before querying Supabase
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        console.error('Invalid Application ID format:', id);
+        setError('Invalid Application ID format. Please check your ID and try again.');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         // Load application
         const { data: applicationData, error: applicationError } = await supabase
