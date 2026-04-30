@@ -9,7 +9,6 @@ import { Footer } from "@/components/layout";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
-import { InfiniteScrollLoader } from "@/constants/navigation";
 import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import "./globals.css";
@@ -131,17 +130,15 @@ export default function RootLayout({
                 <Suspense fallback={<HeaderSkeleton />}>
                   <ConditionalHeader />
                 </Suspense>
-                <InfiniteScrollLoader>
-                  <Box 
-                    component="main" 
-                    sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
-                    data-initial-module="true"
-                    data-href={pathname}
-                    suppressHydrationWarning
-                  >
-                    {children}
-                  </Box>
-                </InfiniteScrollLoader>
+                <Box 
+                  component="main" 
+                  sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
+                  data-initial-module="true"
+                  data-href={pathname}
+                  suppressHydrationWarning
+                >
+                  {children}
+                </Box>
                 <Footer />
               </Box>
             </JobProvider>

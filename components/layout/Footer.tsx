@@ -12,15 +12,16 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { NAV_LINKS, CONTACT_INFO, scrollToHref, MAIN_SEQUENCE, useSyncPathname } from '@/constants/navigation';
+import { NAV_LINKS, CONTACT_INFO, scrollToHref } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
 
 const BUILD_YEAR = new Date().getFullYear();
 
 export function Footer() {
   const theme = useTheme();
-  const pathname = useSyncPathname();
+  const pathname = usePathname();
   const [currentYear, setCurrentYear] = useState<number>(BUILD_YEAR);
 
   useEffect(() => {
@@ -28,13 +29,10 @@ export function Footer() {
   }, []);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
-    if (MAIN_SEQUENCE.includes(pathname) && MAIN_SEQUENCE.includes(href)) {
+    if (pathname === '/' && href.startsWith('/#')) {
       if (scrollToHref(href)) {
         e.preventDefault();
       }
-    } else if (MAIN_SEQUENCE.includes(pathname) && !MAIN_SEQUENCE.includes(href)) {
-      // If we are leaving the landing page, signal to stop scroll synchronization
-      (window as any).__isNavigatingAway = true;
     }
   };
 

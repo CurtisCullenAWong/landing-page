@@ -4,27 +4,29 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ClipboardList } from 'lucide-react';
-import { NAV_LINKS, scrollToHref, MAIN_SEQUENCE, useSyncPathname } from '@/constants/navigation';
+import { NAV_LINKS, scrollToHref, useActiveSection } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
 import { ThemeSwitcher } from '../theme-switcher';
 
 export function UserHeader() {
-  const pathname = useSyncPathname();
+  const pathname = usePathname();
+  const activeSection = useActiveSection();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isActive = (href: string) => 
-    href === '/' ? pathname === '/' || pathname === '/home' : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href.startsWith('/#')) {
+      const section = href.replace('/#', '');
+      return activeSection === section && pathname === '/';
+    }
+    return pathname.startsWith(href);
+  };
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
-    // If we are on a page in the main sequence and clicking another sequence link, scroll instead
-    if (MAIN_SEQUENCE.includes(pathname) && MAIN_SEQUENCE.includes(href)) {
+    if (pathname === '/' && href.startsWith('/#')) {
       if (scrollToHref(href)) {
         e.preventDefault();
         setIsMobileMenuOpen(false);
       }
-    } else if (MAIN_SEQUENCE.includes(pathname) && !MAIN_SEQUENCE.includes(href)) {
-      // If we are leaving the landing page, signal to stop scroll synchronization
-      (window as any).__isNavigatingAway = true;
     }
   };
 
