@@ -24,7 +24,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -130,17 +130,16 @@ export default function RootLayout({
                 <Suspense fallback={<HeaderSkeleton />}>
                   <ConditionalHeader />
                 </Suspense>
-                <Box 
-                  component="main" 
-                  sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
-                  data-initial-module="true"
-                  data-href={pathname}
-                  suppressHydrationWarning
-                >
-                  {children}
-                </Box>
-                <Footer />
+                <Suspense fallback={<Box sx={{ flexGrow: 1, minHeight: '100vh' }}>{children}</Box>}>
+                  <MainContainer>
+                    {children}
+                  </MainContainer>
+                </Suspense>
+                <Suspense fallback={null}>
+                  <Footer />
+                </Suspense>
               </Box>
+
             </JobProvider>
           </MuiThemeProviderWrapper>
         </NextThemeProvider>
@@ -148,3 +147,18 @@ export default function RootLayout({
     </html>
   );
 }
+
+function MainContainer({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <Box 
+      component="main" 
+      sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
+      data-initial-module="true"
+      data-href={pathname}
+      suppressHydrationWarning
+    >
+      {children}
+    </Box>
+  );
+}
