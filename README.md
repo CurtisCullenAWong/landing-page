@@ -84,7 +84,7 @@ boss-cargo/
 │   ├── about-us/                 # About Us page
 │   ├── admin/                    # Admin dashboard
 │   │   ├── job-applications/     # Application management
-│   │   └── job-postings/         # Job posting management
+│   │   └── careers/         # Job posting management
 │   ├── auth/                     # Authentication pages
 │   │   ├── login/
 │   │   ├── sign-up/
@@ -92,7 +92,7 @@ boss-cargo/
 │   │   └── update-password/
 │   ├── home/                     # Home page
 │   ├── history/                  # Company history
-│   ├── job-postings/             # Career portal
+│   ├── careers/             # Career portal
 │   │   ├── apply/                # General application form
 │   │   └── job-details/[id]/     # Job detail pages
 │   │       └── apply/             # Job-specific application

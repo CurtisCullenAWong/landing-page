@@ -247,7 +247,7 @@ export default function GeneralApplicationPage() {
                 </Button>
                 <Button
                   component={Link}
-                  href="/job-postings"
+                  href="/careers"
                   variant="outlined"
                 >
                   Browse Job Postings
@@ -266,7 +266,7 @@ export default function GeneralApplicationPage() {
         {/* Back Button */}
         <Button
           component={Link}
-          href="/job-postings"
+          href="/careers"
           startIcon={<ArrowLeft size={20} />}
           sx={{ mb: 4 }}
         >
@@ -534,7 +534,7 @@ export default function GeneralApplicationPage() {
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
                   <Button
                     component={Link}
-                    href="/job-postings"
+                    href="/careers"
                     variant="outlined"
                     disabled={isSubmitting}
                   >

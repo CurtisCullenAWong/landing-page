@@ -9,13 +9,13 @@ export const NAV_LINKS = [
   { name: 'Why Us', href: '/#why-us' },
   { name: 'History', href: '/#history' },
   { name: 'Partnerships', href: '/#partnerships' },
-  { name: 'Careers', href: '/#job-postings' },
+  { name: 'Careers', href: '/#careers' },
   { name: 'My Application', href: '/my-application' },
 ];
 
 export const ADMIN_NAV_LINKS = [
   { name: 'Dashboard', href: '/admin' },
-  { name: 'Job Postings', href: '/admin/job-postings' },
+  { name: 'Job Postings', href: '/admin/careers' },
   { name: 'Job Applications', href: '/admin/job-applications' },
 ];
 
@@ -55,13 +55,12 @@ export const useActiveSection = () => {
       return;
     }
 
+    const sections = ['home', 'about-us', 'why-us', 'history', 'partnerships', 'careers'];
+
     const handleScroll = () => {
-      const sections = ['home', 'about-us', 'why-us', 'history', 'partnerships', 'job-postings'];
       let current = 'home';
       
-      // Check if we're near the bottom of the page
-      // This is important for the last section (job-postings) which might not be tall enough 
-      // to reach the top 1/3 threshold
+      // 1. Check if we're near the bottom of the page
       const scrollPosition = window.scrollY + window.innerHeight;
       const totalHeight = document.documentElement.scrollHeight;
       const isAtBottom = scrollPosition >= totalHeight - 100;
@@ -69,17 +68,23 @@ export const useActiveSection = () => {
       if (isAtBottom) {
         current = sections[sections.length - 1];
       } else {
-        // Find the section that is currently most visible in the viewport
+        // 2. Find the section that is currently most visible in the viewport
+        // We use a more precise check: the section whose top is closest to the top of the viewport
+        // but still within a reasonable range (top 1/3)
+        let closestSection = 'home';
+        let minDistance = Infinity;
+
         for (const id of sections) {
           const element = document.getElementById(id);
           if (element) {
             const rect = element.getBoundingClientRect();
-            // If the top of the section is above the middle of the screen
+            // If the section is in view or coming into view
             if (rect.top <= window.innerHeight / 3) {
-              current = id;
+              closestSection = id;
             }
           }
         }
+        current = closestSection;
       }
       
       if (current !== currentSectionRef.current) {
@@ -93,11 +98,26 @@ export const useActiveSection = () => {
       }
     };
 
+    // Check if we have an initial hash
+    if (window.location.hash) {
+      const hash = window.location.hash.replace('#', '');
+      if (sections.includes(hash)) {
+        setActiveSection(hash);
+        currentSectionRef.current = hash;
+      }
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Initial check
-    setTimeout(handleScroll, 100);
+    // Run immediately to catch the current position
+    handleScroll();
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Also run after a short delay to account for browser scroll-to-hash
+    const timer = setTimeout(handleScroll, 100);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
   }, [pathname]);
 
   return activeSection;

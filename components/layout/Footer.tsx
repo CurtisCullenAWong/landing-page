@@ -95,7 +95,7 @@ export function Footer() {
               Company
             </Typography>
             <Stack spacing={1.5}>
-              {NAV_LINKS.filter(l => !['Home', 'Careers'].includes(l.name)).map((link) => (
+              {NAV_LINKS.filter(l => !['Careers', 'My Application'].includes(l.name)).map((link) => (
                 <MuiLink 
                   key={link.name} 
                   component={Link} 
@@ -112,6 +112,18 @@ export function Footer() {
                   {link.name}
                 </MuiLink>
               ))}
+              <MuiLink 
+                component={Link} 
+                href="/my-application" 
+                sx={{ 
+                  color: footerStyles.secondaryText, 
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  '&:hover': { color: theme.palette.common.white } 
+                }}
+              >
+                My Application
+              </MuiLink>
             </Stack>
           </Grid>
 
@@ -123,7 +135,8 @@ export function Footer() {
             <Stack spacing={1.5}>
               <MuiLink 
                 component={Link} 
-                href="/job-postings" 
+                href="/#careers"
+                onClick={(e: any) => handleNavClick(e, '/#careers')}
                 sx={{ 
                   color: footerStyles.secondaryText, 
                   textDecoration: 'none',

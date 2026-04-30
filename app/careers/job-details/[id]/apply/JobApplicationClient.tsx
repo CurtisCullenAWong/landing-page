@@ -471,7 +471,7 @@ export default function JobApplicationClient({ id }: Props) {
 
                     <Button
                         component={Link}
-                        href="/job-postings"
+                        href="/careers"
                         variant="contained"
                     >
                         View All Positions
@@ -533,7 +533,7 @@ export default function JobApplicationClient({ id }: Props) {
 
                                 <Button
                                     component={Link}
-                                    href="/job-postings"
+                                    href="/careers"
                                     variant="outlined"
                                 >
                                     Browse More Jobs
@@ -551,7 +551,7 @@ export default function JobApplicationClient({ id }: Props) {
             <Container maxWidth="md">
                 <Button
                     component={Link}
-                    href={`/job-postings/job-details/${id}`}
+                    href={`/careers/job-details/${id}`}
                     startIcon={<ArrowLeft size={20} />}
                     sx={{ mb: 4 }}
                 >

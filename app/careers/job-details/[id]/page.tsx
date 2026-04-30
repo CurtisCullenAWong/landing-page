@@ -231,7 +231,7 @@ export default function JobDetailsPage() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             The position you're looking for doesn't exist.
           </Typography>
-          <Button component={Link} href="/job-postings" variant="contained">
+          <Button component={Link} href="/careers" variant="contained">
             View All Positions
           </Button>
         </Container>
@@ -245,7 +245,7 @@ export default function JobDetailsPage() {
         {/* Back Button */}
         <Button
           component={Link}
-          href="/job-postings"
+          href="/careers"
           startIcon={<ArrowLeft size={20} />}
           sx={{ mb: 4 }}
         >
@@ -518,7 +518,7 @@ export default function JobDetailsPage() {
           )}
           <Button
             component={Link}
-            href={`/job-postings/job-details/${id}/apply`}
+            href={`/careers/job-details/${id}/apply`}
             variant="contained"
             size="large"
             disabled={!!existingApplicationId}

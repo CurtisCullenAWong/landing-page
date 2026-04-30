@@ -17,7 +17,7 @@ export function UserHeader() {
     // 1. If it's an exact match, it's definitely active
     if (pathname === href) return true;
 
-    // 2. Handle hash links (like /#job-postings)
+    // 2. Handle hash links (like /#careers)
     if (href.startsWith('/#')) {
       const section = href.replace('/#', '');
       
@@ -26,23 +26,27 @@ export function UserHeader() {
         return activeSection === section;
       }
       
-      // On other pages, we check if the path matches the section name
-      // e.g., on /job-postings, the Careers link (/#job-postings) should be active
+      // On other pages, we check if the current path matches the section name
+      // e.g., on /careers or /careers/apply, the Careers link (/#careers) should be active
       return pathname === `/${section}` || pathname.startsWith(`/${section}/`);
     }
 
     // 3. Handle standard links (like /my-application)
-    // Check for exact match or if we're on a sub-page of that link
+    // Avoid matching '/' to everything
+    if (href === '/') return pathname === '/';
+    
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
+    // If it's a hash link on the home page, use smooth scroll
     if (pathname === '/' && href.startsWith('/#')) {
       if (scrollToHref(href)) {
         e.preventDefault();
-        setIsMobileMenuOpen(false);
       }
     }
+    // Always close mobile menu on click
+    setIsMobileMenuOpen(false);
   };
 
   const navItemClasses = (href: string) => `
@@ -123,11 +127,19 @@ export function UserHeader() {
                   key={item.name}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-white ${
-                    isActive(item.href) ? 'bg-white/20' : 'hover:bg-white/10'
+                  className={`flex items-center gap-3 rounded-md px-4 py-3 text-base font-medium transition-colors ${
+                    isActive(item.href) 
+                      ? 'bg-white text-primary' 
+                      : 'text-white hover:bg-white/10'
                   }`}
                 >
-                  {isApplication && <ClipboardList size={20} />}
+                  {isApplication ? (
+                    <ClipboardList size={20} className="shrink-0" />
+                  ) : (
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <div className={`w-1.5 h-1.5 rounded-full ${isActive(item.href) ? 'bg-primary' : 'bg-white/40'}`} />
+                    </div>
+                  )}
                   {item.name}
                 </Link>
               );

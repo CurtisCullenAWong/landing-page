@@ -494,7 +494,7 @@ export default function JobPostingsPage() {
                         <TableCell>
                           <Button
                             component={Link}
-                            href={`/job-postings/job-details/${job.id}`}
+                            href={`/careers/job-details/${job.id}`}
                             variant="contained"
                             size="small"
                           >
@@ -566,7 +566,7 @@ export default function JobPostingsPage() {
                         </Box>
                         <Button
                           component={Link}
-                          href={`/job-postings/job-details/${job.id}`}
+                          href={`/careers/job-details/${job.id}`}
                           variant="contained"
                           fullWidth
                         >
@@ -670,7 +670,7 @@ export default function JobPostingsPage() {
           </Typography>
           <Button
             component={Link}
-            href="/job-postings/apply"
+            href="/careers/apply"
             variant="contained"
             size="large"
             sx={{

@@ -10,8 +10,8 @@ import HistoryCargoTruck from '@/assets/images/history/HISTORY_CARGO_TRUCK.jpg';
 
 import PartnershipsHandshake from '@/assets/images/partnerships/PARTNERSHIPS_HANDSHAKE.jpg';
 
-import JobsCareerGrowth from '@/assets/images/job-postings/JOBS_CAREER_GROWTH.jpg';
-import JobsOfficeEnvironment from '@/assets/images/job-postings/JOBS_OFFICE_ENVIRONMENT.jpg';
+import JobsCareerGrowth from '@/assets/images/careers/JOBS_CAREER_GROWTH.jpg';
+import JobsOfficeEnvironment from '@/assets/images/careers/JOBS_OFFICE_ENVIRONMENT.jpg';
 
 import WhyUsValues from '@/assets/images/why-us/WHY_US_VALUES.jpg';
 import WhyUsCulture from '@/assets/images/why-us/WHY_US_CULTURE.jpg';

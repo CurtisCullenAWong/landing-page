@@ -20,7 +20,7 @@ import AboutPage from '../about-us/page';
 import WhyUsPage from '../why-us/page';
 import HistoryPage from '../history/page';
 import PartnershipsPage from '../partnerships/page';
-import JobPostingsPage from '../job-postings/page';
+import JobPostingsPage from '../careers/page';
 
 export default function HomePage() {
   usePageTitle('Home');
@@ -116,7 +116,7 @@ export default function HomePage() {
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 component={Link}
-                href="/#job-postings"
+                href="/#careers"
                 variant="contained"
                 size="large"
                 sx={{
@@ -321,7 +321,7 @@ export default function HomePage() {
       <Box id="partnerships" sx={{ scrollSnapAlign: 'start' }}>
         <PartnershipsPage />
       </Box>
-      <Box id="job-postings" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="careers" sx={{ scrollSnapAlign: 'start' }}>
         <JobPostingsPage />
       </Box>
     </Box>

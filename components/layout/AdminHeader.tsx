@@ -20,7 +20,11 @@ export function AdminHeader() {
     if (href === '/admin') return pathname === '/admin';
     
     // For other routes, match exact or child routes
-    return pathname.startsWith(href + '/');
+    return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  const handleNavClick = () => {
+    setIsMobileMenuOpen(false);
   };
 
   const navItemClasses = (href: string) => `
@@ -33,17 +37,21 @@ export function AdminHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-primary text-primary-foreground shadow-md backdrop-blur-md">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           
           {/* Brand Logo */}
-          <Link href="/admin" className="group flex items-center gap-2 outline-none">
-            <img 
-              src="/favicon.ico" 
-              alt="Boss Cargo Express" 
-              className="h-12 w-12 object-contain brightness-0 invert transition-transform group-hover:scale-105" 
-            />
-            <span className="text-xl font-bold tracking-tight text-white">Boss Cargo Express</span>
-            <span className="text-sm font-medium text-white/60 ml-2">Admin</span>
+          <Link href="/admin" className="group flex items-center outline-none">
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white/20 to-white/5 p-2 backdrop-blur-md transition-all duration-300 group-hover:from-white/30 group-hover:to-white/10 border border-white/10 shadow-lg group-hover:shadow-white/10 group-hover:scale-[1.02] flex items-center gap-3">
+              <img 
+                src="/favicon.ico" 
+                alt="Boss Cargo Express" 
+                className="h-10 w-auto object-contain brightness-0 invert transition-transform group-hover:scale-105" 
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-tight text-white leading-tight">Boss Cargo</span>
+                <span className="text-[10px] font-medium text-white/60 uppercase tracking-widest">Admin Panel</span>
+              </div>
+            </div>
           </Link>
 
           {/* Desktop Nav */}
@@ -79,7 +87,7 @@ export function AdminHeader() {
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={handleNavClick}
                 className={`block rounded-md px-3 py-2 text-base font-medium text-white ${
                   isActive(item.href) ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
