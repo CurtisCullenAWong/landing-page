@@ -284,7 +284,7 @@ export default function MyApplicationPage() {
           startIcon={<ArrowLeft size={20} />}
           sx={{ mb: 4 }}
         >
-          Back to Job Postings
+          Back to Careers
         </Button>
 
         {/* Status Alert */}
@@ -293,8 +293,8 @@ export default function MyApplicationPage() {
             application.status === 'hired' || application.status === 'offer'
               ? 'success'
               : application.status === 'rejected'
-              ? 'error'
-              : 'info'
+                ? 'error'
+                : 'info'
           }
           sx={{ mb: 4 }}
         >

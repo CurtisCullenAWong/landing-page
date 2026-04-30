@@ -250,7 +250,7 @@ export default function GeneralApplicationPage() {
                   href="/careers"
                   variant="outlined"
                 >
-                  Browse Job Postings
+                  Browse Careers
                 </Button>
               </Box>
             </CardContent>
@@ -270,7 +270,7 @@ export default function GeneralApplicationPage() {
           startIcon={<ArrowLeft size={20} />}
           sx={{ mb: 4 }}
         >
-          Back to Job Postings
+          Back to Careers
         </Button>
 
         {/* General Application Info Card */}
@@ -346,7 +346,7 @@ export default function GeneralApplicationPage() {
                   </Typography>
 
                   <Stack spacing={2}>
-                    
+
                     {/* Option A: File Upload */}
                     <Box sx={{ position: 'relative' }}>
                       {resumeFile ? (
@@ -383,7 +383,7 @@ export default function GeneralApplicationPage() {
                               </Typography>
                             </Box>
                           </Box>
-                          
+
                           <IconButton
                             size="small"
                             onClick={() => setResumeFile(null)}
@@ -403,29 +403,29 @@ export default function GeneralApplicationPage() {
                             borderStyle: 'dashed',
                             borderWidth: 2,
                             borderColor: isDragActive ? 'primary.main' : 'divider',
-                            bgcolor: isDragActive 
-                              ? (isDark ? 'rgba(25, 118, 210, 0.08)' : 'rgba(25, 118, 210, 0.04)') 
+                            bgcolor: isDragActive
+                              ? (isDark ? 'rgba(25, 118, 210, 0.08)' : 'rgba(25, 118, 210, 0.04)')
                               : 'transparent',
                             cursor: (isSubmitting || isUploading || formData.resume_url) ? 'not-allowed' : 'pointer',
                             textAlign: 'center',
                             transition: 'all 0.2s ease-in-out',
                             opacity: formData.resume_url ? 0.5 : 1, // Dim if URL is present
                             '&:hover': {
-                              borderColor: (isSubmitting || isUploading || formData.resume_url) 
-                                ? 'divider' 
+                              borderColor: (isSubmitting || isUploading || formData.resume_url)
+                                ? 'divider'
                                 : 'primary.main',
-                              bgcolor: (isSubmitting || isUploading || formData.resume_url) 
-                                ? 'transparent' 
+                              bgcolor: (isSubmitting || isUploading || formData.resume_url)
+                                ? 'transparent'
                                 : (isDark ? 'action.hover' : 'grey.50'),
                             },
                           }}
                         >
                           <input {...getInputProps({ disabled: !!formData.resume_url })} />
-                          <Box sx={{ 
-                            mx: 'auto', 
-                            width: 48, 
-                            height: 48, 
-                            borderRadius: '50%', 
+                          <Box sx={{
+                            mx: 'auto',
+                            width: 48,
+                            height: 48,
+                            borderRadius: '50%',
                             bgcolor: isDark ? 'action.hover' : 'grey.100',
                             display: 'flex',
                             alignItems: 'center',
@@ -435,7 +435,7 @@ export default function GeneralApplicationPage() {
                           }}>
                             <Upload size={24} />
                           </Box>
-                          
+
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {isDragActive ? 'Drop PDF here' : 'Click to upload or drag and drop'}
                           </Typography>
@@ -476,8 +476,8 @@ export default function GeneralApplicationPage() {
                         ),
                       }}
                       helperText={
-                        !!resumeFile 
-                          ? "Remove the uploaded file above to use a URL." 
+                        !!resumeFile
+                          ? "Remove the uploaded file above to use a URL."
                           : "Useful for Google Drive, Dropbox, or Portfolio links."
                       }
                     />

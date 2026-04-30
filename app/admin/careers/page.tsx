@@ -279,7 +279,7 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingJob) {
       // Single edit mode (keep existing behavior)
       const entry = jobEntries[0];
@@ -377,10 +377,10 @@ export default function AdminPage() {
     <Box sx={{ pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="lg">
         {/* Header */}
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between', 
+          justifyContent: 'space-between',
           alignItems: { xs: 'flex-start', sm: 'center' },
           gap: { xs: 3, sm: 4 },
           mb: 5,
@@ -390,17 +390,17 @@ export default function AdminPage() {
         }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h3" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.125rem', md: '2.5rem' }, mb: 1.5 }}>
-              Job Postings Admin
+              Careers Admin
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-              Manage job postings and applications
+              Manage careers and applications
             </Typography>
           </Box>
           <Button
             variant="contained"
             startIcon={<Plus size={20} />}
             onClick={() => setIsFormOpen(true)}
-            sx={{ 
+            sx={{
               alignSelf: { xs: 'stretch', sm: 'auto' },
               minWidth: { xs: '100%', sm: 'auto' },
               px: { xs: 2, sm: 3 },
@@ -417,20 +417,20 @@ export default function AdminPage() {
         {isFormOpen && (
           <Card sx={{ mb: 4 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Box sx={{ 
-                display: 'flex', 
+              <Box sx={{
+                display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'space-between', 
+                justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', sm: 'center' },
                 gap: { xs: 2, sm: 0 },
-                mb: 2 
+                mb: 2
               }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-                  {editingJob ? 'Edit Job Posting' : `Create Job Postings (${jobEntries.length})`}
+                  {editingJob ? 'Edit Job Posting' : `Create Careers (${jobEntries.length})`}
                 </Typography>
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 1, 
+                <Box sx={{
+                  display: 'flex',
+                  gap: 1,
                   alignItems: 'center',
                   width: { xs: '100%', sm: 'auto' },
                   justifyContent: { xs: 'space-between', sm: 'flex-end' }
@@ -447,7 +447,7 @@ export default function AdminPage() {
                       >
                         {isMobile ? 'Add' : 'Add Row'}
                       </Button>
-                      <Typography variant="caption" color="text.secondary" sx={{ 
+                      <Typography variant="caption" color="text.secondary" sx={{
                         ml: { xs: 0, sm: 1 },
                         display: { xs: 'none', sm: 'block' }
                       }}>
@@ -794,10 +794,10 @@ export default function AdminPage() {
                   </TableContainer>
                 )}
 
-                <Box sx={{ 
-                  display: 'flex', 
+                <Box sx={{
+                  display: 'flex',
                   flexDirection: { xs: 'column-reverse', sm: 'row' },
-                  gap: 2, 
+                  gap: 2,
                   justifyContent: 'flex-end'
                 }}>
                   <Button
@@ -833,7 +833,7 @@ export default function AdminPage() {
             }}
           >
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              All Job Postings ({filteredAndSortedJobs.length} of {validJobs.length})
+              All Careers ({filteredAndSortedJobs.length} of {validJobs.length})
             </Typography>
           </Box>
 
@@ -1072,7 +1072,7 @@ export default function AdminPage() {
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                         <Typography variant="body1" color="text.secondary">
-                          No job postings found matching your criteria.
+                          No careers found matching your criteria.
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -1156,7 +1156,7 @@ export default function AdminPage() {
               {paginatedJobs.length === 0 ? (
                 <Box sx={{ py: 4, textAlign: 'center' }}>
                   <Typography variant="body1" color="text.secondary">
-                    No job postings found matching your criteria.
+                    No careers found matching your criteria.
                   </Typography>
                 </Box>
               ) : (

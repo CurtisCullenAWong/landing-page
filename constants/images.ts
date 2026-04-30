@@ -49,7 +49,7 @@ export const IMAGE_URLS = {
   HOME_LOGISTICS_SERVICES: HomeLogisticsServices,
   HOME_TEAM_COLLABORATION: HomeTeamCollaboration,
 
-  // Job Postings Page
+  // Careers Page
   JOBS_CAREER_GROWTH: JobsCareerGrowth,
   JOBS_OFFICE_ENVIRONMENT: JobsOfficeEnvironment,
 

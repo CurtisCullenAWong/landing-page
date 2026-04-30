@@ -15,7 +15,7 @@ export const NAV_LINKS = [
 
 export const ADMIN_NAV_LINKS = [
   { name: 'Dashboard', href: '/admin' },
-  { name: 'Job Postings', href: '/admin/careers' },
+  { name: 'Careers', href: '/admin/careers' },
   { name: 'Job Applications', href: '/admin/job-applications' },
 ];
 
@@ -59,7 +59,7 @@ export const useActiveSection = () => {
 
     const handleScroll = () => {
       let current = 'home';
-      
+
       // 1. Check if we're near the bottom of the page
       const scrollPosition = window.scrollY + window.innerHeight;
       const totalHeight = document.documentElement.scrollHeight;
@@ -86,7 +86,7 @@ export const useActiveSection = () => {
         }
         current = closestSection;
       }
-      
+
       if (current !== currentSectionRef.current) {
         currentSectionRef.current = current;
         setActiveSection(current);
@@ -110,10 +110,10 @@ export const useActiveSection = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     // Run immediately to catch the current position
     handleScroll();
-    
+
     // Also run after a short delay to account for browser scroll-to-hash
     const timer = setTimeout(handleScroll, 100);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);

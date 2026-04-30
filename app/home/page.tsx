@@ -93,7 +93,7 @@ export default function HomePage() {
             >
               Synergy beyond compare
             </Typography>
-  
+
             {/* Subheading / Description */}
             <Typography
               variant="h3"
@@ -111,7 +111,7 @@ export default function HomePage() {
               We take pride in what we do and are always there when you need us the most.
               Our goal is to help you grow your business by working holistically with our partners and our team.
             </Typography>
-  
+
             {/* Buttons */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
@@ -136,9 +136,9 @@ export default function HomePage() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                View Open Job Postings
+                View Open Careers
               </Button>
-  
+
               <Button
                 component={Link}
                 href="/#about-us"
@@ -166,14 +166,14 @@ export default function HomePage() {
             </Box>
           </Container>
         </Box>
-  
+
         {/* Boss Cargo Philosophy Section */}
         <Box sx={{ py: 8, bgcolor: 'background.default' }}>
           <Container maxWidth="lg">
             <Typography variant="h2" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
               The Boss Cargo Philosophy
             </Typography>
-  
+
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 6 }}>
                 <Paper
@@ -190,7 +190,7 @@ export default function HomePage() {
                   </Typography>
                 </Paper>
               </Grid>
-  
+
               <Grid size={{ xs: 12, md: 6 }}>
                 <ImageWithFallback
                   src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
@@ -203,7 +203,7 @@ export default function HomePage() {
             </Grid>
           </Container>
         </Box>
-  
+
         {/* CTA Section */}
         <Box
           sx={{
@@ -216,11 +216,11 @@ export default function HomePage() {
             <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
               Partner with Boss Cargo Express
             </Typography>
-  
+
             <Typography variant="h6" sx={{ mb: 4 }}>
               We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
             </Typography>
-  
+
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 component={Link}
@@ -237,7 +237,7 @@ export default function HomePage() {
               >
                 Why Choose Boss Cargo Express?
               </Button>
-  
+
               <Button
                 component={Link}
                 href="/#partnerships"
@@ -257,14 +257,14 @@ export default function HomePage() {
             </Box>
           </Container>
         </Box>
-  
+
         {/* Services Overview Section */}
         <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
           <Container maxWidth="lg">
             <Typography variant="h2" sx={{ textAlign: 'center', mb: 6, fontWeight: 600 }}>
               Our Services
             </Typography>
-  
+
             <Grid container spacing={4}>
               {[
                 { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },

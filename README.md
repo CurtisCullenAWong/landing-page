@@ -1,6 +1,6 @@
 # Boss Cargo Express
 
-A modern, full-featured web application for Boss Cargo Express, a leading logistics and freight forwarding company in the Philippines. This platform provides company information, job postings, application management, and administrative tools.
+A modern, full-featured web application for Boss Cargo Express, a leading logistics and freight forwarding company in the Philippines. This platform provides company information, careers, application management, and administrative tools.
 
 ## 🚀 Features
 
@@ -13,7 +13,7 @@ A modern, full-featured web application for Boss Cargo Express, a leading logist
   - Partnerships information
 
 - **Career Portal**
-  - Browse active job postings with advanced filtering
+  - Browse active careers with advanced filtering
   - Search by title, department, location, or job type
   - Sort by various criteria (title, department, location, type, posted date)
   - View detailed job descriptions
@@ -29,9 +29,9 @@ A modern, full-featured web application for Boss Cargo Express, a leading logist
   - Receive application ID for tracking
 
 ### Admin Features
-- **Job Postings Management**
-  - Create, edit, and manage job postings
-  - Bulk create multiple job postings
+- **Careers Management**
+  - Create, edit, and manage careers
+  - Bulk create multiple careers
   - Set job status (active/closed)
   - Manage job details (title, department, location, type, salary, description, requirements)
 
@@ -151,7 +151,7 @@ boss-cargo/
    
    You'll need to create the following tables in your Supabase database:
    
-   - `jobs` - Job postings
+   - `jobs` - careers
    - `job_applicants` - Job applications
    - User authentication tables (handled by Supabase Auth)
    
@@ -277,7 +277,7 @@ The application uses Supabase Auth. To set up admin access:
 - Optimized for tablets and desktops
 
 ### Real-time Updates
-- Live updates for job postings
+- Live updates for careers
 - Real-time application status changes
 - Instant notifications for admins
 

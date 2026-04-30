@@ -185,7 +185,7 @@ export default function JobPostingsPage() {
             Join Our Team
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '800px', mx: 'auto', mb: 4 }}>
-            Explore exciting career opportunities at Boss Cargo Express. We're looking for talented 
+            Explore exciting career opportunities at Boss Cargo Express. We're looking for talented
             individuals to help us shape the future of logistics. For Job and Intern Inquiries: please write to people@bosscargo.express
           </Typography>
         </Box>
@@ -226,7 +226,7 @@ export default function JobPostingsPage() {
               }}
             >
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                Job Postings ({filteredAndSortedJobs.length} of {activeJobs.length})
+                Careers ({filteredAndSortedJobs.length} of {activeJobs.length})
               </Typography>
             </Box>
 
@@ -387,210 +387,210 @@ export default function JobPostingsPage() {
             <>
               {/* Desktop Table View */}
               <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'title'}
-                        direction={sortField === 'title' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('title')}
-                      >
-                        Position
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'department'}
-                        direction={sortField === 'department' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('department')}
-                      >
-                        Department
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'location'}
-                        direction={sortField === 'location' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('location')}
-                      >
-                        Location
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'type'}
-                        direction={sortField === 'type' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('type')}
-                      >
-                        Type
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'postedDate'}
-                        direction={sortField === 'postedDate' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('postedDate')}
-                      >
-                        Posted
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedJobs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                        <Typography variant="body1" color="text.secondary">
-                          No job postings found matching your criteria.
-                        </Typography>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'action.hover' }}>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={sortField === 'title'}
+                          direction={sortField === 'title' ? sortDirection : 'asc'}
+                          onClick={() => handleSort('title')}
+                        >
+                          Position
+                        </TableSortLabel>
                       </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={sortField === 'department'}
+                          direction={sortField === 'department' ? sortDirection : 'asc'}
+                          onClick={() => handleSort('department')}
+                        >
+                          Department
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={sortField === 'location'}
+                          direction={sortField === 'location' ? sortDirection : 'asc'}
+                          onClick={() => handleSort('location')}
+                        >
+                          Location
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={sortField === 'type'}
+                          direction={sortField === 'type' ? sortDirection : 'asc'}
+                          onClick={() => handleSort('type')}
+                        >
+                          Type
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>
+                        <TableSortLabel
+                          active={sortField === 'postedDate'}
+                          direction={sortField === 'postedDate' ? sortDirection : 'asc'}
+                          onClick={() => handleSort('postedDate')}
+                        >
+                          Posted
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
                     </TableRow>
-                  ) : (
-                    paginatedJobs.map((job) => (
-                      <TableRow
-                        key={job.id}
-                        sx={{
-                          '&:hover': { bgcolor: 'action.hover' },
-                        }}
-                      >
-                        <TableCell>
-                          <Box>
-                            <Typography variant="body1" fontWeight={500}>
-                              {job.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                  </TableHead>
+                  <TableBody>
+                    {paginatedJobs.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                          <Typography variant="body1" color="text.secondary">
+                            No careers found matching your criteria.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedJobs.map((job) => (
+                        <TableRow
+                          key={job.id}
+                          sx={{
+                            '&:hover': { bgcolor: 'action.hover' },
+                          }}
+                        >
+                          <TableCell>
+                            <Box>
+                              <Typography variant="body1" fontWeight={500}>
+                                {job.title}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {job.salary}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2">{job.department}</Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2">{job.location}</Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Clock size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2">{job.type}</Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2">
+                                {new Date(job.postedDate).toLocaleDateString()}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              component={Link}
+                              href={`/careers/job-details/${job.id}`}
+                              variant="contained"
+                              size="small"
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                {/* Pagination */}
+                <TablePagination
+                  component="div"
+                  count={filteredAndSortedJobs.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                  labelRowsPerPage="Rows per page:"
+                />
+              </TableContainer>
+
+              {/* Mobile Card View */}
+              <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 4 }}>
+                {paginatedJobs.length === 0 ? (
+                  <Paper sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography variant="body1" color="text.secondary">
+                      No careers found matching your criteria.
+                    </Typography>
+                  </Paper>
+                ) : (
+                  <>
+                    {paginatedJobs.map((job) => (
+                      <Card key={job.id} sx={{ mb: 2 }}>
+                        <CardContent>
+                          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                            {job.title}
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {job.department}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {job.location}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Clock size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {job.type}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {new Date(job.postedDate).toLocaleDateString()}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={500}>
                               {job.salary}
                             </Typography>
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2">{job.department}</Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2">{job.location}</Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Clock size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2">{job.type}</Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2">
-                              {new Date(job.postedDate).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
                           <Button
                             component={Link}
                             href={`/careers/job-details/${job.id}`}
                             variant="contained"
-                            size="small"
+                            fullWidth
                           >
                             View Details
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-              {/* Pagination */}
-              <TablePagination
-                component="div"
-                count={filteredAndSortedJobs.length}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                labelRowsPerPage="Rows per page:"
-              />
-            </TableContainer>
-
-            {/* Mobile Card View */}
-            <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 4 }}>
-              {paginatedJobs.length === 0 ? (
-                <Paper sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No job postings found matching your criteria.
-                  </Typography>
-                </Paper>
-              ) : (
-                <>
-                  {paginatedJobs.map((job) => (
-                    <Card key={job.id} sx={{ mb: 2 }}>
-                      <CardContent>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          {job.title}
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2" color="text.secondary">
-                              {job.department}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2" color="text.secondary">
-                              {job.location}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Clock size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2" color="text.secondary">
-                              {job.type}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(job.postedDate).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" fontWeight={500}>
-                            {job.salary}
-                          </Typography>
-                        </Box>
-                        <Button
-                          component={Link}
-                          href={`/careers/job-details/${job.id}`}
-                          variant="contained"
-                          fullWidth
-                        >
-                          View Details
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {/* Pagination for Mobile */}
-                  <Paper sx={{ mt: 2, p: 2 }}>
-                    <TablePagination
-                      component="div"
-                      count={filteredAndSortedJobs.length}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      rowsPerPage={rowsPerPage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                      rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                      labelRowsPerPage="Rows per page:"
-                    />
-                  </Paper>
-                </>
-              )}
-            </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {/* Pagination for Mobile */}
+                    <Paper sx={{ mt: 2, p: 2 }}>
+                      <TablePagination
+                        component="div"
+                        count={filteredAndSortedJobs.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                        labelRowsPerPage="Rows per page:"
+                      />
+                    </Paper>
+                  </>
+                )}
+              </Box>
             </>
           </Card>
         ) : (
@@ -665,7 +665,7 @@ export default function JobPostingsPage() {
             Don't See the Right Position?
           </Typography>
           <Typography variant="h6" sx={{ mb: 4, maxWidth: '700px', mx: 'auto' }}>
-            We're always interested in hearing from talented professionals. Send us your resume 
+            We're always interested in hearing from talented professionals. Send us your resume
             and we'll keep you in mind for future opportunities.
           </Typography>
           <Button
