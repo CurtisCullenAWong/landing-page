@@ -13,17 +13,28 @@ import {
 import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { NAV_LINKS, CONTACT_INFO } from '@/constants/navigation';
+import { NAV_LINKS, CONTACT_INFO, scrollToHref, MAIN_SEQUENCE } from '@/constants/navigation';
+import { IMAGE_URLS } from '@/constants/images';
+import { usePathname } from 'next/navigation';
 
 const BUILD_YEAR = new Date().getFullYear();
 
 export function Footer() {
   const theme = useTheme();
+  const pathname = usePathname();
   const [currentYear, setCurrentYear] = useState<number>(BUILD_YEAR);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
   }, []);
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (MAIN_SEQUENCE.includes(pathname) && MAIN_SEQUENCE.includes(href)) {
+      if (scrollToHref(href)) {
+        e.preventDefault();
+      }
+    }
+  };
 
   // Footer uses dark background with light text for proper contrast
   const footerStyles = {
@@ -49,6 +60,7 @@ export function Footer() {
         pb: 4, 
         mt: 'auto',
         borderTop: `1px solid ${footerStyles.border}`,
+        scrollSnapAlign: 'start'
       }}
     >
       <Container maxWidth="lg">
@@ -57,17 +69,16 @@ export function Footer() {
           {/* Brand Section */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack spacing={2}>
-              <Link href="/" className="flex items-center gap-2 group outline-none">
+              <Link 
+                href="/" 
+                className="flex items-center group outline-none"
+                onClick={(e) => handleNavClick(e, '/')}
+              >
                 <img 
-                  src="/favicon.ico" 
+                  src={IMAGE_URLS.LOGO.src} 
                   alt="Logo" 
-                  width={48} 
-                  height={48} 
-                  className="brightness-0 invert transition-transform group-hover:scale-105" 
+                  className="h-10 w-auto object-contain transition-transform group-hover:scale-105" 
                 />
-                <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1, color: footerStyles.text }}>
-                  BOSS CARGO EXPRESS
-                </Typography>
               </Link>
               <Typography variant="body2" sx={{ color: footerStyles.secondaryText, lineHeight: 1.7 }}>
                 Delivering excellence across the Philippines with world-class logistics 
@@ -75,7 +86,7 @@ export function Footer() {
               </Typography>
             </Stack>
           </Grid>
-
+ 
           {/* Navigation Links */}
           <Grid size={{ xs: 6, sm: 3, md: 2 }}>
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, textTransform: 'uppercase', color: footerStyles.text }}>
@@ -87,6 +98,7 @@ export function Footer() {
                   key={link.name} 
                   component={Link} 
                   href={link.href} 
+                  onClick={(e: any) => handleNavClick(e, link.href)}
                   sx={{ 
                     color: footerStyles.secondaryText, 
                     textDecoration: 'none',

@@ -191,7 +191,12 @@ export default function JobApplicationsPage() {
           .select('id, title');
 
         if (jobsError) {
-          console.error('Error loading jobs:', jobsError);
+          console.error('Error loading jobs:', {
+            message: jobsError.message,
+            details: jobsError.details,
+            hint: jobsError.hint,
+            code: jobsError.code
+          });
         } else if (jobsData) {
           setJobs(jobsData);
         }
@@ -203,7 +208,12 @@ export default function JobApplicationsPage() {
           .order('applied_at', { ascending: false });
 
         if (error) {
-          console.error('Error loading job applicants:', error);
+          console.error('Error loading job applicants:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
           setJobApplicants([]);
         } else if (data) {
           setJobApplicants(data);

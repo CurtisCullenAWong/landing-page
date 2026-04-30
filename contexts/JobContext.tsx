@@ -128,6 +128,16 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
   const loadJobs = async () => {
     try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+      
+      if (!url || !key) {
+        console.error('Error loading jobs: Supabase environment variables are missing');
+        setJobs([]);
+        setIsLoading(false);
+        return;
+      }
+
       const supabase = createClient();
       const { data, error } = await supabase
         .from('jobs')
@@ -135,7 +145,12 @@ export function JobProvider({ children }: { children: ReactNode }) {
         .order('posted_date', { ascending: false });
 
       if (error) {
-        console.error('Error loading jobs:', error);
+        console.error('Error loading jobs (PostgrestError):', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         setJobs([]);
       } else if (data && data.length > 0) {
         const mappedJobs = data.map(mapDatabaseJobToJob);
@@ -144,7 +159,11 @@ export function JobProvider({ children }: { children: ReactNode }) {
         setJobs([]);
       }
     } catch (error) {
-      console.error('Error loading jobs:', error);
+      console.error('Error loading jobs (Catch):', error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : error);
       setJobs([]);
     } finally {
       setIsLoading(false);

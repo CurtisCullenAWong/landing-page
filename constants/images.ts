@@ -1,4 +1,6 @@
 import HeroBackground from '@/assets/images/home/HERO_BACKGROUND.jpg';
+import Logo from '@/assets/images/logo.png';
+
 import HomeLogisticsServices from '@/assets/images/home/HOME_LOGISTICS_SERVICES.jpg';
 import HomeTeamCollaboration from '@/assets/images/home/HOME_TEAM_COLLABORATION.jpg';
 
@@ -22,7 +24,11 @@ import JobDetailsProfessional from '@/assets/images/job-details/JOB_DETAILS_PROF
  * * Update these images to change images across the application.
  */
 export const IMAGE_URLS = {
+  // Branding
+  LOGO: Logo,
+
   // Hero & Landing Images
+
   HERO_BACKGROUND: HeroBackground,
 
   // About Us Page

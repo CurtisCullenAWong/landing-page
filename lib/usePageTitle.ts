@@ -6,6 +6,11 @@ import { useEffect } from 'react';
  */
 export function usePageTitle(title: string) {
   useEffect(() => {
+    // If infinite scroll is managing the title, skip the individual page hook
+    if (typeof window !== 'undefined' && (window as any).__disablePageTitleHook) {
+      return;
+    }
+    
     const fullTitle = title ? `${title} | Boss Cargo Express` : 'Boss Cargo Express';
     document.title = fullTitle;
   }, [title]);

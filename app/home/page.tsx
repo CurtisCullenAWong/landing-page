@@ -31,7 +31,7 @@ export default function HomePage() {
           overflow: 'hidden',
           minHeight: 'calc(100vh - 64px)',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
           background: isDark
             ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
             : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
@@ -45,8 +45,7 @@ export default function HomePage() {
             inset: 0,
             opacity: 0.25,
             zIndex: 0,
-            width: '100%',
-            height: '100%',
+            overflow: 'hidden',
           }}
         >
           <ImageWithFallback
@@ -54,14 +53,25 @@ export default function HomePage() {
             alt={getImageMetadata(IMAGE_URLS.HERO_BACKGROUND).alt}
             layout="fill"
             objectFit="cover"
+            style={{
+              objectPosition: 'center 1%',
+            }}
             priority
           />
         </Box>
-
-        <Container 
-          maxWidth="lg" 
+        <Container
+          maxWidth="lg"
           className="animate-fade-in-up"
-          sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: { xs: 8, md: 0 } }}
+          sx={{
+            position: 'relative',
+            zIndex: 1,
+            textAlign: 'center',
+            py: { xs: 8, md: 0 },
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
         >
           {/* Main Heading */}
           <Typography
@@ -91,8 +101,8 @@ export default function HomePage() {
               opacity: 0.9,
             }}
           >
-            Boss Cargo Express is focused on building partnerships that inspire growth.  
-            We take pride in what we do and are always there when you need us the most.  
+            Boss Cargo Express is focused on building partnerships that inspire growth.
+            We take pride in what we do and are always there when you need us the most.
             Our goal is to help you grow your business by working holistically with our partners and our team.
           </Typography>
 
@@ -122,6 +132,7 @@ export default function HomePage() {
             >
               View Open Job Postings
             </Button>
+
             <Button
               component={Link}
               href="/about-us"
@@ -149,12 +160,14 @@ export default function HomePage() {
           </Box>
         </Container>
       </Box>
+
       {/* Boss Cargo Philosophy Section */}
       <Box sx={{ py: 8, bgcolor: 'background.default' }}>
         <Container maxWidth="lg">
           <Typography variant="h2" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
             The Boss Cargo Philosophy
           </Typography>
+
           <Grid container spacing={4} alignItems="center">
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
@@ -163,11 +176,15 @@ export default function HomePage() {
                   bgcolor: isDark ? 'action.hover' : 'action.selected',
                 }}
               >
-                <Typography variant="body1" color="text.primary" sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}
+                >
                   The heart of Boss Cargo Express is centered on businesses. We understand that you have your top priorities in order to stay competitive and financially sound. Outsource your logistics requirements to us so you can focus on your core. Our ability to integrate proven cargo handling expertise and provide flexible and personalized customer services enables Boss Cargo Express to deliver the most efficient and economical cargo solutions that is ideally fit to your needs.
                 </Typography>
               </Paper>
             </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
               <ImageWithFallback
                 src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
@@ -180,6 +197,7 @@ export default function HomePage() {
           </Grid>
         </Container>
       </Box>
+
       {/* CTA Section */}
       <Box
         sx={{
@@ -188,13 +206,15 @@ export default function HomePage() {
           color: isDark ? 'text.primary' : 'primary.contrastText',
         }}
       >
-        <Container maxWidth="lg" sx={{ textAlign: 'center'}}>
+        <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
           <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
             Partner with Boss Cargo Express
           </Typography>
+
           <Typography variant="h6" sx={{ mb: 4 }}>
             We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
           </Typography>
+
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button
               component={Link}
@@ -206,12 +226,12 @@ export default function HomePage() {
                 color: isDark ? 'text.primary' : 'primary.main',
                 '&:hover': {
                   bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  color: isDark ? 'text.primary' : 'primary.main',
                 },
               }}
             >
               Why Choose Boss Cargo Express?
             </Button>
+
             <Button
               component={Link}
               href="/partnerships"
@@ -231,6 +251,7 @@ export default function HomePage() {
           </Box>
         </Container>
       </Box>
+
       {/* Services Overview Section */}
       <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
         <Container maxWidth="lg">
@@ -238,53 +259,6 @@ export default function HomePage() {
             Our Services
           </Typography>
 
-          {/* Top Section: Featured Image & Description */}
-          {/* alignItems="stretch" ensures the Image and Text Box are the same height */}
-          <Grid container spacing={4} sx={{ mb: 8 }} alignItems="stretch">
-            <Grid size={{ xs: 12, md: 6 }}>
-              {/* Replaced the 'scale(2)' div with a Box that handles the image fit properly */}
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  minHeight: { xs: 300, md: 400 }, // Ensures height on mobile
-                  position: 'relative',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  boxShadow: 2,
-                }}
-              >
-                <ImageWithFallback
-                  src={IMAGE_URLS.HOME_LOGISTICS_SERVICES.src}
-                  alt={getImageMetadata(IMAGE_URLS.HOME_LOGISTICS_SERVICES).alt}
-                  layout="fill"
-                />
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Paper
-                elevation={1}
-                sx={{
-                  p: 4,
-                  height: '100%', // Fills the grid height
-                  bgcolor: isDark ? 'action.hover' : 'background.default',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  borderRadius: 2,
-                }}
-              >
-                <Typography variant="body1" color="text.primary" sx={{ mb: 3, fontSize: '1.1rem', lineHeight: 1.8 }}>
-                  The Boss Cargo Express Services in Focus: What is the need that the transport and storage sector satisfy? What is the need that Boss Cargo Express (BCE) satisfies? Being part of the entire value chain, we play a crucial role in adding value to the customers. It's more than just merely shipping cargoes via land, air, and sea. It is deeper than delivering parcels via trucks or motorcycles to different parts of the country. There's a greater meaning than crafting a supply chain management software or warehousing tons of products.
-                </Typography>
-                <Typography variant="body1" color="text.primary" sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}>
-                  Logistics encompass far more than planes, trains and automobiles. They are more than having a dedicated, do-whatever-it-takes team member to make things happen in a pinch. Logistics are a part of everyday routine... At BCE, we promise to deliver these and more.
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-
-          {/* Bottom Section: Service Cards */}
           <Grid container spacing={4}>
             {[
               { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },
@@ -293,10 +267,27 @@ export default function HomePage() {
               { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' }
             ].map((service, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: '0.3s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 } }}>
-                  <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: '0.3s',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      p: 3,
+                      flexGrow: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center'
+                    }}
+                  >
                     <service.icon size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, fontSize: '1.25rem' }}>
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
                       {service.title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">

@@ -59,35 +59,35 @@ export default function AboutPage() {
 
       {/* Mission & Vision */}
       <ContentGrid spacing="medium" sx={{ mb: SECTION_SPACING.large }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h4" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
-                  Our Mission
-                </Typography>
-                <Typography variant="body1" color="text.primary">
-                  To provide world-class logistics solutions that exceed customer expectations while 
-                  fostering a culture of excellence, innovation, and continuous improvement. We are 
-                  committed to delivering value to our clients, opportunities to our employees, and 
-                  positive impact to our communities.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h4" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
-                  Our Vision
-                </Typography>
-                <Typography variant="body1" color="text.primary">
-                  To be the most trusted and innovative logistics partner globally, setting industry 
-                  standards for reliability, sustainability, and customer service. We envision a future 
-                  where Boss Cargo is synonymous with excellence in freight and logistics solutions.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h4" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
+                Our Mission
+              </Typography>
+              <Typography variant="body1" color="text.primary">
+                To provide world-class logistics solutions that exceed customer expectations while
+                fostering a culture of excellence, innovation, and continuous improvement. We are
+                committed to delivering value to our clients, opportunities to our employees, and
+                positive impact to our communities.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h4" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
+                Our Dreams
+              </Typography>
+              <Typography variant="body1" color="text.primary">
+                To be the most trusted and innovative logistics partner globally, setting industry
+                standards for reliability, sustainability, and customer service. We envision a future
+                where Boss Cargo is synonymous with excellence in freight and logistics solutions.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
       </ContentGrid>
 
       {/* About Section */}
@@ -124,18 +124,18 @@ export default function AboutPage() {
           bottomSpacing={SECTION_SPACING.medium}
           align="center"
         />
-        
+
         {/* Added justifyContent center to handle 1, 2, or 3 officials gracefully */}
-        <Grid 
-          container 
-          spacing={4} 
+        <Grid
+          container
+          spacing={4}
           justifyContent="center"
         >
           {[
             {
               name: 'Aris Delos Reyes',
               title: 'Founder, CEO',
-              image: '', 
+              image: '',
               phones: ['09171360195', '09999900195'],
               emails: ['aris@bosscargo.express', 'info@bosscargo.express'],
               website: 'www.bosscargo.express',
@@ -144,7 +144,7 @@ export default function AboutPage() {
             {
               name: 'Curtis Cullen A. Wong',
               title: 'KALMA! Testing palang ito!',
-              image: 'https://media.tenor.com/WX4TeHt4Xt8AAAAe/high-af-high.png', 
+              image: 'https://media.tenor.com/WX4TeHt4Xt8AAAAe/high-af-high.png',
               phones: ['+63 999 999 9999', '+63 999 999 9999'],
               emails: ['testing@email.com', 'testing@email.com'],
               website: 'www.bosscargo.express',
@@ -152,10 +152,10 @@ export default function AboutPage() {
             },
           ].map((official, index) => (
             <Grid size={{ xs: 12, sm: 8, md: 6, lg: 4 }} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
                   maxWidth: 450, // Prevents card from becoming too wide on single item layouts
                   mx: 'auto',    // Centers the card itself in the grid item
@@ -284,246 +284,246 @@ export default function AboutPage() {
           bottomSpacing={SECTION_SPACING.medium}
         />
         <ContentGrid spacing="medium">
-            {offices.map((office, index) => (
-              <Grid size={{ xs: 12 }} key={index}>
-                <Card>
-                  <CardContent sx={{ p: 4 }}>
-                    <Typography variant="h5" sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
-                      {office.name}
-                    </Typography>
-                    <Grid container spacing={4}>
-                      {/* Left Column - Address & Map */}
-                      <Grid size={{ xs: 12, md: 6 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                          {/* Address */}
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                            <MapPin size={20} style={{ color: theme.palette.text.secondary, marginTop: 4, flexShrink: 0 }} />
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>Address</Typography>
-                              <Typography variant="body2" color="text.secondary">{office.address}</Typography>
-                              <Typography variant="body2" color="text.secondary">{office.city}</Typography>
-                            </Box>
-                          </Box>
-                          
-                          {/* Map */}
+          {offices.map((office, index) => (
+            <Grid size={{ xs: 12 }} key={index}>
+              <Card>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h5" sx={{ mb: 3, color: 'primary.main', fontWeight: 600 }}>
+                    {office.name}
+                  </Typography>
+                  <Grid container spacing={4}>
+                    {/* Left Column - Address & Map */}
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {/* Address */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                          <MapPin size={20} style={{ color: theme.palette.text.secondary, marginTop: 4, flexShrink: 0 }} />
                           <Box>
-                            <iframe
-                              src={`https://www.google.com/maps?q=${encodeURIComponent(`${office.address}, ${office.city}`)}&output=embed`}
-                              width="100%"
-                              height="300"
-                              style={{ border: 0, borderRadius: '8px' }}
-                              allowFullScreen
-                              loading="lazy"
-                              referrerPolicy="no-referrer-when-downgrade"
-                              title="Boss Cargo Express Location"
-                            />
+                            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>Address</Typography>
+                            <Typography variant="body2" color="text.secondary">{office.address}</Typography>
+                            <Typography variant="body2" color="text.secondary">{office.city}</Typography>
                           </Box>
                         </Box>
-                      </Grid>
 
-                      {/* Right Column - Contact Methods */}
-                      <Grid size={{ xs: 12, md: 6 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                          {/* Email Addresses */}
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                              Email
-                            </Typography>
-                            <Stack spacing={1.5}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Mail size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href={`mailto:${office.email}`}
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  {office.email}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Mail size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href="mailto:people@bosscargo.express"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  people@bosscargo.express <Typography component="span" variant="caption" color="text.secondary">(Careers)</Typography>
-                                </Typography>
-                              </Box>
-                            </Stack>
-                          </Box>
-
-                          {/* Phone Numbers */}
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                              Phone
-                            </Typography>
-                            <Stack spacing={1.5}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href={`tel:${office.phone.replace(/\s/g, '')}`}
-                                  variant="body2"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  <strong>General:</strong> {office.phone}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href={`tel:${office.marketing.replace(/\s/g, '')}`}
-                                  variant="body2"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  <strong>Marketing:</strong> {office.marketing}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href={`tel:${office.customerService.replace(/\s/g, '')}`}
-                                  variant="body2"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  <strong>Customer Service:</strong> {office.customerService}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href={`tel:${office.finance.replace(/\s/g, '')}`}
-                                  variant="body2"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  <strong>Finance:</strong> {office.finance}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                <Phone size={18} style={{ color: theme.palette.text.secondary, marginTop: 2, flexShrink: 0 }} />
-                                <Box>
-                                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                    <strong>Mobile:</strong>
-                                  </Typography>
-                                  <Stack spacing={0.5}>
-                                    {office.mobile.map((num, idx) => (
-                                      <Typography
-                                        key={idx}
-                                        component="a"
-                                        href={`tel:${num.replace(/\D/g, '')}`}
-                                        variant="body2"
-                                        sx={{
-                                          color: 'text.primary',
-                                          textDecoration: 'none',
-                                          display: 'block',
-                                          '&:hover': { color: 'primary.main' },
-                                        }}
-                                      >
-                                        {num}
-                                      </Typography>
-                                    ))}
-                                  </Stack>
-                                </Box>
-                              </Box>
-                            </Stack>
-                          </Box>
-
-                          {/* Social Media */}
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                              Follow Us
-                            </Typography>
-                            <Stack spacing={1.5}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Linkedin size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href="https://www.linkedin.com/company/boss-cargo-express/?originalSubdomain=ph"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  LinkedIn
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Facebook size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href="https://www.facebook.com/ikawangbossko20"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  Facebook
-                                </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <ExternalLink size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
-                                <Typography
-                                  component="a"
-                                  href="https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  sx={{
-                                    color: 'text.primary',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    '&:hover': { color: 'primary.main' },
-                                  }}
-                                >
-                                  Indeed Jobs
-                                </Typography>
-                              </Box>
-                            </Stack>
-                          </Box>
+                        {/* Map */}
+                        <Box>
+                          <iframe
+                            src={`https://www.google.com/maps?q=${encodeURIComponent(`${office.address}, ${office.city}`)}&output=embed`}
+                            width="100%"
+                            height="300"
+                            style={{ border: 0, borderRadius: '8px' }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="Boss Cargo Express Location"
+                          />
                         </Box>
-                      </Grid>
+                      </Box>
                     </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+
+                    {/* Right Column - Contact Methods */}
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {/* Email Addresses */}
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
+                            Email
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Mail size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href={`mailto:${office.email}`}
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                {office.email}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Mail size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href="mailto:people@bosscargo.express"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                people@bosscargo.express <Typography component="span" variant="caption" color="text.secondary">(Careers)</Typography>
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Box>
+
+                        {/* Phone Numbers */}
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
+                            Phone
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href={`tel:${office.phone.replace(/\s/g, '')}`}
+                                variant="body2"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                <strong>General:</strong> {office.phone}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href={`tel:${office.marketing.replace(/\s/g, '')}`}
+                                variant="body2"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                <strong>Marketing:</strong> {office.marketing}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href={`tel:${office.customerService.replace(/\s/g, '')}`}
+                                variant="body2"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                <strong>Customer Service:</strong> {office.customerService}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Phone size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href={`tel:${office.finance.replace(/\s/g, '')}`}
+                                variant="body2"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                <strong>Finance:</strong> {office.finance}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                              <Phone size={18} style={{ color: theme.palette.text.secondary, marginTop: 2, flexShrink: 0 }} />
+                              <Box>
+                                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                  <strong>Mobile:</strong>
+                                </Typography>
+                                <Stack spacing={0.5}>
+                                  {office.mobile.map((num, idx) => (
+                                    <Typography
+                                      key={idx}
+                                      component="a"
+                                      href={`tel:${num.replace(/\D/g, '')}`}
+                                      variant="body2"
+                                      sx={{
+                                        color: 'text.primary',
+                                        textDecoration: 'none',
+                                        display: 'block',
+                                        '&:hover': { color: 'primary.main' },
+                                      }}
+                                    >
+                                      {num}
+                                    </Typography>
+                                  ))}
+                                </Stack>
+                              </Box>
+                            </Box>
+                          </Stack>
+                        </Box>
+
+                        {/* Social Media */}
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
+                            Follow Us
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Linkedin size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href="https://www.linkedin.com/company/boss-cargo-express/?originalSubdomain=ph"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                LinkedIn
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Facebook size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href="https://www.facebook.com/ikawangbossko20"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                Facebook
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <ExternalLink size={18} style={{ color: theme.palette.text.secondary, flexShrink: 0 }} />
+                              <Typography
+                                component="a"
+                                href="https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{
+                                  color: 'text.primary',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  '&:hover': { color: 'primary.main' },
+                                }}
+                              >
+                                Indeed Jobs
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </ContentGrid>
       </Section>
 

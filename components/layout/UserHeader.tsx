@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
-import { NAV_LINKS } from '@/constants/navigation';
+import { Menu, X, ClipboardList } from 'lucide-react';
+import { NAV_LINKS, scrollToHref, MAIN_SEQUENCE } from '@/constants/navigation';
+import { IMAGE_URLS } from '@/constants/images';
 import { ThemeSwitcher } from '../theme-switcher';
 
 export function UserHeader() {
@@ -14,6 +15,16 @@ export function UserHeader() {
   const isActive = (href: string) => 
     href === '/' ? pathname === '/' || pathname === '/home' : pathname.startsWith(href);
 
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    // If we are on a page in the main sequence and clicking another sequence link, scroll instead
+    if (MAIN_SEQUENCE.includes(pathname) && MAIN_SEQUENCE.includes(href)) {
+      if (scrollToHref(href)) {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+      }
+    }
+  };
+
   const navItemClasses = (href: string) => `
     px-3 py-2 rounded-md text-sm font-medium transition-all
     ${isActive(href) 
@@ -22,27 +33,46 @@ export function UserHeader() {
   `;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-primary text-primary-foreground shadow-md backdrop-blur-md">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full border-b border-white/10 bg-primary text-primary-foreground shadow-md backdrop-blur-md">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           
           {/* Brand Logo */}
-          <Link href="/" className="group flex items-center gap-2 outline-none">
+          <Link 
+            href="/" 
+            className="group flex items-center outline-none"
+            onClick={(e) => handleNavClick(e, '/')}
+          >
             <img 
-              src="/favicon.ico" 
+              src={IMAGE_URLS.LOGO.src} 
               alt="Boss Cargo Express" 
-              className="h-12 w-12 object-contain brightness-0 invert transition-transform group-hover:scale-105" 
+              className="h-14 w-auto object-contain transition-transform group-hover:scale-105" 
             />
-            <span className="text-xl font-bold tracking-tight text-white">Boss Cargo Express</span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden items-center gap-1 md:flex">
-            {NAV_LINKS.map((item) => (
-              <Link key={item.name} href={item.href} className={navItemClasses(item.href)}>
-                {item.name}
-              </Link>
-            ))}
+            {NAV_LINKS.map((item) => {
+              const isApplication = item.name === 'My Application';
+              return (
+                <Link 
+                  key={item.name} 
+                  href={item.href} 
+                  className={`${navItemClasses(item.href)} flex items-center group/nav transition-all duration-300 ${isApplication ? 'gap-0 hover:gap-2' : ''}`}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                >
+                  {isApplication && <ClipboardList size={18} className="shrink-0" />}
+                  <span className={`
+                    overflow-hidden transition-all duration-300 whitespace-nowrap
+                    ${isApplication 
+                      ? 'max-w-0 opacity-0 group-hover/nav:max-w-[150px] group-hover/nav:opacity-100 group-hover/nav:ml-1' 
+                      : ''}
+                  `}>
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
             <div className="ml-4 flex items-center gap-2 border-l border-white/20 pl-4">
               <ThemeSwitcher />
             </div>
@@ -64,18 +94,22 @@ export function UserHeader() {
         {/* Mobile Nav Menu */}
         {isMobileMenuOpen && (
           <div className="space-y-1 border-t border-white/10 pb-4 pt-2 md:hidden">
-            {NAV_LINKS.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block rounded-md px-3 py-2 text-base font-medium text-white ${
-                  isActive(item.href) ? 'bg-white/20' : 'hover:bg-white/10'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {NAV_LINKS.map((item) => {
+              const isApplication = item.name === 'My Application';
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-white ${
+                    isActive(item.href) ? 'bg-white/20' : 'hover:bg-white/10'
+                  }`}
+                >
+                  {isApplication && <ClipboardList size={20} />}
+                  {item.name}
+                </Link>
+              );
+            })}
             <div className="mt-4 border-t border-white/10 pt-4 px-3">
             </div>
           </div>

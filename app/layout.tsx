@@ -9,7 +9,9 @@ import { Footer } from "@/components/layout";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
+import { InfiniteScrollLoader } from "@/constants/navigation";
 import { Box } from "@mui/material";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,6 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -99,7 +102,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
         {/* 3. Create splash screen immediately - outside React tree to avoid hydration issues */}
         <div 
           id="initial-loader" 
@@ -128,9 +131,17 @@ export default function RootLayout({
                 <Suspense fallback={<HeaderSkeleton />}>
                   <ConditionalHeader />
                 </Suspense>
-                <Box component="main" sx={{ flexGrow: 1 }}>
-                  {children}
-                </Box>
+                <InfiniteScrollLoader>
+                  <Box 
+                    component="main" 
+                    sx={{ flexGrow: 1, scrollSnapAlign: 'start', minHeight: '100vh' }}
+                    data-initial-module="true"
+                    data-href={pathname}
+                    suppressHydrationWarning
+                  >
+                    {children}
+                  </Box>
+                </InfiniteScrollLoader>
                 <Footer />
               </Box>
             </JobProvider>
