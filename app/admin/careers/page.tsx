@@ -374,8 +374,8 @@ export default function AdminPage() {
   };
 
   return (
-    <Box sx={{ pt: { xs: 10, sm: 12 }, pb: 8 }}>
-      <Container maxWidth="lg">
+    <Box>
+      <Container maxWidth="xl" sx={{ px: 0 }}>
         {/* Header */}
         <Box sx={{
           display: 'flex',
@@ -383,17 +383,17 @@ export default function AdminPage() {
           justifyContent: 'space-between',
           alignItems: { xs: 'flex-start', sm: 'center' },
           gap: { xs: 3, sm: 4 },
-          mb: 5,
+          mb: 4,
           pb: 3,
           borderBottom: 1,
           borderColor: 'divider'
         }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h3" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.125rem', md: '2.5rem' }, mb: 1.5 }}>
-              Careers Admin
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+              Careers Management
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-              Manage careers and applications
+            <Typography variant="body1" color="text.secondary">
+              Create, edit, and manage your company's job postings.
             </Typography>
           </Box>
           <Button

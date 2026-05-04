@@ -17,7 +17,7 @@ import {
   useMediaQuery,
   Collapse
 } from '@mui/material';
-import { ThemeSwitcher } from '../theme-switcher';
+import ThemeSwitcher from '../theme-switcher';
 
 export function UserHeader() {
   const theme = useTheme();
@@ -159,43 +159,62 @@ export function UserHeader() {
           >
             {NAV_LINKS.map((item) => {
               const isApplication = item.name === 'My Application';
+              const active = isActive(item.href);
+
               return (
-                <Box
+                <MuiLink
                   key={item.name}
                   component={Link}
                   href={item.href}
                   onClick={(e: any) => handleNavClick(e, item.href)}
-                  className="nav-item"
+                  className="nav-group"
                   sx={{
                     ...navItemStyles(item.href),
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: isApplication ? 0 : 1,
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
                     overflow: 'hidden',
-                    '&:hover': isApplication ? { gap: 1 } : {},
+                    textDecoration: 'none !important',
+                    '&:hover': isApplication ? {
+                      gap: 1.5,
+                      pr: 2.5
+                    } : {},
                   }}
                 >
-                  {isApplication && <ClipboardList size={18} style={{ flexShrink: 0 }} />}
+                  {isApplication && (
+                    <ClipboardList
+                      size={18}
+                      style={{
+                        flexShrink: 0,
+                        transition: 'transform 0.3s ease',
+                      }}
+                    />
+                  )}
                   <Box
                     component="span"
                     sx={{
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       whiteSpace: 'nowrap',
                       ...(isApplication && {
                         maxWidth: 0,
                         opacity: 0,
-                        '.nav-item:hover &': {
+                        visibility: 'hidden',
+                        '.nav-group:hover &': {
                           maxWidth: 150,
                           opacity: 1,
-                          ml: 1
+                          visibility: 'visible',
                         }
                       })
                     }}
                   >
                     {item.name}
                   </Box>
-                </Box>
+                </MuiLink>
               );
             })}
-            <Box sx={{ ml: 2, pl: 2, borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ ml: 1, pl: 2, borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, display: 'flex', alignItems: 'center' }}>
               <ThemeSwitcher />
             </Box>
           </Stack>
@@ -220,7 +239,7 @@ export function UserHeader() {
                 const isApplication = item.name === 'My Application';
                 const active = isActive(item.href);
                 return (
-                  <Box
+                  <MuiLink
                     key={item.name}
                     component={Link}
                     href={item.href}
@@ -232,12 +251,11 @@ export function UserHeader() {
                       px: 2,
                       py: 1.5,
                       borderRadius: 1,
-                      textDecoration: 'none',
-                      // color: 'common.white',
+                      textDecoration: 'none !important',
                       transition: 'background-color 0.2s',
                       ...(active
                         ? { bgcolor: 'common.white', color: 'primary.main' }
-                        : { '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) } }
+                        : { color: 'common.white', '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) } }
                       )
                     }}
                   >
@@ -251,7 +269,7 @@ export function UserHeader() {
                     <Box component="span" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                       {item.name}
                     </Box>
-                  </Box>
+                  </MuiLink>
                 );
               })}
             </Stack>

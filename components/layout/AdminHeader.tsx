@@ -15,7 +15,7 @@ import {
   alpha,
   Collapse
 } from '@mui/material';
-import { ThemeSwitcher } from '../theme-switcher';
+import ThemeSwitcher from '../theme-switcher';
 import { AuthButton } from '../auth-button';
 
 export function AdminHeader() {

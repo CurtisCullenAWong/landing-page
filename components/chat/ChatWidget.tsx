@@ -169,7 +169,7 @@ export const ChatWidget = () => {
       }}
     >
       {/* Chat Window */}
-      <Zoom in={isOpen}>
+      <Zoom in={isOpen} mountOnEnter unmountOnExit>
         <Paper
           elevation={6}
           sx={{

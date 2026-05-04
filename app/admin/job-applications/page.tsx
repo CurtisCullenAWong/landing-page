@@ -554,15 +554,15 @@ export default function JobApplicationsPage() {
   }
 
   return (
-    <Box sx={{ pt: { xs: 10, sm: 12 }, pb: 8 }}>
-      <Container maxWidth="xl">
+    <Box>
+      <Container maxWidth="xl" sx={{ px: 0 }}>
         {/* Header */}
-        <Box sx={{ mb: 5, pb: 3, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="h3" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.125rem', md: '2.5rem' }, mb: 1.5 }}>
+        <Box sx={{ mb: 4, pb: 3, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
             Job Applications
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
-            Manage and update job application statuses
+          <Typography variant="body1" color="text.secondary">
+            Manage and update job application statuses.
           </Typography>
         </Box>
 

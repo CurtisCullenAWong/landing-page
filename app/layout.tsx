@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isSequencePage = pathname === '/';
+  const isSequencePage = pathname === '/' || pathname === '/about-us' || pathname === '/why-us';
 
   return (
     <html lang="en" suppressHydrationWarning className={isSequencePage ? 'scroll-lock-active' : ''}>
@@ -106,14 +106,14 @@ export default function RootLayout({
       </head>
       <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
         {/* 3. Create splash screen immediately - outside React tree to avoid hydration issues */}
-        <div 
-          id="initial-loader" 
+        <div
+          id="initial-loader"
           suppressHydrationWarning
           style={{ pointerEvents: 'none' }}
         >
-          <img 
-            src="/favicon.ico" 
-            alt="Loading" 
+          <img
+            src="/favicon.ico"
+            alt="Loading"
             className="favicon-loader"
           />
         </div>
@@ -156,12 +156,12 @@ export default function RootLayout({
 function MainContainer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <Box 
-      component="main" 
-      sx={{ 
-        flexGrow: 1, 
-        scrollSnapAlign: pathname === '/' ? 'start' : 'none', 
-        minHeight: '100vh' 
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        scrollSnapAlign: pathname === '/' ? 'start' : 'none',
+        minHeight: '100vh'
       }}
       data-initial-module="true"
       data-href={pathname}
@@ -170,4 +170,4 @@ function MainContainer({ children }: { children: React.ReactNode }) {
       {children}
     </Box>
   );
-}
+}

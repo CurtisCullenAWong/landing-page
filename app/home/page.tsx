@@ -29,13 +29,22 @@ export default function HomePage() {
 
   return (
     <Box>
-      <Box id="home">
-        {/* Hero Section */}
+      {/* Hero Section */}
+      <Box 
+        id="home"
+        sx={{ 
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         <Box
           sx={{
             position: 'relative',
             overflow: 'hidden',
-            minHeight: 'calc(100vh - 64px)',
+            flexGrow: 1,
             display: 'flex',
             flexDirection: 'column',
             background: isDark
@@ -166,146 +175,152 @@ export default function HomePage() {
             </Box>
           </Container>
         </Box>
+      </Box>
 
-        {/* Boss Cargo Philosophy Section */}
-        <Box sx={{ py: 8, bgcolor: 'background.default' }}>
-          <Container maxWidth="lg">
-            <Typography variant="h2" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
-              The Boss Cargo Philosophy
-            </Typography>
-
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Paper
-                  sx={{
-                    p: 4,
-                    bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}
-                  >
-                    The heart of Boss Cargo Express is centered on businesses. We understand that you have your top priorities in order to stay competitive and financially sound. Outsource your logistics requirements to us so you can focus on your core. Our ability to integrate proven cargo handling expertise and provide flexible and personalized customer services enables Boss Cargo Express to deliver the most efficient and economical cargo solutions that is ideally fit to your needs.
+      {/* Compressed Overview Section (Philosophy + CTA + Services) */}
+      <Box 
+        sx={{ 
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: 'background.default',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          py: { xs: 4, md: 6 }
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={6}>
+            {/* Top Row: Philosophy & Image */}
+            <Grid size={12}>
+              <Grid container spacing={4} alignItems="center">
+                <Grid size={{ xs: 12, md: 7 }}>
+                  <Typography variant="h2" sx={{ mb: 3, fontWeight: 600 }}>
+                    The Boss Cargo Philosophy
                   </Typography>
-                </Paper>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <ImageWithFallback
-                  src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
-                  alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
-                  layout="responsive"
-                  rounded={8}
-                  shadow={2}
-                />
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-
-        {/* CTA Section */}
-        <Box
-          sx={{
-            py: 8,
-            bgcolor: isDark ? 'primary.dark' : 'primary.main',
-            color: isDark ? 'text.primary' : 'primary.contrastText',
-          }}
-        >
-          <Container maxWidth="lg" sx={{ textAlign: 'center' }}>
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
-              Partner with Boss Cargo Express
-            </Typography>
-
-            <Typography variant="h6" sx={{ mb: 4 }}>
-              We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                component={Link}
-                href="/#why-us"
-                variant="contained"
-                size="large"
-                sx={{
-                  bgcolor: 'background.paper',
-                  color: isDark ? 'text.primary' : 'primary.main',
-                  '&:hover': {
-                    bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  },
-                }}
-              >
-                Why Choose Boss Cargo Express?
-              </Button>
-
-              <Button
-                component={Link}
-                href="/#partnerships"
-                variant="outlined"
-                size="large"
-                sx={{
-                  borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                  color: isDark ? 'text.primary' : 'primary.contrastText',
-                  '&:hover': {
-                    borderColor: isDark ? 'text.primary' : 'primary.contrastText',
-                    bgcolor: 'action.hover',
-                  },
-                }}
-              >
-                Partnership Opportunities
-              </Button>
-            </Box>
-          </Container>
-        </Box>
-
-        {/* Services Overview Section */}
-        <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
-          <Container maxWidth="lg">
-            <Typography variant="h2" sx={{ textAlign: 'center', mb: 6, fontWeight: 600 }}>
-              Our Services
-            </Typography>
-
-            <Grid container spacing={4}>
-              {[
-                { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },
-                { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
-                { icon: Users, title: 'Domestic Services', desc: 'Air, land, and sea freight across the Philippine archipelago' },
-                { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' }
-              ].map((service, index) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
-                  <Card
+                  <Paper
                     sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      transition: '0.3s',
-                      '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+                      p: 3,
+                      bgcolor: isDark ? 'action.hover' : 'action.selected',
                     }}
                   >
-                    <CardContent
+                    <Typography
+                      variant="body1"
+                      sx={{ fontSize: '1rem', lineHeight: 1.6 }}
+                    >
+                      The heart of Boss Cargo Express is centered on businesses. We understand that you have your top priorities in order to stay competitive and financially sound. Outsource your logistics requirements to us so you can focus on your core. Our ability to integrate proven cargo handling expertise and provide flexible and personalized customer services enables Boss Cargo Express to deliver the most efficient and economical cargo solutions that is ideally fit to your needs.
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid size={{ xs: 12, md: 5 }}>
+                  <ImageWithFallback
+                    src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
+                    alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
+                    layout="responsive"
+                    rounded={8}
+                    shadow={2}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Middle Row: Services Overview */}
+            <Grid size={12}>
+              <Typography variant="h4" sx={{ textAlign: 'center', mb: 3, fontWeight: 600 }}>
+                Our Services
+              </Typography>
+              <Grid container spacing={2}>
+                {[
+                  { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },
+                  { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
+                  { icon: Users, title: 'Domestic Services', desc: 'Air, land, and sea freight across the Philippine archipelago' },
+                  { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' }
+                ].map((service, index) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+                    <Card
                       sx={{
-                        p: 3,
-                        flexGrow: 1,
+                        height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center'
+                        transition: '0.3s',
+                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
                       }}
                     >
-                      <service.icon size={48} style={{ color: theme.palette.primary.main, marginBottom: 16 }} />
-                      <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                        {service.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {service.desc}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
+                      <CardContent
+                        sx={{
+                          p: 2,
+                          flexGrow: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <service.icon size={32} style={{ color: theme.palette.primary.main, marginBottom: 12 }} />
+                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, fontSize: '1rem' }}>
+                          {service.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                          {service.desc}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
-          </Container>
-        </Box>
+
+            {/* Bottom Row: Compact CTA */}
+            <Grid size={12}>
+              <Paper
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  bgcolor: isDark ? 'primary.dark' : 'primary.main',
+                  color: isDark ? 'text.primary' : 'primary.contrastText',
+                  borderRadius: 4,
+                }}
+              >
+                <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
+                  Partner with Boss Cargo Express
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
+                  We take pride in growing the business together with firms by being dependable, cost-effective, and on-time.
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <Button
+                    component={Link}
+                    href="/#why-us"
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      bgcolor: 'background.paper',
+                      color: isDark ? 'text.primary' : 'primary.main',
+                      fontWeight: 600,
+                      '&:hover': { bgcolor: isDark ? 'action.hover' : 'action.selected' },
+                    }}
+                  >
+                    Why Choose Us?
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/#partnerships"
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderColor: isDark ? 'text.primary' : 'primary.contrastText',
+                      color: isDark ? 'text.primary' : 'primary.contrastText',
+                      fontWeight: 600,
+                      '&:hover': { borderColor: isDark ? 'text.primary' : 'primary.contrastText', bgcolor: 'rgba(255,255,255,0.1)' },
+                    }}
+                  >
+                    Partnerships
+                  </Button>
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
 
       {/* Embedded Sections */}
