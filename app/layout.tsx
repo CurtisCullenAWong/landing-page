@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import "./globals.css";
@@ -141,6 +142,8 @@ export default function RootLayout({
                   <Footer />
                 </Suspense>
               </Box>
+
+              <ChatWidget />
 
             </JobProvider>
           </MuiThemeProviderWrapper>
