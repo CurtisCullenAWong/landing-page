@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { Search, FileText, ArrowRight } from 'lucide-react';
 import {
   Box,
@@ -19,6 +20,12 @@ export default function MyApplicationSection() {
   const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+
+  // Ensure page starts at the top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

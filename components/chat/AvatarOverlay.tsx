@@ -142,12 +142,13 @@ export const AvatarOverlay = () => {
 
   // Defensive theme extraction
   const colors = useMemo(() => [
-    theme.palette.primary.main,
-    (theme.palette as any).tertiary?.main || theme.palette.primary.light,
-    theme.palette.secondary.main,
-    theme.palette.info.main,
-    theme.palette.success.main,
+    theme.palette.primary?.main || '#00A39D',
+    (theme.palette as any).tertiary?.main || theme.palette.primary?.light || '#FCE200',
+    theme.palette.secondary?.main || '#1a1a1a',
+    theme.palette.info?.main || '#0288d1',
+    theme.palette.success?.main || '#2e7d32',
   ], [theme]);
+
 
   // Optimized Intersection Observer
   useEffect(() => {

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+
 import { useJobs } from '../../contexts/JobContext';
 import { MapPin, Briefcase, Clock, Search, X, ChevronDown, ChevronUp, GraduationCap, Target, Users } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
@@ -91,6 +92,12 @@ export default function JobPostingsPage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
+  // Ensure page starts at the top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+
   // Defensive Theme Extraction
   const primaryMain = theme.palette.primary?.main || '#00A39D';
   const primaryDark = theme.palette.primary?.dark || '#007A76';
@@ -114,6 +121,8 @@ export default function JobPostingsPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+
 
   // Get unique values for filter dropdowns
   const uniqueDepartments = useMemo(() => {

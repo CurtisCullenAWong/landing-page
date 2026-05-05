@@ -271,13 +271,24 @@ export default function GeneralApplicationPage() {
             <CornerBrackets color={tertiaryMain} radius={16} />
             <CardContent sx={{ p: 6, textAlign: 'center' }}>
               <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ p: 2, bgcolor: alpha('success.main', 0.1), color: 'success.main', borderRadius: '50%' }}>
+                <Box sx={{ 
+                  p: 2, 
+                  bgcolor: alpha(theme.palette.success?.main || '#2e7d32', 0.1), 
+                  color: theme.palette.success?.main || '#2e7d32', 
+                  borderRadius: '50%' 
+                }}>
                   <ShieldCheck size={64} />
                 </Box>
               </Box>
-              <Typography variant="h3" sx={{ mb: 2, fontWeight: 900, color: 'success.main', letterSpacing: -1 }}>
+              <Typography variant="h3" sx={{ 
+                mb: 2, 
+                fontWeight: 900, 
+                color: theme.palette.success?.main || '#2e7d32', 
+                letterSpacing: -1 
+              }}>
                 Submission Successful
               </Typography>
+
               <Typography variant="h6" color="text.secondary" sx={{ mb: 4, fontWeight: 400 }}>
                 Thank you for your interest in Boss Cargo Express. Your professional application has been formally received and queued for review by our talent acquisition team.
               </Typography>
