@@ -90,7 +90,7 @@ export default function AboutPage() {
         height: 12,
         borderTop: `2px solid ${tertiaryMain}`,
         borderLeft: `2px solid ${tertiaryMain}`,
-        borderTopLeftRadius: 4,
+        borderTopLeftRadius: 1.5,
         zIndex: 2
       }} />
       <Box sx={{
@@ -101,7 +101,7 @@ export default function AboutPage() {
         height: 12,
         borderBottom: `2px solid ${tertiaryMain}`,
         borderRight: `2px solid ${tertiaryMain}`,
-        borderBottomRightRadius: 4,
+        borderBottomRightRadius: 1.5,
         zIndex: 2
       }} />
     </>
@@ -177,6 +177,7 @@ export default function AboutPage() {
                 sx={{
                   p: 3,
                   mb: 2.5,
+                  borderRadius: 1.5,
                   bgcolor: alpha(isDark ? primaryDark : primaryMain, 0.08),
                   backdropFilter: 'blur(10px)',
                   border: `1px solid ${alpha(primaryMain, 0.2)}`,
@@ -200,7 +201,7 @@ export default function AboutPage() {
 
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <Card sx={{ height: '100%', position: 'relative', bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Card sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
                     <CornerBrackets />
                     <CardContent sx={{ p: 2.5 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
@@ -213,7 +214,7 @@ export default function AboutPage() {
                   </Card>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <Card sx={{ height: '100%', position: 'relative', bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                  <Card sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
                     <CornerBrackets />
                     <CardContent sx={{ p: 2.5 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
@@ -231,12 +232,12 @@ export default function AboutPage() {
             {/* Right: Hero Image with Offset Decorative Frame */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ position: 'relative', p: 1 }}>
-                {/* Decorative Frame */}
+                {/* Decorative Squiggly Frame */}
                 <Box sx={{
                   position: 'absolute',
-                  inset: '-10px 10px 10px -10px',
+                  inset: '-15px 15px 15px -15px',
                   border: `2px solid ${tertiaryMain}`,
-                  borderRadius: '24px 8px 24px 8px',
+                  borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
                   zIndex: 0,
                   opacity: 0.6
                 }} />
@@ -246,7 +247,7 @@ export default function AboutPage() {
                     alt={getImageMetadata(IMAGE_URLS.ABOUT_WAREHOUSE_TEAM).alt}
                     layout="responsive"
                     aspectRatio="4:3"
-                    rounded={16}
+                    rounded={6}
                     shadow={8}
                     priority
                   />
@@ -350,7 +351,7 @@ export default function AboutPage() {
                     },
                     bgcolor: 'background.default',
                     boxShadow: isDark ? 4 : 2,
-                    borderRadius: 4,
+                    borderRadius: 1.5,
                     position: 'relative',
                     overflow: 'hidden',
                     border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
@@ -374,6 +375,7 @@ export default function AboutPage() {
                         src={official.image}
                         alt={official.name}
                         layout="fill"
+                        rounded={6}
                         style={{ objectFit: 'cover' }}
                       />
                     ) : (
@@ -497,7 +499,7 @@ export default function AboutPage() {
           <Box sx={{
             p: 4,
             mb: 4,
-            borderRadius: 4,
+            borderRadius: 2,
             background: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
             color: 'white',
             position: 'relative',
@@ -511,7 +513,7 @@ export default function AboutPage() {
               width: '400px',
               height: '400px',
               bgcolor: alpha('#fff', 0.1),
-              borderRadius: '50%',
+              borderRadius: 6,
             }} />
             <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, textTransform: 'uppercase', letterSpacing: -1 }}>
               Get In Touch
@@ -540,13 +542,13 @@ export default function AboutPage() {
                       {/* Address */}
                       <Paper variant="outlined" sx={{
                         p: 2,
-                        borderRadius: 3,
+                        borderRadius: 2,
                         bgcolor: alpha(primaryMain, 0.03),
                         borderColor: alpha(primaryMain, 0.2),
                         position: 'relative'
                       }}>
                         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                          <Box sx={{ p: 1, borderRadius: 2, bgcolor: primaryMain, color: 'white', display: 'flex', boxShadow: 2 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: primaryMain, color: 'white', display: 'flex', boxShadow: 2 }}>
                             <MapPin size={24} />
                           </Box>
                           <Box>
@@ -560,12 +562,12 @@ export default function AboutPage() {
                       {/* Phone Numbers */}
                       <Paper variant="outlined" sx={{
                         p: 2,
-                        borderRadius: 3,
+                        borderRadius: 2,
                         bgcolor: alpha(tertiaryMain, 0.03),
                         borderColor: alpha(tertiaryMain, 0.2)
                       }}>
                         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          <Box sx={{ p: 1, borderRadius: 2, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex', boxShadow: 2, alignSelf: 'flex-start' }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex', boxShadow: 2, alignSelf: 'flex-start' }}>
                             <Phone size={24} />
                           </Box>
                           <Box sx={{ flex: 1 }}>
@@ -629,18 +631,18 @@ export default function AboutPage() {
 
                 <Grid size={{ xs: 12, md: 7 }}>
                   <Box sx={{ position: 'relative', height: '100%', minHeight: { xs: 300, md: 500 } }}>
-                    {/* Decorative Frame for Map */}
+                    {/* Decorative Squiggly Frame for Map */}
                     <Box sx={{
                       position: 'absolute',
                       inset: '20px -20px -20px 20px',
                       border: `2px solid ${tertiaryMain}`,
-                      borderRadius: 4,
+                      borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
                       zIndex: 0
                     }} />
                     <Paper
                       elevation={12}
                       sx={{
-                        borderRadius: 4,
+                        borderRadius: 2,
                         overflow: 'hidden',
                         height: '100%',
                         width: '100%',

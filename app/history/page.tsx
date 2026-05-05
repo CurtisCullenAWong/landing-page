@@ -130,6 +130,12 @@ export default function HistoryPage() {
     }
   ];
 
+  // Scalable Milestone Grouping (2 per slide)
+  const milestoneChunks = [];
+  for (let i = 0; i < milestones.length; i += 2) {
+    milestoneChunks.push(milestones.slice(i, i + 2));
+  }
+
   return (
     <Box>
       {/* Slide 1: Introduction & Story */}
@@ -141,7 +147,7 @@ export default function HistoryPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
+          py: { xs: 6, md: 10 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -202,7 +208,7 @@ export default function HistoryPage() {
           </Grid>
         </PageContainer>
 
-        {/* Smooth transition to Slide 2 */}
+        {/* Transition to Milestones */}
         <Box
           sx={{
             position: 'absolute',
@@ -212,272 +218,185 @@ export default function HistoryPage() {
             height: '15vh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
-            zIndex: 3,
+            zIndex: 0, // Lower z-index so content isn't covered
           }}
         />
       </Box>
 
-      {/* Slide 2: Early Milestones (Alternating) */}
-      <Box
-        sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
-          display: 'flex',
-          alignItems: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          bgcolor: 'background.paper',
-          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <AbstractBlob color={secondaryMain} top="10%" left="-15%" size="900px" rotate={45} opacity={0.08} />
-        <AbstractBlob color={primaryMain} bottom="-10%" right="-10%" size="700px" rotate={-15} opacity={0.06} />
-
-        {/* Timeline Connecting Line - Continuous */}
+      {/* Dynamic Milestone Slides */}
+      {milestoneChunks.map((chunk, slideIndex) => (
         <Box
+          key={slideIndex}
           sx={{
-            position: 'absolute',
-            left: '50%',
-            top: 0,
-            bottom: 0,
-            width: '3px',
-            background: `linear-gradient(to bottom, ${primaryMain}, ${secondaryMain})`,
-            opacity: 0.5,
-            display: { xs: 'none', md: 'block' },
-            zIndex: 1
+            height: { xs: 'auto', md: 'calc(100vh - 80px)' },
+            minHeight: { xs: '100vh', md: 'auto' },
+            display: 'flex',
+            alignItems: 'center',
+            scrollSnapAlign: 'start',
+            scrollSnapStop: 'always',
+            bgcolor: slideIndex % 2 === 0 ? 'background.paper' : 'background.default',
+            py: { xs: 6, md: 10 },
+            position: 'relative',
+            overflow: 'hidden'
           }}
-        />
+        >
+          {/* Alternating Background Blobs */}
+          {slideIndex % 2 === 0 ? (
+            <>
+              <AbstractBlob color={secondaryMain} top="10%" left="-15%" size="900px" rotate={45} opacity={0.08} />
+              <AbstractBlob color={primaryMain} bottom="-10%" right="-10%" size="700px" rotate={-15} opacity={0.06} />
+            </>
+          ) : (
+            <>
+              <AbstractBlob color={tertiaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.1} />
+              <AbstractBlob color={primaryMain} bottom="10%" left="-15%" size="600px" rotate={30} opacity={0.08} />
+            </>
+          )}
 
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
-              CHRONICLES
-            </Typography>
-            <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', md: '2.75rem' } }}>
-              Early Milestones
-            </Typography>
-          </Box>
+          {/* Timeline Connecting Line - Explicitly Not Faded (Z-Index 4) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              bottom: slideIndex === milestoneChunks.length - 1 ? '50%' : 0,
+              width: '3px',
+              background: slideIndex % 2 === 0
+                ? `linear-gradient(to bottom, ${primaryMain}, ${secondaryMain})`
+                : `linear-gradient(to bottom, ${secondaryMain}, ${tertiaryMain})`,
+              opacity: 1, // Explicitly not faded
+              display: { xs: 'none', md: 'block' },
+              zIndex: 4,
+              boxShadow: `0 0 10px ${alpha(isDark ? '#fff' : '#000', 0.1)}`
+            }}
+          />
 
-          <Stack spacing={3}>
-            {/* Milestone 1 (Left) */}
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
-                    borderLeft: `5px solid ${primaryMain}`,
-                    borderRadius: '0 20px 20px 0',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { transform: 'translateX(10px)', bgcolor: alpha(primaryMain, 0.1) }
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                    <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[0].year}</Typography>
-                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[0].title}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[0].description}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: primaryMain, border: `6px solid ${theme.palette.background.paper}`, boxShadow: `0 0 25px ${alpha(primaryMain, 0.5)}` }} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }} />
-            </Grid>
-
-            {/* Milestone 2 (Right) */}
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 5 }} />
-              <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: secondaryMain, border: `6px solid ${theme.palette.background.paper}`, boxShadow: `0 0 25px ${alpha(secondaryMain, 0.5)}` }} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    bgcolor: isDark ? alpha(secondaryMain, 0.08) : alpha(secondaryMain, 0.03),
-                    borderRight: `5px solid ${secondaryMain}`,
-                    borderRadius: '20px 0 0 20px',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { transform: 'translateX(-10px)', bgcolor: alpha(secondaryMain, 0.1) }
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: 'right' }}>
-                    <Typography variant="h3" sx={{ color: 'secondary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[1].year}</Typography>
-                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[1].title}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[1].description}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Stack>
-        </PageContainer>
-
-        {/* Smooth transition to Slide 3 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '15vh',
-            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
-            pointerEvents: 'none',
-            zIndex: 3,
-          }}
-        />
-      </Box>
-
-      {/* Slide 3: Recent Milestones & Vision (Alternating) */}
-      <Box
-        sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
-          display: 'flex',
-          alignItems: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <AbstractBlob color={tertiaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.1} />
-        <AbstractBlob color={primaryMain} bottom="10%" left="-15%" size="600px" rotate={30} opacity={0.08} />
-
-        {/* Timeline Connecting Line - Continuous until vision section */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: 0,
-            bottom: '50%',
-            width: '3px',
-            background: `linear-gradient(to bottom, ${secondaryMain}, ${tertiaryMain})`,
-            opacity: 0.5,
-            display: { xs: 'none', md: 'block' }
-          }}
-        />
-
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <Stack spacing={3}>
-            {/* Milestone 3 (Left) */}
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    bgcolor: isDark ? alpha(tertiaryMain, 0.08) : alpha(tertiaryMain, 0.03),
-                    borderLeft: `5px solid ${tertiaryMain}`,
-                    borderRadius: '0 20px 20px 0',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { transform: 'translateX(10px)', bgcolor: alpha(tertiaryMain, 0.1) }
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                    <Typography variant="h3" sx={{ color: tertiaryMain, fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[2].year}</Typography>
-                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[2].title}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[2].description}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: tertiaryMain, border: `6px solid ${theme.palette.background.default}`, boxShadow: `0 0 25px ${alpha(tertiaryMain, 0.5)}` }} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }} />
-            </Grid>
-
-            {/* Milestone 4 (Right) */}
-            <Grid container spacing={4} alignItems="center">
-              <Grid size={{ xs: 12, md: 5 }} />
-              <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: primaryMain, border: `6px solid ${theme.palette.background.default}`, boxShadow: `0 0 25px ${alpha(primaryMain, 0.5)}` }} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
-                    borderRight: `5px solid ${primaryMain}`,
-                    borderRadius: '20px 0 0 20px',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { transform: 'translateX(-10px)', bgcolor: alpha(primaryMain, 0.1) }
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: 'right' }}>
-                    <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[3].year}</Typography>
-                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[3].title}</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[3].description}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            {/* Vision Section */}
-            <Box sx={{ mt: 2, position: 'relative' }}>
-              <AbstractBlob color={primaryMain} top="-20%" left="30%" size="400px" opacity={0.08} />
-              <Paper
-                elevation={0}
-                sx={{
-                  p: { xs: 3, md: 5 },
-                  borderRadius: 6,
-                  textAlign: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  background: isDark
-                    ? `linear-gradient(135deg, ${alpha(secondaryMain, 0.25)} 0%, ${alpha(primaryMain, 0.15)} 100%)`
-                    : `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, ${alpha(secondaryMain, 0.08)} 100%)`,
-                  border: '1px solid',
-                  borderColor: isDark ? alpha(primaryMain, 0.3) : alpha(primaryMain, 0.15),
-                  boxShadow: `0 20px 50px -20px ${alpha(secondaryMain, 0.4)}`
-                }}
-              >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '6px',
-                    background: `linear-gradient(to right, ${primaryMain}, ${tertiaryMain}, ${secondaryMain})`
-                  }}
-                />
-                <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>
-                  OUR VISION
+          <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 5 }}>
+            {slideIndex === 0 && (
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
+                  CHRONICLES
                 </Typography>
-                <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.5rem', md: '2rem' } }}>
-                  Looking Ahead
+                <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', md: '2.75rem' } }}>
+                  Early Milestones
                 </Typography>
-                <Typography variant="body1" sx={{ maxWidth: '750px', mx: 'auto', lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.1rem' }, color: 'text.primary', fontWeight: 500 }}>
-                  "As we move forward, Boss Cargo Express remains committed to innovation, sustainability, and
-                  creating opportunities for our team members to grow and succeed. We continue to embrace the frame
-                  of CANI as we write the next chapter of our story."
-                </Typography>
+              </Box>
+            )}
 
-                {/* Decorative elements inside vision card */}
-                <Box sx={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: '50%', border: `2px dashed ${alpha(tertiaryMain, 0.3)}` }} />
-                <Box sx={{ position: 'absolute', bottom: -15, left: -15, width: 60, height: 60, borderRadius: '50%', bgcolor: alpha(primaryMain, 0.1) }} />
-              </Paper>
-            </Box>
-          </Stack>
-        </PageContainer>
+            <Stack spacing={3}>
+              {chunk.map((milestone, index) => {
+                const globalIndex = slideIndex * 2 + index;
+                const isLeft = globalIndex % 2 === 0;
 
-        {/* Smooth transition to next page section */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '15vh',
-            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
-            pointerEvents: 'none',
-            zIndex: 3,
-          }}
-        />
-      </Box>
+                return (
+                  <Grid container spacing={4} alignItems="center" key={globalIndex}>
+                    {/* Left Position */}
+                    <Grid size={{ xs: 12, md: 5 }} sx={{ order: isLeft ? 1 : 3 }}>
+                      <Card
+                        elevation={0}
+                        sx={{
+                          bgcolor: isDark ? alpha(milestone.color, 0.15) : alpha(milestone.color, 0.06),
+                          borderLeft: isLeft ? `5px solid ${milestone.color}` : 'none',
+                          borderRight: !isLeft ? `5px solid ${milestone.color}` : 'none',
+                          borderRadius: isLeft ? '0 20px 20px 0' : '20px 0 0 20px',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: isLeft ? 'translateX(10px)' : 'translateX(-10px)',
+                            bgcolor: alpha(milestone.color, 0.2)
+                          }
+                        }}
+                      >
+                        <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: isLeft ? 'left' : 'right' }}>
+                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1 }}>{milestone.year}</Typography>
+                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestone.title}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestone.description}</Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+
+                    {/* Timeline Center Dot */}
+                    <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', order: 2 }}>
+                      <Box
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          bgcolor: milestone.color,
+                          border: `6px solid ${theme.palette.background.paper}`,
+                          boxShadow: `0 0 25px ${alpha(milestone.color, 0.6)}`,
+                          zIndex: 6,
+                          position: 'relative'
+                        }}
+                      />
+                    </Grid>
+
+                    {/* Empty Space for Alternating */}
+                    <Grid size={{ xs: 12, md: 5 }} sx={{ order: isLeft ? 3 : 1 }} />
+                  </Grid>
+                );
+              })}
+
+              {/* Vision Section (Appended to last milestone slide) */}
+              {slideIndex === milestoneChunks.length - 1 && (
+                <Box sx={{ mt: 4, position: 'relative' }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: { xs: 3, md: 5 },
+                      borderRadius: 6,
+                      textAlign: 'center',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      background: isDark
+                        ? `linear-gradient(135deg, ${alpha(secondaryMain, 0.25)} 0%, ${alpha(primaryMain, 0.15)} 100%)`
+                        : `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, ${alpha(secondaryMain, 0.08)} 100%)`,
+                      border: '1px solid',
+                      borderColor: isDark ? alpha(primaryMain, 0.3) : alpha(primaryMain, 0.15),
+                      boxShadow: `0 20px 50px -20px ${alpha(secondaryMain, 0.4)}`
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '6px',
+                        background: `linear-gradient(to right, ${primaryMain}, ${tertiaryMain}, ${secondaryMain})`
+                      }}
+                    />
+                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>
+                      OUR VISION
+                    </Typography>
+                    <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.5rem', md: '2rem' } }}>
+                      Looking Ahead
+                    </Typography>
+                    <Typography variant="body1" sx={{ maxWidth: '750px', mx: 'auto', lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.1rem' }, color: 'text.primary', fontWeight: 500 }}>
+                      "As we move forward, Boss Cargo Express remains committed to innovation, sustainability, and
+                      creating opportunities for our team members to grow and succeed. We continue to embrace the frame
+                      of CANI as we write the next chapter of our story."
+                    </Typography>
+                  </Paper>
+                </Box>
+              )}
+            </Stack>
+          </PageContainer>
+
+          {/* Smooth transition to next section */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '15vh',
+              background: `linear-gradient(to bottom, transparent, ${slideIndex === milestoneChunks.length - 1 ? theme.palette.background.default : theme.palette.background.paper})`,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          />
+        </Box>
+      ))}
     </Box>
   );
 }
