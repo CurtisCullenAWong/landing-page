@@ -12,36 +12,121 @@ import {
   Paper,
   useTheme,
   Stack,
-  Divider,
+  alpha,
 } from '@mui/material';
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
+
+// Abstract squiggly shapes for background variety
+const BLOB_PATHS = [
+  "M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-46.5C87.4,-33.8,90,-18.4,89.1,-3.5C88.2,11.4,83.7,25.9,76,38.5C68.3,51.1,57.3,61.8,44.2,69.5C31.1,77.2,15.5,81.9,0.4,81.2C-14.7,80.5,-29.4,74.3,-42.1,65.8C-54.8,57.3,-65.5,46.5,-73.2,33.8C-80.9,21.1,-85.7,6.5,-84.9,-7.7C-84.1,-21.9,-77.7,-35.7,-68.8,-47.4C-59.9,-59.1,-48.5,-68.7,-35.9,-76.7C-23.3,-84.7,-9.4,-91.1,3.4,-97C16.2,-102.9,30.5,-103.6,44.7,-76.4Z",
+  "M38.5,-64.1C51.6,-56.3,65.2,-48.2,74.5,-36.5C83.7,-24.8,88.7,-9.5,88.5,5.8C88.4,21.1,83.1,36.5,73.5,48.7C63.8,60.9,49.8,70,34.8,75.1C19.8,80.2,3.8,81.4,-11.5,78.3C-26.8,75.2,-41.4,67.8,-53.4,57.2C-65.4,46.6,-74.8,32.8,-79.9,17.7C-85,2.6,-85.8,-13.7,-80.1,-27.9C-74.4,-42.1,-62.1,-54.2,-48.2,-61.6C-34.3,-69,-18.8,-71.7,-4.4,-64.6C10,-57.5,25.4,-71.8,38.5,-64.1Z",
+  "M48.2,-78.3C60.7,-71.1,68,-54.2,73.2,-38.4C78.4,-22.6,81.4,-7.8,81.3,7.5C81.1,22.8,77.7,38.7,69.5,51.8C61.3,64.9,48.3,75.1,33.8,80.8C19.2,86.5,3,87.7,-14.2,85.5C-31.5,83.2,-49.8,77.5,-63.9,65.9C-78.1,54.3,-88.2,36.9,-91.5,18.7C-94.8,0.4,-91.3,-18.6,-82.5,-34.5C-73.8,-50.3,-59.8,-62.9,-44.7,-69.3C-29.6,-75.7,-13.4,-75.8,2,-78.9C17.5,-82,35.6,-85.5,48.2,-78.3Z"
+];
+
+const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.08, variant = 0 }: any) => (
+  <Box
+    sx={{
+      position: 'absolute',
+      top, left, right, bottom,
+      width: size || { xs: '300px', md: '600px' },
+      height: size || { xs: '300px', md: '600px' },
+      zIndex: 0,
+      opacity,
+      transform: `rotate(${rotate || 0}deg)`,
+      pointerEvents: 'none',
+      filter: 'blur(40px)',
+    }}
+  >
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+      <path
+        fill={color}
+        d={BLOB_PATHS[variant % BLOB_PATHS.length]}
+        transform="translate(100 100)"
+      />
+    </svg>
+  </Box>
+);
+
+const DecorativeImageFrame = ({ children, theme }: any) => {
+  const tertiaryMain = (theme.palette as any).tertiary?.main || theme.palette.primary.main;
+
+  return (
+    <Box sx={{ position: 'relative', p: 1 }}>
+      {/* Architectural accent borders */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: -12,
+          border: '1px solid',
+          borderColor: tertiaryMain,
+          borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
+          opacity: 0.2,
+          zIndex: 0,
+          animation: 'rotate 20s linear infinite',
+          '@keyframes rotate': {
+            '0%': { transform: 'rotate(0deg)' },
+            '100%': { transform: 'rotate(360deg)' },
+          }
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: -6,
+          border: '2px solid',
+          borderColor: 'primary.main',
+          borderRadius: '60% 40% 30% 70% / 60% 60% 40% 40%',
+          opacity: 0.1,
+          zIndex: 0,
+          animation: 'rotate-reverse 25s linear infinite',
+          '@keyframes rotate-reverse': {
+            '0%': { transform: 'rotate(360deg)' },
+            '100%': { transform: 'rotate(0deg)' },
+          }
+        }}
+      />
+      <Box sx={{ position: 'relative', zIndex: 1, borderRadius: 4, overflow: 'hidden', boxShadow: theme.shadows[10] }}>
+        {children}
+      </Box>
+    </Box>
+  );
+};
 
 export default function HistoryPage() {
   usePageTitle('History');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
+  // Defensive Theme Extraction
+  const primaryMain = theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary.main;
+  const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
+
   const milestones = [
     {
       year: '2014',
       title: 'Company Founded',
-      description: 'Boss Cargo Express started its roots in Puerto Princesa City, Palawan, with a vision to deliver the best cargo solutions across the Philippine archipelago.'
+      description: 'Boss Cargo Express started its roots in Puerto Princesa City, Palawan, with a vision to deliver the best cargo solutions across the Philippine archipelago.',
+      color: primaryMain
     },
     {
       year: '2015-2018',
       title: 'Growth & Expansion',
-      description: 'Expanded operations across the Philippines, serving various clients across a wide range of industries. Built a team of skilled professionals with years of solid experience in handling ground freight, sea freight, and air freight.'
+      description: 'Expanded operations across the Philippines, serving various clients across a wide range of industries. Built a team of skilled professionals with years of solid experience in handling ground freight, sea freight, and air freight.',
+      color: secondaryMain
     },
     {
       year: '2019-2022',
       title: 'Strategic Development',
-      description: 'Established corporate directives and initiatives that add value to existing and potential clients. Strengthened the organization\'s functional areas and made the corporation highly competitive.'
+      description: 'Established corporate directives and initiatives that add value to existing and potential clients. Strengthened the organization\'s functional areas and made the corporation highly competitive.',
+      color: tertiaryMain
     },
     {
       year: '2023-Present',
       title: 'Technology & Sustainability',
-      description: 'Focused on adopting technology within supply chains, expanding geographical locations, and serving a wider market segment. Through effective resource management, sound financial planning, and sales prospecting, we continue to attain our objectives.'
+      description: 'Focused on adopting technology within supply chains, expanding geographical locations, and serving a wider market segment. Through effective resource management, sound financial planning, and sales prospecting, we continue to attain our objectives.',
+      color: primaryMain
     }
   ];
 
@@ -50,60 +135,74 @@ export default function HistoryPage() {
       {/* Slide 1: Introduction & Story */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
+          minHeight: { xs: '100vh', md: 'auto' },
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 },
-          position: 'relative'
+          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
+        <AbstractBlob color={primaryMain} top="-10%" right="-5%" size="800px" rotate={15} opacity={0.12} />
+        <AbstractBlob color={tertiaryMain} bottom="0%" left="-10%" size="600px" rotate={-20} opacity={0.08} />
+        <AbstractBlob color={secondaryMain} top="20%" left="15%" size="400px" rotate={45} opacity={0.06} />
+
+        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <PageHeader
             title="Our Journey"
             subtitle="Embark on a sustainable and transformative journey with us."
             bottomSpacing={SECTION_SPACING.small}
           />
 
-          <Grid container spacing={4} alignItems="center">
+          <Grid container spacing={6} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }}>
-              <Paper
-                sx={{
-                  p: 3,
-                  bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  borderRadius: 2
-                }}
-              >
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
+              <Box sx={{ position: 'relative' }}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -20,
+                    left: -20,
+                    width: 60,
+                    height: 60,
+                    bgcolor: tertiaryMain,
+                    opacity: 0.15,
+                    borderRadius: '50%',
+                    zIndex: -1
+                  }}
+                />
+                <Typography variant="h3" sx={{ mb: 2, fontWeight: 800, color: 'primary.main', letterSpacing: -1, fontSize: { xs: '1.75rem', md: '2.25rem' } }}>
                   The Boss Cargo Express Story
                 </Typography>
                 <Stack spacing={2}>
-                  <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.6 }}>
-                    Founded in 2014, Boss Cargo Express started its roots in Puerto Princesa City, Palawan. Since then, the company has grown and delivered the best cargo solutions to various clients across a wide range of industries across the Philippine archipelago. Our team consists of skilled professionals with years of solid experience in handling ground freight, sea freight, and air freight.
+                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.7, fontSize: '1.05rem', borderLeft: `4px solid ${tertiaryMain}`, pl: 3 }}>
+                    Founded in 2014, Boss Cargo Express started its roots in Puerto Princesa City, Palawan. Since then, the company has grown and delivered the best cargo solutions to various clients.
                   </Typography>
-                  <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.6 }}>
-                    Boss Cargo Express (BCE) recognizes the potential changes in the macroenvironment of the wider transportation and storage sector. Thus, the BCE management continuously prepares the firm amidst the industry and customer trends that will have a direct impact on its overall business operations. Coming up with corporate directives and initiatives that add value to existing and potential clients, strengthening the organization's functional areas, and making the corporation highly competitive are top priorities.
-                  </Typography>
-                  <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.6 }}>
-                    At BCE, we constantly and keenly listen to companies' overwhelming advocacy for the adoption of technology within supply chains, infrastructural developments, economic growth, booming markets, and other pertinent factors. Our key strategies for expansion, customer satisfaction, fiscal standing, and enterprise sustainability are geared towards extending our product scope and serving a wider market segment.
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, pl: 4 }}>
+                    Our key strategies for expansion, customer satisfaction, fiscal standing, and enterprise sustainability are geared towards extending our product scope and serving a wider market segment. We constantly listen to companies' overwhelming advocacy for the adoption of technology.
                   </Typography>
                 </Stack>
-              </Paper>
+              </Box>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }}>
-              <ImageWithFallback
-                src={IMAGE_URLS.HISTORY_CARGO_TRUCK}
-                alt={getImageMetadata(IMAGE_URLS.HISTORY_CARGO_TRUCK).alt}
-                layout="responsive"
-                aspectRatio="4:3"
-                rounded={12}
-                shadow={4}
-                hoverZoom
-              />
+              <DecorativeImageFrame theme={theme}>
+                <ImageWithFallback
+                  src={IMAGE_URLS.HISTORY_CARGO_TRUCK}
+                  alt={getImageMetadata(IMAGE_URLS.HISTORY_CARGO_TRUCK).alt}
+                  layout="responsive"
+                  aspectRatio="4:3"
+                  rounded={0}
+                  shadow={0}
+                  hoverZoom
+                />
+              </DecorativeImageFrame>
             </Grid>
           </Grid>
         </PageContainer>
+
+        {/* Smooth transition to Slide 2 */}
         <Box
           sx={{
             position: 'absolute',
@@ -113,7 +212,7 @@ export default function HistoryPage() {
             height: '15vh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
-            zIndex: 1,
+            zIndex: 3,
           }}
         />
       </Box>
@@ -121,49 +220,69 @@ export default function HistoryPage() {
       {/* Slide 2: Early Milestones (Alternating) */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
+          minHeight: { xs: '100vh', md: 'auto' },
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: 'background.paper',
-          py: { xs: 4, md: 0 },
-          position: 'relative'
+          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        {/* Timeline Connecting Line */}
+        <AbstractBlob color={secondaryMain} top="10%" left="-15%" size="900px" rotate={45} opacity={0.08} />
+        <AbstractBlob color={primaryMain} bottom="-10%" right="-10%" size="700px" rotate={-15} opacity={0.06} />
+
+        {/* Timeline Connecting Line - Continuous */}
         <Box
           sx={{
             position: 'absolute',
             left: '50%',
             top: 0,
             bottom: 0,
-            width: '2px',
-            bgcolor: 'primary.main',
-            opacity: 0.15,
-            display: { xs: 'none', md: 'block' }
+            width: '3px',
+            background: `linear-gradient(to bottom, ${primaryMain}, ${secondaryMain})`,
+            opacity: 0.5,
+            display: { xs: 'none', md: 'block' },
+            zIndex: 1
           }}
         />
 
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <Typography variant="h3" sx={{ mb: 8, fontWeight: 700, color: 'primary.main', textAlign: 'center' }}>
-            Early Milestones
-          </Typography>
+        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
+              CHRONICLES
+            </Typography>
+            <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', md: '2.75rem' } }}>
+              Early Milestones
+            </Typography>
+          </Box>
 
-          <Stack spacing={4}>
+          <Stack spacing={3}>
             {/* Milestone 1 (Left) */}
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 5 }}>
-                <Card sx={{ borderRight: `4px solid ${theme.palette.primary.main}` }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 800, mb: 1 }}>{milestones[0].year}</Typography>
+                <Card
+                  elevation={0}
+                  sx={{
+                    bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
+                    borderLeft: `5px solid ${primaryMain}`,
+                    borderRadius: '0 20px 20px 0',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateX(10px)', bgcolor: alpha(primaryMain, 0.1) }
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                    <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[0].year}</Typography>
                     <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[0].title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{milestones[0].description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[0].description}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
               <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'primary.main', border: `4px solid ${theme.palette.background.paper}`, boxShadow: 2 }} />
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: primaryMain, border: `6px solid ${theme.palette.background.paper}`, boxShadow: `0 0 25px ${alpha(primaryMain, 0.5)}` }} />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }} />
             </Grid>
@@ -172,20 +291,31 @@ export default function HistoryPage() {
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 5 }} />
               <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'primary.main', border: `4px solid ${theme.palette.background.paper}`, boxShadow: 2 }} />
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: secondaryMain, border: `6px solid ${theme.palette.background.paper}`, boxShadow: `0 0 25px ${alpha(secondaryMain, 0.5)}` }} />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }}>
-                <Card sx={{ borderLeft: `4px solid ${theme.palette.primary.main}` }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 800, mb: 1 }}>{milestones[1].year}</Typography>
+                <Card
+                  elevation={0}
+                  sx={{
+                    bgcolor: isDark ? alpha(secondaryMain, 0.08) : alpha(secondaryMain, 0.03),
+                    borderRight: `5px solid ${secondaryMain}`,
+                    borderRadius: '20px 0 0 20px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateX(-10px)', bgcolor: alpha(secondaryMain, 0.1) }
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: 'right' }}>
+                    <Typography variant="h3" sx={{ color: 'secondary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[1].year}</Typography>
                     <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[1].title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{milestones[1].description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[1].description}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
           </Stack>
         </PageContainer>
+
+        {/* Smooth transition to Slide 3 */}
         <Box
           sx={{
             position: 'absolute',
@@ -195,7 +325,7 @@ export default function HistoryPage() {
             height: '15vh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
             pointerEvents: 'none',
-            zIndex: 1,
+            zIndex: 3,
           }}
         />
       </Box>
@@ -203,44 +333,58 @@ export default function HistoryPage() {
       {/* Slide 3: Recent Milestones & Vision (Alternating) */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
+          minHeight: { xs: '100vh', md: 'auto' },
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 },
-          position: 'relative'
+          py: { xs: 6, md: 10 }, // Vertical margins for full-screen fit
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        {/* Timeline Connecting Line */}
+        <AbstractBlob color={tertiaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.1} />
+        <AbstractBlob color={primaryMain} bottom="10%" left="-15%" size="600px" rotate={30} opacity={0.08} />
+
+        {/* Timeline Connecting Line - Continuous until vision section */}
         <Box
           sx={{
             position: 'absolute',
             left: '50%',
             top: 0,
-            bottom: '40%',
-            width: '2px',
-            bgcolor: 'primary.main',
-            opacity: 0.15,
+            bottom: '50%',
+            width: '3px',
+            background: `linear-gradient(to bottom, ${secondaryMain}, ${tertiaryMain})`,
+            opacity: 0.5,
             display: { xs: 'none', md: 'block' }
           }}
         />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <Stack spacing={4}>
+          <Stack spacing={3}>
             {/* Milestone 3 (Left) */}
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 5 }}>
-                <Card sx={{ borderRight: `4px solid ${theme.palette.primary.main}` }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 800, mb: 1 }}>{milestones[2].year}</Typography>
+                <Card
+                  elevation={0}
+                  sx={{
+                    bgcolor: isDark ? alpha(tertiaryMain, 0.08) : alpha(tertiaryMain, 0.03),
+                    borderLeft: `5px solid ${tertiaryMain}`,
+                    borderRadius: '0 20px 20px 0',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateX(10px)', bgcolor: alpha(tertiaryMain, 0.1) }
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                    <Typography variant="h3" sx={{ color: tertiaryMain, fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[2].year}</Typography>
                     <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[2].title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{milestones[2].description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[2].description}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
               <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'primary.main', border: `4px solid ${theme.palette.background.paper}`, boxShadow: 2 }} />
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: tertiaryMain, border: `6px solid ${theme.palette.background.default}`, boxShadow: `0 0 25px ${alpha(tertiaryMain, 0.5)}` }} />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }} />
             </Grid>
@@ -249,44 +393,90 @@ export default function HistoryPage() {
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 5 }} />
               <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
-                <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: 'primary.main', border: `4px solid ${theme.palette.background.paper}`, boxShadow: 2 }} />
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: primaryMain, border: `6px solid ${theme.palette.background.default}`, boxShadow: `0 0 25px ${alpha(primaryMain, 0.5)}` }} />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }}>
-                <Card sx={{ borderLeft: `4px solid ${theme.palette.primary.main}` }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 800, mb: 1 }}>{milestones[3].year}</Typography>
+                <Card
+                  elevation={0}
+                  sx={{
+                    bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
+                    borderRight: `5px solid ${primaryMain}`,
+                    borderRadius: '20px 0 0 20px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateX(-10px)', bgcolor: alpha(primaryMain, 0.1) }
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: 'right' }}>
+                    <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 900, mb: 1, opacity: 0.9 }}>{milestones[3].year}</Typography>
                     <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestones[3].title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{milestones[3].description}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestones[3].description}</Typography>
                   </CardContent>
                 </Card>
               </Grid>
             </Grid>
 
             {/* Vision Section */}
-            <Box sx={{ mt: 6 }}>
+            <Box sx={{ mt: 2, position: 'relative' }}>
+              <AbstractBlob color={primaryMain} top="-20%" left="30%" size="400px" opacity={0.08} />
               <Paper
                 elevation={0}
                 sx={{
-                  p: 4,
-                  bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  borderRadius: 3,
+                  p: { xs: 3, md: 5 },
+                  borderRadius: 6,
                   textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
                   background: isDark
-                    ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-                    : `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
-                  color: isDark ? 'text.primary' : 'primary.contrastText',
+                    ? `linear-gradient(135deg, ${alpha(secondaryMain, 0.25)} 0%, ${alpha(primaryMain, 0.15)} 100%)`
+                    : `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, ${alpha(secondaryMain, 0.08)} 100%)`,
+                  border: '1px solid',
+                  borderColor: isDark ? alpha(primaryMain, 0.3) : alpha(primaryMain, 0.15),
+                  boxShadow: `0 20px 50px -20px ${alpha(secondaryMain, 0.4)}`
                 }}
               >
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Looking Ahead</Typography>
-                <Typography variant="body1" sx={{ maxWidth: '800px', mx: 'auto', lineHeight: 1.8, fontSize: '1.1rem' }}>
-                  As we move forward, Boss Cargo Express remains committed to innovation, sustainability, and
-                  creating opportunities for our team members to grow and succeed. We continue to embrace the frame
-                  of CANI (Constant And Never Ending Improvement) as we write the next chapter of our story.
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '6px',
+                    background: `linear-gradient(to right, ${primaryMain}, ${tertiaryMain}, ${secondaryMain})`
+                  }}
+                />
+                <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>
+                  OUR VISION
                 </Typography>
+                <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.5rem', md: '2rem' } }}>
+                  Looking Ahead
+                </Typography>
+                <Typography variant="body1" sx={{ maxWidth: '750px', mx: 'auto', lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.1rem' }, color: 'text.primary', fontWeight: 500 }}>
+                  "As we move forward, Boss Cargo Express remains committed to innovation, sustainability, and
+                  creating opportunities for our team members to grow and succeed. We continue to embrace the frame
+                  of CANI as we write the next chapter of our story."
+                </Typography>
+
+                {/* Decorative elements inside vision card */}
+                <Box sx={{ position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: '50%', border: `2px dashed ${alpha(tertiaryMain, 0.3)}` }} />
+                <Box sx={{ position: 'absolute', bottom: -15, left: -15, width: 60, height: 60, borderRadius: '50%', bgcolor: alpha(primaryMain, 0.1) }} />
               </Paper>
             </Box>
           </Stack>
         </PageContainer>
+
+        {/* Smooth transition to next page section */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
     </Box>
   );

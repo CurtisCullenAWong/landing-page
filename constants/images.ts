@@ -9,6 +9,9 @@ import AboutWarehouseTeam from '@/assets/images/about-us/ABOUT_WAREHOUSE_TEAM.jp
 import HistoryCargoTruck from '@/assets/images/history/HISTORY_CARGO_TRUCK.jpg';
 
 import PartnershipsHandshake from '@/assets/images/partnerships/PARTNERSHIPS_HANDSHAKE.jpg';
+import MembershipSCMAP from '@/assets/images/partnerships/SCMAP_LOGO.png';
+import MembershipPEZA from '@/assets/images/partnerships/PEZA_LOGO.svg';
+import MembershipJCTRANS from '@/assets/images/partnerships/JCTRANS_LOGO.png';
 
 import JobsCareerGrowth from '@/assets/images/careers/JOBS_CAREER_GROWTH.jpg';
 import JobsOfficeEnvironment from '@/assets/images/careers/JOBS_OFFICE_ENVIRONMENT.jpg';
@@ -41,9 +44,9 @@ export const IMAGE_URLS = {
   PARTNERSHIPS_HANDSHAKE: PartnershipsHandshake,
 
   // Memberships & Accreditations
-  MEMBERSHIP_SCMAP: 'https://cdn.prod.website-files.com/6835326349a54fd20d519406/68b1aea25a00d8c67b1781b0_scmap.png',
-  MEMBERSHIP_PEZA: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/PEZA_logo.svg',
-  MEMBERSHIP_JCTRANS: 'https://www.bosscargo.express/wp-content/uploads/elementor/thumbs/Group-7-qwjw4kp80oqvhxxr88qo1vg0kljf7tsuwp8qjwhmea.png',
+  MEMBERSHIP_SCMAP: MembershipSCMAP,
+  MEMBERSHIP_PEZA: MembershipPEZA,
+  MEMBERSHIP_JCTRANS: MembershipJCTRANS,
 
   // Home Page
   HOME_LOGISTICS_SERVICES: HomeLogisticsServices,
@@ -109,15 +112,15 @@ export const IMAGE_METADATA = {
     alt: 'Company culture',
     description: 'Team culture and collaboration',
   },
-  [IMAGE_URLS.MEMBERSHIP_SCMAP]: {
+  [(IMAGE_URLS.MEMBERSHIP_SCMAP as any).src || IMAGE_URLS.MEMBERSHIP_SCMAP]: {
     alt: 'SCMAP Logo',
     description: 'Supply Chain Management Association of the Philippines logo',
   },
-  [IMAGE_URLS.MEMBERSHIP_PEZA]: {
+  [(IMAGE_URLS.MEMBERSHIP_PEZA as any).src || IMAGE_URLS.MEMBERSHIP_PEZA]: {
     alt: 'PEZA Logo',
     description: 'Philippine Economic Zone Authority logo',
   },
-  [IMAGE_URLS.MEMBERSHIP_JCTRANS]: {
+  [(IMAGE_URLS.MEMBERSHIP_JCTRANS as any).src || IMAGE_URLS.MEMBERSHIP_JCTRANS]: {
     alt: 'JCtrans Logo',
     description: 'JCtrans Network-International Freight Forwarders Network logo',
   },

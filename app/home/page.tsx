@@ -244,42 +244,29 @@ export default function HomePage() {
             WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
           }}
         >
-          {/* Massive Bold Tertiary Slash */}
+          {/* Massive Squiggly Tertiary Blob */}
           <Box
             sx={{
               position: 'absolute',
-              top: '-15%',
+              top: '-20%',
               left: '-10%',
               width: '1200px',
               height: '1000px',
-              borderRadius: '0 0 80% 0',
+              borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
               background: `linear-gradient(135deg, ${tertiaryMain} 0%, ${tertiaryLight} 100%)`,
               opacity: isDark ? 0.12 : 0.18,
               transform: 'rotate(-5deg)',
             }}
           />
-          {/* Massive Slanted Tertiary Bar */}
+          {/* Massive Squiggly Primary Blob */}
           <Box
             sx={{
               position: 'absolute',
-              top: '10%',
-              right: '-20%',
-              width: '1500px',
-              height: '150px',
-              background: tertiaryMain,
-              opacity: 0.06,
-              transform: 'rotate(-25deg)',
-            }}
-          />
-          {/* Massive Bold Primary Slash */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '-20%',
+              bottom: '-25%',
               right: '-10%',
               width: '1400px',
               height: '1200px',
-              borderRadius: '80% 0 0 0',
+              borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
               background: `linear-gradient(315deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
               opacity: isDark ? 0.1 : 0.15,
               transform: 'rotate(5deg)',
@@ -299,7 +286,7 @@ export default function HomePage() {
               transform: 'rotate(-10deg)',
             }}
           />
-          {/* Overlapping Sharp Accent */}
+          {/* Overlapping Squiggly Accent */}
           <Box
             sx={{
               position: 'absolute',
@@ -307,7 +294,7 @@ export default function HomePage() {
               right: '-5%',
               width: '600px',
               height: '400px',
-              borderRadius: '100% 0 0 100%',
+              borderRadius: '50% 50% 0 50% / 50% 50% 0 50%',
               background: tertiaryMain,
               opacity: isDark ? 0.08 : 0.12,
             }}
@@ -323,19 +310,6 @@ export default function HomePage() {
               borderRadius: '50%',
               border: `3px solid ${tertiaryMain}`,
               opacity: 0.2,
-            }}
-          />
-          {/* Subtle Primary Grid Pattern */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '30%',
-              left: '5%',
-              width: '300px',
-              height: '300px',
-              backgroundImage: `radial-gradient(${primaryMain} 2px, transparent 0)`,
-              backgroundSize: '30px 30px',
-              opacity: 0.15,
             }}
           />
         </Box>
@@ -369,12 +343,12 @@ export default function HomePage() {
                     <Box
                       sx={{
                         position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: '80%',
-                        height: '80%',
+                        top: '-5%',
+                        right: '-5%',
+                        width: '90%',
+                        height: '90%',
                         border: `2px solid ${tertiaryMain}`,
-                        borderRadius: '24px 4px 24px 4px',
+                        borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
                         zIndex: 0,
                         opacity: 0.6,
                       }}
@@ -433,11 +407,11 @@ export default function HomePage() {
                           position: 'absolute',
                           top: -2,
                           left: -2,
-                          width: '20px',
-                          height: '20px',
+                          width: '24px',
+                          height: '24px',
                           borderTop: `3px solid ${tertiaryMain}`,
                           borderLeft: `3px solid ${tertiaryMain}`,
-                          borderRadius: '4px 0 0 0',
+                          borderRadius: '12px 0 0 0',
                           zIndex: 1,
                         }
                       }}

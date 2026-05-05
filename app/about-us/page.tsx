@@ -255,6 +255,20 @@ export default function AboutPage() {
             </Grid>
           </Grid>
         </PageContainer>
+
+        {/* Smooth transition to Slide 2 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Company Officials */}
@@ -417,6 +431,20 @@ export default function AboutPage() {
             ))}
           </Grid>
         </PageContainer>
+
+        {/* Smooth transition to Slide 3 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
 
       {/* Slide 3: Contact Information */}
@@ -637,6 +665,20 @@ export default function AboutPage() {
             ))}
           </Grid>
         </PageContainer>
+
+        {/* Smooth transition to next page section */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
     </Box>
   );

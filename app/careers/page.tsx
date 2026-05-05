@@ -361,6 +361,20 @@ export default function JobPostingsPage() {
             </Grid>
           </Grid>
         </Container>
+
+        {/* Smooth transition to next slide */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${activeJobs.length > 0 ? theme.palette.background.paper : theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Career Opportunities */}
@@ -639,6 +653,20 @@ export default function JobPostingsPage() {
               </Box>
             </Card>
           </Container>
+
+          {/* Smooth transition to Slide 3 */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '15vh',
+              background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+              pointerEvents: 'none',
+              zIndex: 3,
+            }}
+          />
         </Box>
       )}
 
@@ -822,6 +850,20 @@ export default function JobPostingsPage() {
             </Grid>
           </Grid>
         </Container>
+
+        {/* Smooth transition to next page section or footer */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box>
     </Box>
   );
