@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGLTF, Float, PerspectiveCamera, Stage, Center, useAnimations } from '@react-three/drei';
 
@@ -32,50 +32,69 @@ const POSITIONS = [
 const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-align"]';
 const SECTION_CHANGE_DEBOUNCE = 100; // ms to wait before committing to a section change
 
-// Sub-component for the Avatar with refined animation logic
+// Sub-component for the Avatar with refined animation logic and modern Three.js practices
 const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
   const group = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF('/models/avatar.glb');
-  const { actions, names } = useAnimations(animations, group);
-  const currentActionNameRef = useRef<string | null>(null);
+
+  // Manual Mixer and Timer to avoid THREE.Clock deprecation and fix playback
+  const [mixer] = useState(() => new THREE.AnimationMixer(scene));
+  const timer = useMemo(() => {
+    try {
+      return new (THREE as any).Timer();
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  const currentActionRef = useRef<THREE.AnimationAction | null>(null);
+
+  // Animation update loop
+  useFrame((_state, delta) => {
+    if (timer) {
+      timer.update();
+      mixer.update(timer.getDelta());
+    } else {
+      mixer.update(delta);
+    }
+  });
 
   useEffect(() => {
-    if (!actions || names.length === 0) return;
+    if (!animations || animations.length === 0) return;
 
-    // Filter for any movement/dance keywords
-    const danceAnimations = names.filter(n => {
-      const low = n.toLowerCase();
+    // Broad filter to find dance or movement animations
+    const danceClips = animations.filter(clip => {
+      const low = clip.name.toLowerCase();
       return low.includes('dance');
     });
 
-    const pool = danceAnimations.length > 0 ? danceAnimations : names;
-    const animationName = pool[sectionIndex % pool.length] || names[0];
+    const pool = danceClips.length > 0 ? danceClips : animations;
+    const clip = pool[sectionIndex % pool.length];
 
-    if (!animationName) return;
-    if (currentActionNameRef.current === animationName) return;
+    if (!clip) return;
 
-    const nextAction = actions[animationName];
-    const prevActionName = currentActionNameRef.current;
+    const action = mixer.clipAction(clip);
 
-    if (nextAction) {
-      console.log(`[AvatarModel] Playing: ${animationName}`);
+    if (currentActionRef.current !== action) {
+      console.log(`[AvatarModel] Transitioning to: ${clip.name}`);
 
-      // Stop all other actions to prevent T-pose or blending issues
-      Object.values(actions).forEach(action => {
-        if (action !== nextAction) action?.fadeOut(0.5);
-      });
+      // Stop all other actions
+      mixer.stopAllAction();
 
-      nextAction
+      if (currentActionRef.current) {
+        currentActionRef.current.fadeOut(0.5);
+      }
+
+      action
         .reset()
         .setEffectiveTimeScale(1)
         .setEffectiveWeight(1)
         .fadeIn(0.5)
         .play();
 
-      currentActionNameRef.current = animationName;
+      currentActionRef.current = action;
     }
-  }, [sectionIndex, actions, names]);
-
+  }, [sectionIndex, animations, mixer]);
 
   return (
     <group ref={group} dispose={null}>
@@ -319,8 +338,9 @@ export const AvatarOverlay = () => {
 
         >
           <Canvas
-            shadows={{ type: THREE.PCFSoftShadowMap }}
+            shadows={{ type: THREE.PCFShadowMap }}
             dpr={[1, 1.5]} // Capped at 1.5 for mobile performance
+
             camera={{ fov: 35, near: 0.1, far: 1000 }}
             style={{ pointerEvents: 'none' }}
             gl={{
