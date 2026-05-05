@@ -1,38 +1,82 @@
-"use client";
-
-import { Suspense } from "react";
-import { Geist } from "next/font/google";
-import { ThemeProvider as NextThemeProvider } from "next-themes";
-import { JobProvider } from "@/contexts/JobContext";
-import { MuiThemeProviderWrapper } from "@/components/mui-theme-provider";
-import { Footer } from "@/components/layout";
-import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
-import { HeaderSkeleton } from "@/components/loading";
-import { SplashScreen } from "@/components/splash-screen";
-import { ChatWidget } from "@/components/chat/ChatWidget";
-import { Box } from "@mui/material";
-import { usePathname } from "next/navigation";
+import localFont from "next/font/local";
+import { ClientLayout } from "./client-layout";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const secondaryFont = localFont({
+  src: [
+    {
+      path: "../assets/fonts/secondary/Roboto-Light.ttf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/secondary/Roboto-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/secondary/Roboto-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/secondary/Roboto-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-secondary",
   display: "swap",
-  subsets: ["latin"],
 });
+
+const primaryFont = localFont({
+  src: [
+    {
+      path: "../assets/fonts/primary/Montserrat-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/primary/Montserrat-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/primary/Montserrat-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/primary/Montserrat-ExtraBold.ttf",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/primary/Montserrat-Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+  ],
+  variable: "--font-primary",
+  display: "swap",
+});
+
+export const metadata = {
+  title: "Boss Cargo Express",
+  description: "Logistics Driven by Culture",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isSequencePage = pathname === '/' || pathname === '/about-us' || pathname === '/why-us' || pathname === '/history' || pathname === '/partnerships' || pathname === '/careers';
-
   return (
-    <html lang="en" suppressHydrationWarning className={isSequencePage ? 'scroll-lock-active' : ''}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* 1. INSTANT THEME DETECTION: Prevents white flash in dark mode */}
         <script
+          id="theme-detection"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -104,7 +148,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
+      <body className={`${secondaryFont.variable} ${primaryFont.variable} ${primaryFont.className} antialiased`} suppressHydrationWarning>
         {/* 3. Create splash screen immediately - outside React tree to avoid hydration issues */}
         <div
           id="initial-loader"
@@ -118,56 +162,10 @@ export default function RootLayout({
           />
         </div>
 
-        <NextThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <MuiThemeProviderWrapper>
-            <JobProvider>
-              {/* 4. THE MANAGER: Handles the exit of the loader above */}
-              <SplashScreen />
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                <Suspense fallback={<HeaderSkeleton />}>
-                  <ConditionalHeader />
-                </Suspense>
-                <Suspense fallback={<Box sx={{ flexGrow: 1, minHeight: '100vh' }}>{children}</Box>}>
-                  <MainContainer>
-                    {children}
-                  </MainContainer>
-                </Suspense>
-                <Suspense fallback={null}>
-                  <Footer />
-                </Suspense>
-              </Box>
-
-              <ChatWidget />
-
-            </JobProvider>
-          </MuiThemeProviderWrapper>
-        </NextThemeProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
-  );
-}
-
-function MainContainer({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  return (
-    <Box
-      component="main"
-      sx={{
-        flexGrow: 1,
-        scrollSnapAlign: pathname === '/' ? 'start' : 'none',
-        minHeight: '100vh'
-      }}
-      data-initial-module="true"
-      data-href={pathname}
-      suppressHydrationWarning
-    >
-      {children}
-    </Box>
   );
 }

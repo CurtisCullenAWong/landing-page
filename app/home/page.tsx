@@ -29,6 +29,13 @@ export default function HomePage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
+  // Defensive color access
+  const primaryMain = theme.palette.primary?.main || '#00A39D';
+  const primaryDark = theme.palette.primary?.dark || '#007A76';
+  const tertiaryMain = theme.palette.tertiary?.main || primaryMain;
+  const tertiaryLight = theme.palette.tertiary?.light || primaryMain;
+  const tertiaryDark = theme.palette.tertiary?.dark || primaryDark;
+
   // Handle initial hash scroll when navigating from another page
   useEffect(() => {
     const hash = window.location.hash;
@@ -221,10 +228,119 @@ export default function HomePage() {
           bgcolor: 'background.default',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 6 }
+          py: { xs: 4, md: 6 },
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="lg">
+        {/* Abstract Background Elements Container with Vertical Fade */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+          }}
+        >
+          {/* Massive Bold Tertiary Slash */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '-15%',
+              left: '-10%',
+              width: '1200px',
+              height: '1000px',
+              borderRadius: '0 0 80% 0',
+              background: `linear-gradient(135deg, ${tertiaryMain} 0%, ${tertiaryLight} 100%)`,
+              opacity: isDark ? 0.12 : 0.18,
+              transform: 'rotate(-5deg)',
+            }}
+          />
+          {/* Massive Slanted Tertiary Bar */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '10%',
+              right: '-20%',
+              width: '1500px',
+              height: '150px',
+              background: tertiaryMain,
+              opacity: 0.06,
+              transform: 'rotate(-25deg)',
+            }}
+          />
+          {/* Massive Bold Primary Slash */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '-20%',
+              right: '-10%',
+              width: '1400px',
+              height: '1200px',
+              borderRadius: '80% 0 0 0',
+              background: `linear-gradient(315deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+              opacity: isDark ? 0.1 : 0.15,
+              transform: 'rotate(5deg)',
+            }}
+          />
+          {/* Additional Primary Squiggle */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '10%',
+              left: '-5%',
+              width: '800px',
+              height: '600px',
+              borderRadius: '30% 70% 40% 60% / 50% 30% 70% 50%',
+              background: primaryMain,
+              opacity: 0.08,
+              transform: 'rotate(-10deg)',
+            }}
+          />
+          {/* Overlapping Sharp Accent */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '40%',
+              right: '-5%',
+              width: '600px',
+              height: '400px',
+              borderRadius: '100% 0 0 100%',
+              background: tertiaryMain,
+              opacity: isDark ? 0.08 : 0.12,
+            }}
+          />
+          {/* Decorative Floating Ring (Sharper) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '10%',
+              right: '10%',
+              width: '400px',
+              height: '400px',
+              borderRadius: '50%',
+              border: `3px solid ${tertiaryMain}`,
+              opacity: 0.2,
+            }}
+          />
+          {/* Subtle Primary Grid Pattern */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '30%',
+              left: '5%',
+              width: '300px',
+              height: '300px',
+              backgroundImage: `radial-gradient(${primaryMain} 2px, transparent 0)`,
+              backgroundSize: '30px 30px',
+              opacity: 0.15,
+            }}
+          />
+        </Box>
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={6}>
             {/* Top Row: Philosophy & Image */}
             <Grid size={12}>
@@ -248,13 +364,38 @@ export default function HomePage() {
                   </Paper>
                 </Grid>
                 <Grid size={{ xs: 12, md: 5 }}>
-                  <ImageWithFallback
-                    src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
-                    alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
-                    layout="responsive"
-                    rounded={8}
-                    shadow={2}
-                  />
+                  <Box sx={{ position: 'relative', p: 1 }}>
+                    {/* Decorative Image Frame */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: '80%',
+                        height: '80%',
+                        border: `2px solid ${tertiaryMain}`,
+                        borderRadius: '24px 4px 24px 4px',
+                        zIndex: 0,
+                        opacity: 0.6,
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        mt: 2,
+                        mr: 2,
+                      }}
+                    >
+                      <ImageWithFallback
+                        src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
+                        alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
+                        layout="responsive"
+                        rounded={24}
+                        shadow={6}
+                      />
+                    </Box>
+                  </Box>
                 </Grid>
               </Grid>
             </Grid>
@@ -278,7 +419,27 @@ export default function HomePage() {
                         display: 'flex',
                         flexDirection: 'column',
                         transition: '0.3s',
-                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+                        position: 'relative',
+                        overflow: 'visible',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: 6,
+                          '& .service-icon': {
+                            transform: 'scale(1.1) rotate(5deg)',
+                          }
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -2,
+                          left: -2,
+                          width: '20px',
+                          height: '20px',
+                          borderTop: `3px solid ${tertiaryMain}`,
+                          borderLeft: `3px solid ${tertiaryMain}`,
+                          borderRadius: '4px 0 0 0',
+                          zIndex: 1,
+                        }
                       }}
                     >
                       <CardContent
@@ -291,7 +452,15 @@ export default function HomePage() {
                           textAlign: 'center'
                         }}
                       >
-                        <service.icon size={32} style={{ color: theme.palette.primary.main, marginBottom: 12 }} />
+                        <service.icon
+                          className="service-icon"
+                          size={32}
+                          style={{
+                            color: primaryMain,
+                            marginBottom: 12,
+                            transition: 'transform 0.3s ease'
+                          }}
+                        />
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, fontSize: '1rem' }}>
                           {service.title}
                         </Typography>
@@ -311,9 +480,26 @@ export default function HomePage() {
                 sx={{
                   p: 3,
                   textAlign: 'center',
-                  bgcolor: isDark ? 'primary.dark' : 'primary.main',
-                  color: isDark ? 'text.primary' : 'primary.contrastText',
-                  borderRadius: 4,
+                  background: isDark
+                    ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  color: 'primary.contrastText',
+                  borderRadius: '24px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '-50%',
+                    right: '-10%',
+                    width: '200px',
+                    height: '200px',
+                    borderRadius: '50%',
+                    background: tertiaryMain,
+                    opacity: 0.1,
+                    filter: 'blur(40px)',
+                  }
                 }}
               >
                 <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
