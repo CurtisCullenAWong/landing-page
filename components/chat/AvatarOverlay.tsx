@@ -3,27 +3,97 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
+import { Canvas } from '@react-three/fiber';
+import { useGLTF, Float, PerspectiveCamera, Stage, Center, useAnimations } from '@react-three/drei';
+
+// Component to load and display the 3D Avatar
+// Component to load and display the 3D Avatar with animations
+const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
+  const { scene, animations } = useGLTF('/models/avatar.glb');
+  const { actions, names } = useAnimations(animations, scene);
+
+  const currentActionNameRef = useRef<string | null>(null);
+
+  // Play animation based on section index
+  useEffect(() => {
+    if (names.length === 0) return;
+
+    // Filter for dance animations if possible, otherwise use all
+    const danceAnimations = names.filter(n =>
+      n.toLowerCase().includes('dance') ||
+      n.toLowerCase().includes('mixamo') ||
+      n.toLowerCase().includes('move')
+    );
+
+    const pool = danceAnimations.length > 0 ? danceAnimations : names;
+    const animationName = pool[sectionIndex % pool.length];
+
+    // If the animation is already playing, don't restart it (prevents flicker)
+    if (currentActionNameRef.current === animationName) return;
+
+    const nextAction = actions[animationName];
+    const prevActionName = currentActionNameRef.current;
+    const prevAction = prevActionName ? actions[prevActionName] : null;
+
+    if (nextAction) {
+      // Ensure the next action is enabled and has weight 1
+      nextAction.enabled = true;
+      nextAction.setEffectiveTimeScale(1);
+      nextAction.setEffectiveWeight(1);
+
+      if (prevAction && prevAction !== nextAction) {
+        // Crossfade from the previous animation
+        nextAction.reset().play();
+        prevAction.crossFadeTo(nextAction, 0.5, true);
+      } else {
+        // Just fade in if there's no previous animation
+        nextAction.reset().fadeIn(0.5).play();
+      }
+
+      currentActionNameRef.current = animationName;
+    }
+
+    return () => {
+      // No need to fade out here if we manage it with currentActionNameRef
+      // but we should fade out on unmount if needed.
+    };
+  }, [sectionIndex, actions, names]);
+
+  return (
+    <Float
+      speed={1.5}
+      rotationIntensity={0.2}
+      floatIntensity={0.3}
+      floatingRange={[-0.05, 0.05]}
+    >
+      <primitive
+        object={scene}
+      />
+    </Float>
+  );
+};
 
 // Abstract squiggly paths for morphing - more organic and abstract
 const SQUIGGLY_PATHS = [
-  "M47.5,-63.2C61.4,-52.9,72.5,-37.7,76.1,-21.1C79.7,-4.5,75.8,13.5,67.3,29.4C58.8,45.3,45.7,59.1,30,66.4C14.3,73.7,-4.1,74.5,-21.4,69.5C-38.7,64.5,-55,53.7,-64.1,38.8C-73.2,23.9,-75.1,4.9,-70.6,-12.6C-66.1,-30.1,-55.2,-46.1,-41.1,-56.4C-27,-66.7,-9.6,-71.3,4.4,-77.3C18.4,-83.4,33.6,-73.5,47.5,-63.2Z",
-  "M40.3,-58.5C52.4,-51.2,62.5,-40,68.8,-26.8C75.1,-13.6,77.6,1.6,74.1,15.1C70.6,28.6,61.1,40.4,49.2,49.1C37.3,57.8,23,63.4,8.5,64.2C-6,65,-20.7,61.1,-33.5,53.4C-46.3,45.7,-57.2,34.2,-63.1,20.5C-69,6.8,-69.9,-9.1,-65,-23.4C-60.1,-37.7,-49.4,-50.4,-36.8,-57.5C-24.2,-64.6,-9.7,-66.1,2.8,-69.9C15.3,-73.7,28.2,-65.8,40.3,-58.5Z",
-  "M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-46.5C87.4,-33.8,90,-18.4,89.1,-3.5C88.2,11.4,83.7,25.9,76,38.5C68.3,51.1,57.3,61.8,44.2,69.5C31.1,77.2,15.5,81.9,0.4,81.2C-14.7,80.5,-29.4,74.3,-42.1,65.8C-54.8,57.3,-65.5,46.5,-73.2,33.8C-80.9,21.1,-85.7,6.5,-84.9,-7.7C-84.1,-21.9,-77.7,-35.7,-68.8,-47.4C-59.9,-59.1,-48.5,-68.7,-35.9,-76.7C-23.3,-84.7,-9.4,-91.1,3.4,-97C16.2,-102.9,30.5,-103.6,44.7,-76.4Z",
-  "M38.1,-65.2C49.1,-58.4,57.6,-47.6,63.1,-35.6C68.6,-23.6,71.1,-10.4,70.6,2.6C70.1,15.6,66.6,28.4,59,38.7C51.4,49,39.7,56.8,27.1,61.6C14.5,66.4,1,68.2,-12.3,66.4C-25.6,64.6,-38.7,59.2,-49.4,50.1C-60.1,41,-68.4,28.2,-72.1,14.1C-75.8,0,-74.9,-15.4,-68.6,-28.6C-62.3,-41.8,-50.6,-52.8,-37.8,-58.9C-25,-65,-11.1,-66.2,1.8,-68.8C14.7,-71.4,27.1,-72,38.1,-65.2Z",
-  "M43.2,-72.1C55.6,-65.4,65.1,-53.1,71.2,-39.4C77.3,-25.7,80,-10.6,78.7,4C77.4,18.6,72.1,32.7,63.4,44.2C54.7,55.7,42.6,64.6,29,69.5C15.4,74.4,0.3,75.3,-14.8,72.3C-29.9,69.3,-45,62.3,-56.8,51.6C-68.6,40.9,-77.1,26.5,-80.4,11.2C-83.7,-4.1,-81.8,-20.3,-74.5,-34.5C-67.2,-48.7,-54.5,-60.9,-40.5,-67.2C-26.5,-73.5,-11.2,-73.9,2,-77.2C15.2,-80.5,29.8,-83.4,43.2,-72.1Z",
-  "M40.8,-68.1C52.6,-61.1,61.7,-48.7,67.6,-35.1C73.5,-21.5,76.2,-6.7,74.9,7.6C73.6,21.9,68.3,35.7,59.5,46.8C50.7,57.9,38.4,66.3,24.8,70.5C11.2,74.7,-3.7,74.7,-18.2,71.1C-32.7,67.5,-46.8,60.3,-57.8,49.8C-68.8,39.3,-76.7,25.5,-79.8,10.6C-82.9,-4.3,-81.2,-20.3,-74,-34.2C-66.8,-48.1,-54.1,-59.9,-39.9,-66.4C-25.7,-72.9,-10,-74.1,3.4,-79.6C16.8,-85.1,31.6,-83.9,40.8,-68.1Z"
+  "M0,-100C27.6,-100,55.2,-91.1,75.9,-75.9C96.6,-60.7,110.3,-39.2,110.3,-17.7C110.3,3.8,96.6,25.3,75.9,40.5C55.2,55.7,27.6,64.6,0,64.6C-27.6,64.6,-55.2,55.7,-75.9,40.5C-96.6,25.3,-110.3,3.8,-110.3,-17.7C-110.3,-39.2,-96.6,-60.7,-75.9,-75.9C-55.2,-91.1,-27.6,-100,0,-100Z",
+  "M0,-95C26,-95,48.2,-80.4,66.6,-66.6C85,-52.8,99.6,-39.8,99.6,-26.8C99.6,-13.8,85,0.8,66.6,14.6C48.2,28.4,26,41.4,0,41.4C-26,41.4,-48.2,28.4,-66.6,14.6C-85,0.8,-99.6,-13.8,-99.6,-26.8C-99.6,-39.8,-85,-52.8,-66.6,-66.6C-48.2,-80.4,-26,-95,0,-95Z",
+  "M0,-110C30.4,-110,54.8,-88.9,74,-74C93.2,-59.1,107.2,-50.4,107.2,-41.7C107.2,-33,93.2,-24.3,74,-9.4C54.8,5.5,30.4,26.6,0,26.6C-30.4,26.6,-54.8,5.5,-74,-9.4C-93.2,-24.3,-107.2,-33,-107.2,-41.7C-107.2,-50.4,-93.2,-59.1,-74,-74C-54.8,-88.9,-30.4,-110,0,-110Z",
+  "M0,-85C23.5,-85,47,-76.3,64.3,-64.3C81.6,-52.3,92.7,-37,92.7,-21.7C92.7,-6.4,81.6,8.9,64.3,20.9C47,32.9,23.5,41.6,0,41.6C-23.5,41.6,-47,32.9,-64.3,20.9C-81.6,8.9,-92.7,-6.4,-92.7,-21.7C-92.7,-37,-81.6,-52.3,-64.3,-64.3C-47,-76.3,-23.5,-85,0,-85Z",
+  "M0,-105C29,-105,58,-93.2,77.1,-77.1C96.2,-61,105.4,-40.6,105.4,-20.2C105.4,0.2,96.2,20.6,77.1,36.7C58,52.8,29,64.6,0,64.6C-29,64.6,-58,52.8,-77.1,36.7C-96.2,20.6,-105.4,0.2,-105.4,-20.2C-105.4,-40.6,-96.2,-61,-77.1,-77.1C-58,-93.2,-29,-105,0,-105Z",
+  "M0,-90C24.8,-90,49.6,-81.1,68.2,-68.2C86.8,-55.3,99.2,-38.4,99.2,-21.5C99.2,-4.6,86.8,12.3,68.2,25.2C49.6,38.1,24.8,47,0,47C-24.8,47,-49.6,38.1,-68.2,25.2C-86.8,12.3,-99.2,-4.6,-99.2,-21.5C-99.2,-38.4,-86.8,-55.3,-68.2,-68.2C-49.6,-81.1,-24.8,-90,0,-90Z"
 ];
 
-// POSITIONS optimized to bias left side and top/middle right - reduce teleporting
-// Using bottom/right prevents edge clipping on fixed positioning
+// POSITIONS normalized to x/y coordinates to ensure smooth Framer Motion transitions
+// We use calc with vh/vw to maintain consistency and avoid teleporting when switching between top/bottom/left/right
 const POSITIONS = [
-  { bottom: '12px', left: '12px', top: 'auto', right: 'auto' },    // Bottom Left
-  { top: '50%', left: '12px', bottom: 'auto', right: 'auto', transform: 'translateY(-50%)' },  // Middle Left
-  { top: '30%', left: '12px', bottom: 'auto', right: 'auto' },     // Upper Middle Left
-  { top: '12px', left: '12px', bottom: 'auto', right: 'auto' },    // Top Left
-  { top: '12px', right: '12px', bottom: 'auto', left: 'auto' },    // Top Right
-  { top: '35%', right: '12px', bottom: 'auto', left: 'auto' }      // Upper Middle Right
+  { x: '12px', y: 'calc(100vh - 332px)' },             // Bottom Left (320px height + 12px margin)
+  { x: '12px', y: 'calc(50vh - 160px)' },              // Middle Left
+  { x: '12px', y: 'calc(30vh - 160px)' },              // Upper Middle Left
+  { x: '12px', y: '12px' },                           // Top Left
+  { x: 'calc(100vw - 332px)', y: '12px' },             // Top Right (320px width + 12px margin)
+  { x: 'calc(100vw - 332px)', y: 'calc(35vh - 160px)' } // Upper Middle Right
 ];
+
 
 // Broad selector to capture page sections AND internal slides
 const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-align"]';
@@ -33,12 +103,25 @@ const SCROLL_END_DEBOUNCE = 120; // ms after which scrolling is considered finis
 
 export const AvatarOverlay = () => {
   const theme = useTheme();
-  
+
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [positionIndex, setPositionIndex] = useState(0);
   const lastSectionRef = useRef<Element | null>(null);
   const lastScrollTimeRef = useRef(0);
   const isScrollingRef = useRef(false);
   const scrollEndTimeoutRef = useRef<number | null>(null);
+
+  // Randomize position index when section changes to keep it feeling dynamic
+  useEffect(() => {
+    setPositionIndex(prev => {
+      let next;
+      // We want a new random position that isn't the same as the current one
+      do {
+        next = Math.floor(Math.random() * POSITIONS.length);
+      } while (next === prev && POSITIONS.length > 1);
+      return next;
+    });
+  }, [activeSectionIndex]);
 
   // Defensive theme extraction
   const colors = useMemo(() => [
@@ -53,8 +136,8 @@ export const AvatarOverlay = () => {
   const currentPath = SQUIGGLY_PATHS[activeSectionIndex % SQUIGGLY_PATHS.length];
   const currentColor = colors[activeSectionIndex % colors.length];
   const nextColor = colors[(activeSectionIndex + 1) % colors.length];
-  const currentPos = POSITIONS[activeSectionIndex % POSITIONS.length];
-  
+  const currentPos = POSITIONS[positionIndex];
+
   // Throttled scroll handler - smoother position mapping
   const handleScroll = useCallback(() => {
     const now = Date.now();
@@ -132,28 +215,36 @@ export const AvatarOverlay = () => {
   return (
     <motion.div
       animate={{
-        top: currentPos.top,
-        left: currentPos.left,
-        bottom: currentPos.bottom,
-        right: currentPos.right,
+        x: currentPos.x,
+        y: currentPos.y,
       }}
       transition={{
-        duration: 1.0,
+        duration: 1.2, // Slightly slower for more grace
         ease: [0.22, 1, 0.36, 1] // Custom quintic ease-out for premium feel
       }}
       style={{
         position: 'fixed',
+        top: -40, // Offset to compensate for increased container size (320-240)/2
+        left: -40,
         zIndex: 10000,
-        width: 240,
-        height: 240,
+        height: 320, // Increased from 240
         pointerEvents: 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         willChange: 'opacity',
+        overflow: 'visible', // Ensure no clipping
       }}
     >
-      <Box sx={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'visible'
+      }}>
         {/* Glow effect background - breathing pulse */}
         <motion.div
           animate={{
@@ -187,9 +278,9 @@ export const AvatarOverlay = () => {
           }}
           viewBox="0 0 300 300"
           xmlns="http://www.w3.org/2000/svg"
-          style={{ 
-            width: '120%', 
-            height: '120%', 
+          style={{
+            width: '120%',
+            height: '120%',
             filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.25))',
             transform: 'scale(1.2)',
             willChange: 'transform'
@@ -220,7 +311,7 @@ export const AvatarOverlay = () => {
               fill: { duration: 1.5, ease: "easeInOut" }
             }}
             transform="translate(150 150)"
-            style={{ 
+            style={{
               opacity: 0.95,
               stroke: 'none',
             }}
@@ -237,66 +328,39 @@ export const AvatarOverlay = () => {
           />
         </motion.svg>
 
-        {/* Future Avatar Space Indicator */}
+        {/* 3D Avatar Space */}
         <Box
           sx={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '58%',
-            height: '58%',
-            borderRadius: '50%',
+            width: '200%', // Significantly expanded
+            height: '200%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             pointerEvents: 'auto',
+            zIndex: 5,
+            overflow: 'visible',
           }}
         >
-          <motion.div
-            animate={{
-              scale: [0.96, 1.04, 1.02, 0.98, 0.96],
-              rotate: [0, 8, -6, 4, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: '90%',
-              height: '90%',
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              boxShadow: 'inset 0 0 15px rgba(255,255,255,0.05)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              willChange: 'transform'
-            }}
-          >
-            <motion.div 
-               animate={{ 
-                 opacity: [0.1, 0.5, 0.3, 0.6, 0.1],
-                 scale: [0.9, 1.05, 1.0, 1.1, 0.9]
-               }}
-               transition={{ 
-                 duration: 3.5, 
-                 repeat: Infinity,
-                 ease: "easeInOut"
-               }}
-               style={{
-                 width: '35%',
-                 height: '35%',
-                 borderRadius: '50%',
-                 border: '1px solid rgba(255,255,255,0.2)',
-                 boxShadow: '0 0 8px rgba(255,255,255,0.3)',
-                 willChange: 'transform, opacity'
-               }}
-            />
-          </motion.div>
+          <Canvas shadows dpr={[1, 2]} camera={{ fov: 35, near: 0.1, far: 1000 }}>
+            <PerspectiveCamera makeDefault position={[0, 0, 12]} fov={30} />
+
+            <React.Suspense fallback={null}>
+              <Stage
+                intensity={0.6}
+                environment="city"
+                adjustCamera={false} // Manual control for precise framing
+                shadows="contact"
+              >
+                <Center>
+                  <AvatarModel sectionIndex={activeSectionIndex} />
+                </Center>
+              </Stage>
+            </React.Suspense>
+          </Canvas>
         </Box>
       </Box>
     </motion.div>
