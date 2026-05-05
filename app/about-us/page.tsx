@@ -60,35 +60,62 @@ export default function AboutPage() {
     address: SITE_CONTENT.contact.headquarters.address,
   }));
 
-  // Shared "Corner Brackets" component
-  const CornerBrackets = () => (
+  // Shared "Corner Accents" component
+  const CornerAccents = () => (
     <>
+      {/* Top Left Squiggle */}
+      <Box sx={{
+        position: 'absolute',
+        top: -12,
+        left: -12,
+        width: 40,
+        height: 40,
+        bgcolor: alpha(tertiaryMain, 0.25),
+        borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+        zIndex: 0,
+        pointerEvents: 'none',
+        transform: 'rotate(-15deg)'
+      }} />
       <Box sx={{
         position: 'absolute',
         top: -1,
         left: -1,
-        width: 16,
-        height: 16,
-        borderTop: `2px solid ${tertiaryMain}`,
-        borderLeft: `2px solid ${tertiaryMain}`,
+        width: 20,
+        height: 20,
+        borderTop: `3px solid ${tertiaryMain}`,
+        borderLeft: `3px solid ${tertiaryMain}`,
         borderTopLeftRadius: 'inherit',
         zIndex: 2,
         pointerEvents: 'none'
+      }} />
+      {/* Bottom Right Squiggle */}
+      <Box sx={{
+        position: 'absolute',
+        bottom: -12,
+        right: -12,
+        width: 32,
+        height: 32,
+        bgcolor: alpha(tertiaryMain, 0.2),
+        borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
+        zIndex: 0,
+        pointerEvents: 'none',
+        transform: 'rotate(15deg)'
       }} />
       <Box sx={{
         position: 'absolute',
         bottom: -1,
         right: -1,
-        width: 16,
-        height: 16,
-        borderBottom: `2px solid ${tertiaryMain}`,
-        borderRight: `2px solid ${tertiaryMain}`,
+        width: 20,
+        height: 20,
+        borderBottom: `3px solid ${tertiaryMain}`,
+        borderRight: `3px solid ${tertiaryMain}`,
         borderBottomRightRadius: 'inherit',
         zIndex: 2,
         pointerEvents: 'none'
       }} />
     </>
   );
+
 
   return (
     <Box sx={{ bgcolor: bgColor }}>
@@ -168,7 +195,8 @@ export default function AboutPage() {
                   overflow: 'visible'
                 }}
               >
-                <CornerBrackets />
+                <CornerAccents />
+
                 <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700, color: primaryMain }}>
                   Who We Are
                 </Typography>
@@ -185,7 +213,8 @@ export default function AboutPage() {
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Card sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <CornerBrackets />
+                    <CornerAccents />
+
                     <CardContent sx={{ p: 2.5 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
                         Our Mission
@@ -198,7 +227,8 @@ export default function AboutPage() {
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Card sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                    <CornerBrackets />
+                    <CornerAccents />
+
                     <CardContent sx={{ p: 2.5 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
                         Our Dreams
@@ -341,7 +371,8 @@ export default function AboutPage() {
                     border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
                   }}
                 >
-                  <CornerBrackets />
+                  <CornerAccents />
+
                   <Box
                     sx={{
                       width: '100%',
@@ -352,8 +383,11 @@ export default function AboutPage() {
                       justifyContent: 'center',
                       position: 'relative',
                       overflow: 'hidden',
+                      borderTopLeftRadius: 'inherit',
+                      borderTopRightRadius: 'inherit',
                     }}
                   >
+
                     {official.image ? (
                       <ImageWithFallback
                         src={official.image}
@@ -488,24 +522,42 @@ export default function AboutPage() {
             color: 'white',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: 8
+            boxShadow: 8,
+            borderLeft: `4px solid ${tertiaryMain}`
           }}>
+            {/* Tertiary Squiggle Overlay */}
             <Box sx={{
               position: 'absolute',
-              top: '-20%',
-              right: '-10%',
-              width: '400px',
-              height: '400px',
-              bgcolor: alpha('#fff', 0.1),
-              borderRadius: 6,
+              top: '-15%',
+              right: '-5%',
+              width: '300px',
+              height: '300px',
+              bgcolor: alpha(tertiaryMain, 0.15),
+              borderRadius: '40% 60% 70% 30% / 30% 30% 70% 70%',
+              zIndex: 0,
+              transform: 'rotate(15deg)',
             }} />
-            <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, textTransform: 'uppercase', letterSpacing: -1 }}>
-              Get In Touch
-            </Typography>
-            <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400, maxWidth: 600 }}>
-              We're ready to handle your logistics needs with precision and care.
-            </Typography>
+            <Box sx={{
+              position: 'absolute',
+              bottom: '-20%',
+              left: '20%',
+              width: '150px',
+              height: '150px',
+              bgcolor: alpha(tertiaryMain, 0.1),
+              borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
+              zIndex: 0,
+            }} />
+            
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, textTransform: 'uppercase', letterSpacing: -1 }}>
+                Get In Touch
+              </Typography>
+              <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400, maxWidth: 600 }}>
+                We're ready to handle your logistics needs with precision and care.
+              </Typography>
+            </Box>
           </Box>
+
 
           <Grid container spacing={4} alignItems="stretch">
             {offices.map((office, index) => (

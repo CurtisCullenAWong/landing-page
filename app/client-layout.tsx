@@ -19,6 +19,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
 
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [gender, setGender] = useState<'male' | 'female'>('female');
+
   if (typeof window !== 'undefined') {
     const _warn = console.warn.bind(console);
     console.warn = (...args: unknown[]) => {
@@ -63,10 +65,16 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
           {isSequencePage && (
             <>
-              <ChatWidget isOpen={isChatOpen} onToggle={setIsChatOpen} />
-              {isChatOpen && <AvatarOverlay />}
+              <ChatWidget
+                isOpen={isChatOpen}
+                onToggle={setIsChatOpen}
+                gender={gender}
+                onGenderToggle={() => setGender(prev => prev === 'female' ? 'male' : 'female')}
+              />
+              {isChatOpen && <AvatarOverlay gender={gender} />}
             </>
           )}
+
         </JobProvider>
       </MuiThemeProviderWrapper>
     </NextThemeProvider>

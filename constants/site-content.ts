@@ -39,7 +39,7 @@ export const SITE_CONTENT = {
   },
 
   missionVision: {
-    mission: "To grow and empower businesses across the Philippines by providing customized logistics solutions and seek to develop a highly sustainable business by using state-of-the-art technology and creating unprecedented value and opportunity for our customers and employees while embracing the frame of CANI (Constant And Never Ending Improvement).",
+    mission: "To empower businesses across the Philippines through customized logistics solutions, innovative technology, sustainable growth, and continuous improvement under the CANI(Constant And Never Ending Improvement) principle.",
     vision: "To be the country's preeminent and technologically driven logistics company.",
     philosophy: {
       name: "CANI",
@@ -75,8 +75,8 @@ export const SITE_CONTENT = {
         items: [
           { name: "Air Freight", description: "Global air transport solutions." },
           { name: "Sea Freight", description: "Full Cargo Load (FCL) and Loose Cargo Load (LCL)." },
-          { 
-            name: "Brokerage Services", 
+          {
+            name: "Brokerage Services",
             subItems: [
               "Import and Export Customs Clearance",
               "International Trade & Tariff Classification",

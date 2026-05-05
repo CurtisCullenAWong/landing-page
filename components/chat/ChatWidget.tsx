@@ -34,11 +34,16 @@ import { Volume2, VolumeX, UserCircle, UserCircle2 } from 'lucide-react';
 
 export const ChatWidget = ({
   isOpen,
-  onToggle
+  onToggle,
+  gender,
+  onGenderToggle
 }: {
   isOpen: boolean;
   onToggle: (open: boolean) => void;
+  gender: 'male' | 'female';
+  onGenderToggle: () => void;
 }) => {
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [message, setMessage] = useState('');
@@ -53,8 +58,8 @@ export const ChatWidget = ({
 
   // Speech State
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
-  const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+
   const [isServiceOnline, setIsServiceOnline] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -79,7 +84,8 @@ export const ChatWidget = ({
         window.speechSynthesis.cancel();
       }
     }
-  }, [isSpeechEnabled, voiceGender, isOpen]);
+  }, [isSpeechEnabled, gender, isOpen]);
+
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -106,7 +112,8 @@ export const ChatWidget = ({
     forceEnabled?: boolean
   ) => {
     const activeEnabled = forceEnabled !== undefined ? forceEnabled : isSpeechEnabled;
-    const activeGender = forceGender !== undefined ? forceGender : voiceGender;
+    const activeGender = forceGender !== undefined ? forceGender : gender;
+
 
     if (!activeEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
 
@@ -129,25 +136,32 @@ export const ChatWidget = ({
 
     // 3. Language detection
     let detectedLang = 'en';
-    const tlWords = ['mga', 'ang', 'ng', 'sa', 'ay', 'para', 'na', 'may', 'ni', 'po', 'opo', 'kumusta', 'salamat'];
+    const tlWords = ['mga', 'ang', 'ng', 'sa', 'ay', 'para', 'na', 'may', 'ni', 'po', 'opo', 'kumusta', 'salamat', 'kayo', 'ikaw', 'tayo', 'kami'];
     const lowerText = cleanText.toLowerCase();
-    const tlMatch = tlWords.filter(w => new RegExp(`\\b${w}\\b`).test(lowerText)).length;
-    if (tlMatch >= 2) detectedLang = 'fil';
+    const tlMatchCount = tlWords.filter(w => new RegExp(`\\b${w}\\b`).test(lowerText)).length;
+    const hasStrongIndicator = /\b(po|opo|kumusta|salamat|mga)\b/i.test(lowerText);
+
+    if (tlMatchCount >= 2 || (tlMatchCount >= 1 && (hasStrongIndicator || cleanText.length < 40))) {
+      detectedLang = 'fil';
+    }
 
     window.speechSynthesis.cancel();
 
     // 4. Sentence splitting
     const sentences = cleanText.split(/(?<=[.!?])\s+/);
 
-    // 5. Human-like American English voice selection
+    // 5. Voice selection (Language + Gender priority)
     let targetVoice: SpeechSynthesisVoice | undefined;
 
     if (detectedLang === 'fil') {
-      // Filipino: find a matching locale voice
+      // Priority 1: Native Filipino voices
       targetVoice = voicePool.find(v =>
         v.lang.startsWith('fil') || v.lang.startsWith('tl')
-      );
+      ) ||
+        // Priority 2: Spanish voices (Spanish phonetics are much closer to Filipino than English)
+        voicePool.find(v => v.lang.startsWith('es'));
     }
+
 
     if (!targetVoice) {
       const isAmericanEnglish = (v: SpeechSynthesisVoice) =>
@@ -439,8 +453,9 @@ export const ChatWidget = ({
                       setIsSpeechEnabled(nextEnabled);
                       if (nextEnabled) {
                         const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
-                        if (lastMsg) speak(lastMsg.content, voiceGender, true);
+                        if (lastMsg) speak(lastMsg.content, gender, true);
                       } else {
+
                         window.speechSynthesis.cancel();
                       }
                     }}
@@ -455,26 +470,27 @@ export const ChatWidget = ({
                 </span>
               </Tooltip>
 
-              <Tooltip title={`Switch to ${voiceGender === 'female' ? 'Male' : 'Female'} Narrator`} arrow placement="top">
+              <Tooltip title={`Switch to ${gender === 'female' ? 'Male' : 'Female'} Narrator`} arrow placement="top">
                 <span>
                   <IconButton
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const nextGender = voiceGender === 'female' ? 'male' : 'female';
-                      setVoiceGender(nextGender);
+                      onGenderToggle();
                       if (isSpeechEnabled) {
                         const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
-                        // Pass nextGender and forceEnabled=true to avoid stale closure
+                        // Use the next gender for immediate feedback
+                        const nextGender = gender === 'female' ? 'male' : 'female';
                         if (lastMsg) speak(lastMsg.content, nextGender, true);
                       }
                     }}
                     sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
                   >
-                    {voiceGender === 'female' ? <UserCircle2 size={18} /> : <UserCircle size={18} />}
+                    {gender === 'female' ? <UserCircle2 size={18} /> : <UserCircle size={18} />}
                   </IconButton>
                 </span>
               </Tooltip>
+
 
               <Box sx={{ width: 8 }} />
 

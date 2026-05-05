@@ -22,11 +22,9 @@ const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-a
 const SECTION_CHANGE_DEBOUNCE = 100; // ms
 
 // ─── AvatarModel ─────────────────────────────────────────────────────────────
-// Fix: removed THREE.Timer/THREE.Clock usage entirely.
-// useFrame's `delta` is already computed by R3F with its own internal clock,
-// so we just pass it directly to the mixer — no extra timer needed.
-const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
+const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: 'male' | 'female' }) => {
   const group = useRef<THREE.Group>(null);
+
   const [manualIndex, setManualIndex] = useState(0);
   const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
 
@@ -54,10 +52,10 @@ const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
   useEffect(() => {
     if (!animations || animations.length === 0) return;
 
-    const keywords = ['dance', 'jump', 'walk', 'run', 'idle', 'wave', 'nod', 'clap', 'hug', 'kiss', 'cry', 'sleep', 'eat', 'drink', 'swim', 'fly', 'fall', 'sit', 'stand'];
+    const keywords = ['dance', 'walk', 'idle', 'wave', 'nod', 'clap', 'sit', 'stand', 'run'];
     const pool = animations.filter((clip) =>
       keywords.some(k => clip.name.toLowerCase().includes(k))
-    ) || animations;
+    ).slice(0, Math.ceil(animations.length / 2)) || animations;
 
     // Use modulo to stay within pool bounds
     const targetIdx = (sectionIndex + manualIndex) % pool.length;
@@ -67,10 +65,10 @@ const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
   useEffect(() => {
     if (!animations || animations.length === 0) return;
     
-    const keywords = ['dance', 'jump', 'walk', 'run', 'idle', 'wave', 'nod', 'clap', 'hug', 'kiss', 'cry', 'sleep', 'eat', 'drink', 'swim', 'fly', 'fall', 'sit', 'stand'];
+    const keywords = ['dance', 'walk', 'idle', 'wave', 'nod', 'clap', 'sit', 'stand', 'run'];
     const pool = animations.filter((clip) =>
       keywords.some(k => clip.name.toLowerCase().includes(k))
-    ) || animations;
+    ).slice(0, Math.ceil(animations.length / 2)) || animations;
 
     const clip = pool[currentClipIndex];
     if (!clip) return;
@@ -84,7 +82,7 @@ const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
     
     // Smooth transition
     nextAction.reset();
-    nextAction.setEffectiveTimeScale(1);
+    nextAction.setEffectiveTimeScale(0.5); // Reduced speed to half
     nextAction.setEffectiveWeight(1);
     nextAction.fadeIn(0.5);
     nextAction.play();
@@ -121,8 +119,9 @@ const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
 };
 
 // ─── AvatarOverlay ────────────────────────────────────────────────────────────
-export const AvatarOverlay = () => {
+export const AvatarOverlay = ({ gender }: { gender: 'male' | 'female' }) => {
   const theme = useTheme();
+
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
   const [currentPos, setCurrentPos] = useState<{ x: string; y: string }>({
@@ -136,15 +135,18 @@ export const AvatarOverlay = () => {
 
   // Reposition on section change — avoids chat widget (bottom-right)
   useEffect(() => {
-    const isLeft = Math.random() > 0.35; // 65% left, 35% top-right
+    // Force it away from the bottom-right chat area
+    const isLeft = Math.random() > 0.3; // 70% left side
     if (isLeft) {
-      const randomY = Math.floor(Math.random() * 75) + 10;
-      setCurrentPos({ x: '24px', y: `calc(${randomY}vh - 160px)` });
+      const randomY = Math.floor(Math.random() * 60) + 15;
+      setCurrentPos({ x: '40px', y: `calc(${randomY}vh - 160px)` });
     } else {
-      const randomY = Math.floor(Math.random() * 30) + 5;
-      setCurrentPos({ x: 'calc(100vw - 344px)', y: `calc(${randomY}vh - 160px)` });
+      // Top Right - avoids the chat window at the bottom
+      const randomY = Math.floor(Math.random() * 20) + 5;
+      setCurrentPos({ x: 'calc(100vw - 360px)', y: `calc(${randomY}vh - 160px)` });
     }
   }, [activeSectionIndex]);
+
 
   // Stable color array derived from theme
   const colors = useMemo(
@@ -203,8 +205,9 @@ export const AvatarOverlay = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 10000,
+        zIndex: 12000,
         width: 320,
+
         height: 320,
         pointerEvents: 'none', // Base overlay is transparent to clicks
         display: 'flex',
@@ -311,7 +314,8 @@ export const AvatarOverlay = () => {
             cursor: 'pointer',
             zIndex: 5,
             overflow: 'visible',
-            clipPath: 'circle(40%)', // Minimize the area that blocks background clicks
+            clipPath: 'circle(35%)', // Minimize the area that blocks background clicks
+
           }}
         >
           <Canvas
@@ -331,9 +335,10 @@ export const AvatarOverlay = () => {
                 shadows="contact"
               >
                 <Center>
-                  <AvatarModel sectionIndex={activeSectionIndex} />
+                  <AvatarModel sectionIndex={activeSectionIndex} gender={gender} />
                 </Center>
               </Stage>
+
             </React.Suspense>
           </Canvas>
         </Box>
