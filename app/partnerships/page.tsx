@@ -1,7 +1,9 @@
 'use client';
 
 import { Handshake, Briefcase, Package, Wrench, UtensilsCrossed, DollarSign, Store } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
@@ -158,51 +160,114 @@ export default function PartnershipsPage() {
             bottomSpacing={5}
           />
 
-          <Box>
-            <Typography variant="overline" sx={{ display: 'block', textAlign: 'center', mb: 2, fontWeight: 800, color: 'primary.main', letterSpacing: 3 }}>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="overline" sx={{ display: 'block', textAlign: 'center', mb: 4, fontWeight: 800, color: 'primary.main', letterSpacing: 4, opacity: 0.8 }}>
               INDUSTRIES WE SERVE
             </Typography>
-            <Grid container spacing={3} justifyContent="center">
-              {industries.map((industry, index) => {
-                const IconComponent = industry.icon;
-                return (
-                  <Grid size={{ xs: 6, sm: 4, md: 2 }} key={index}>
-                    <Card 
-                      elevation={0}
-                      sx={{ 
-                        height: '100%', 
-                        bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
-                        border: '1px solid',
-                        borderColor: isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.1),
-                        transition: 'all 0.3s ease', 
-                        '&:hover': { transform: 'translateY(-8px)', bgcolor: alpha(primaryMain, 0.1), borderColor: primaryMain } 
-                      }}
-                    >
-                      <CardContent sx={{ p: 3, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: '50%',
-                            bgcolor: 'primary.main',
-                            color: 'primary.contrastText',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: `0 4px 12px ${alpha(primaryMain, 0.3)}`
-                          }}
-                        >
-                          <IconComponent size={24} />
-                        </Box>
-                        <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.3 }}>
-                          {industry.name}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                );
-              })}
-            </Grid>
+            
+            {/* Infinite Scrolling Carousel Container */}
+            <Box sx={{ 
+              position: 'relative', 
+              width: '100vw', 
+              left: '50%', 
+              right: '50%', 
+              marginLeft: '-50vw', 
+              marginRight: '-50vw',
+              overflow: 'hidden',
+              py: 2
+            }}>
+              {/* Soft Edge Gradient Masks */}
+              <Box sx={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                width: { xs: 80, md: 200 },
+                background: `linear-gradient(to right, ${theme.palette.background.default}, transparent)`,
+                zIndex: 2,
+                pointerEvents: 'none'
+              }} />
+              <Box sx={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                width: { xs: 80, md: 200 },
+                background: `linear-gradient(to left, ${theme.palette.background.default}, transparent)`,
+                zIndex: 2,
+                pointerEvents: 'none'
+              }} />
+
+              <motion.div
+                animate={{
+                  x: [0, -1224], // 6 items * (180px width + 24px gap)
+                }}
+                transition={{
+                  x: {
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    duration: 35,
+                    ease: "linear",
+                  },
+                }}
+                style={{
+                  display: 'flex',
+                  gap: '24px',
+                  width: 'fit-content',
+                  padding: '0 12px'
+                }}
+              >
+                {/* Triple the items to ensure seamless overlap */}
+                {[...industries, ...industries, ...industries].map((industry, index) => {
+                  const IconComponent = industry.icon;
+                  return (
+                    <Box key={index} sx={{ width: 180, flexShrink: 0 }}>
+                      <Card 
+                        elevation={0}
+                        sx={{ 
+                          height: '100%', 
+                          bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
+                          border: '1px solid',
+                          borderColor: isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.1),
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', 
+                          borderRadius: 4,
+                          '&:hover': { 
+                            transform: 'translateY(-10px) scale(1.02)', 
+                            bgcolor: alpha(primaryMain, 0.12), 
+                            borderColor: primaryMain,
+                            boxShadow: `0 20px 40px ${alpha(primaryMain, 0.15)}`
+                          } 
+                        }}
+                      >
+                        <CardContent sx={{ p: 3, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5 }}>
+                          <Box
+                            sx={{
+                              p: 2,
+                              borderRadius: '50%',
+                              bgcolor: 'primary.main',
+                              color: 'primary.contrastText',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: `0 8px 20px ${alpha(primaryMain, 0.3)}`,
+                              transition: 'transform 0.3s ease',
+                              '.MuiCard-root:hover &': { transform: 'rotate(10deg) scale(1.1)' }
+                            }}
+                          >
+                            <IconComponent size={24} />
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 800, fontSize: '0.95rem', lineHeight: 1.3, letterSpacing: -0.2 }}>
+                            {industry.name}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Box>
+                  );
+                })}
+              </motion.div>
+            </Box>
           </Box>
+
         </PageContainer>
 
         {/* Smooth transition to Slide 2 */}
