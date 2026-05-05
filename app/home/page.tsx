@@ -21,11 +21,26 @@ import WhyUsPage from '../why-us/page';
 import HistoryPage from '../history/page';
 import PartnershipsPage from '../partnerships/page';
 import JobPostingsPage from '../careers/page';
+import { useEffect } from 'react';
+import { scrollToHref } from '../../constants/navigation';
 
 export default function HomePage() {
   usePageTitle('Home');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+
+  // Handle initial hash scroll when navigating from another page
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Small delay to ensure all components (especially JobPostings with async data) 
+      // have started rendering and the DOM is ready for scroll snapping
+      const timer = setTimeout(() => {
+        scrollToHref(hash);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <Box>
@@ -324,19 +339,19 @@ export default function HomePage() {
       </Box>
 
       {/* Embedded Sections */}
-      <Box id="about-us" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="about-us">
         <AboutPage />
       </Box>
-      <Box id="why-us" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="why-us">
         <WhyUsPage />
       </Box>
-      <Box id="history" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="history">
         <HistoryPage />
       </Box>
-      <Box id="partnerships" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="partnerships" sx={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}>
         <PartnershipsPage />
       </Box>
-      <Box id="careers" sx={{ scrollSnapAlign: 'start' }}>
+      <Box id="careers" sx={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}>
         <JobPostingsPage />
       </Box>
     </Box>

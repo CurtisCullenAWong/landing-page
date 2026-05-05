@@ -177,7 +177,14 @@ export default function JobPostingsPage() {
   }
 
   return (
-    <Box sx={{ py: 8 }}>
+    <Box
+      sx={{
+        minHeight: 'calc(100vh - 80px)',
+        display: 'flex',
+        alignItems: 'center',
+        py: { xs: 8, md: 0 }
+      }}
+    >
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>

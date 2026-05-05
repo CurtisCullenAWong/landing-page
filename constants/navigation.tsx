@@ -35,6 +35,11 @@ export const scrollToHref = (href: string) => {
   const element = document.getElementById(id);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Update the URL hash without triggering a jump
+    const newHash = id === 'home' ? '' : `#${id}`;
+    window.history.replaceState(null, '', `${window.location.pathname}${newHash}`);
+
     return true;
   }
   return false;
@@ -94,6 +99,10 @@ export const useActiveSection = () => {
         if (link) {
           document.title = `${link.name} | Boss Cargo Express`;
           (window as any).__disablePageTitleHook = true;
+
+          // Update the URL hash to match the active section
+          const newHash = current === 'home' ? '' : `#${current}`;
+          window.history.replaceState(null, '', `${window.location.pathname}${newHash}`);
         }
       }
     };

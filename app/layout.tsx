@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isSequencePage = pathname === '/' || pathname === '/about-us' || pathname === '/why-us';
+  const isSequencePage = pathname === '/' || pathname === '/about-us' || pathname === '/why-us' || pathname === '/history' || pathname === '/partnerships' || pathname === '/careers';
 
   return (
     <html lang="en" suppressHydrationWarning className={isSequencePage ? 'scroll-lock-active' : ''}>
