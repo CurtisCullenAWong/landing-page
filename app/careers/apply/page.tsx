@@ -40,28 +40,28 @@ interface ApplicationFormData {
 }
 
 // Shared "Corner Brackets" component for architectural emphasis
-const CornerBrackets = ({ color }: { color: string }) => (
+const CornerBrackets = ({ color, size = 24, radius = 16 }: { color: string, size?: number, radius?: number }) => (
   <>
     <Box sx={{
       position: 'absolute',
       top: 0,
       left: 0,
-      width: 16,
-      height: 16,
-      borderTop: `2px solid ${color}`,
-      borderLeft: `2px solid ${color}`,
-      borderTopLeftRadius: 2,
+      width: size,
+      height: size,
+      borderTop: `3px solid ${color}`,
+      borderLeft: `3px solid ${color}`,
+      borderTopLeftRadius: radius,
       zIndex: 2
     }} />
     <Box sx={{
       position: 'absolute',
       bottom: 0,
       right: 0,
-      width: 16,
-      height: 16,
-      borderBottom: `2px solid ${color}`,
-      borderRight: `2px solid ${color}`,
-      borderBottomRightRadius: 2,
+      width: size,
+      height: size,
+      borderBottom: `3px solid ${color}`,
+      borderRight: `3px solid ${color}`,
+      borderBottomRightRadius: radius,
       zIndex: 2
     }} />
   </>
@@ -267,8 +267,8 @@ export default function GeneralApplicationPage() {
     return (
       <Box sx={{ py: 12, minHeight: '100vh', bgcolor: bgColor }}>
         <Container maxWidth="md">
-          <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 4 }}>
-            <CornerBrackets color={tertiaryMain} />
+          <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 2 }}>
+            <CornerBrackets color={tertiaryMain} radius={16} />
             <CardContent sx={{ p: 6, textAlign: 'center' }}>
               <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ p: 2, bgcolor: alpha('success.main', 0.1), color: 'success.main', borderRadius: '50%' }}>
@@ -382,8 +382,8 @@ export default function GeneralApplicationPage() {
         </Paper>
 
         {/* Application Form */}
-        <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 3, border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-          <CornerBrackets color={tertiaryMain} />
+        <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 2, border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <CornerBrackets color={tertiaryMain} radius={16} />
           <CardContent sx={{ p: { xs: 3, md: 5 } }}>
             <Box sx={{ mb: 4 }}>
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, letterSpacing: -0.5 }}>

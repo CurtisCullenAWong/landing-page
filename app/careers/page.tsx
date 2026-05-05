@@ -42,30 +42,46 @@ type SortField = 'title' | 'department' | 'location' | 'type' | 'postedDate';
 type SortDirection = 'asc' | 'desc';
 
 // Shared "Corner Brackets" component for architectural emphasis
-const CornerBrackets = ({ color, size = 24, radius = 16 }: { color: string, size?: number, radius?: number }) => (
+const CornerBrackets = ({
+  color,
+  size = 24,
+  radius = 16,
+  hideTopLeft = false,
+  hideBottomRight = false
+}: {
+  color: string,
+  size?: number,
+  radius?: number,
+  hideTopLeft?: boolean,
+  hideBottomRight?: boolean
+}) => (
   <>
-    <Box sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: size,
-      height: size,
-      borderTop: `3px solid ${color}`,
-      borderLeft: `3px solid ${color}`,
-      borderTopLeftRadius: radius,
-      zIndex: 2
-    }} />
-    <Box sx={{
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: size,
-      height: size,
-      borderBottom: `3px solid ${color}`,
-      borderRight: `3px solid ${color}`,
-      borderBottomRightRadius: radius,
-      zIndex: 2
-    }} />
+    {!hideTopLeft && (
+      <Box sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: size,
+        height: size,
+        borderTop: `3px solid ${color}`,
+        borderLeft: `3px solid ${color}`,
+        borderTopLeftRadius: radius,
+        zIndex: 2
+      }} />
+    )}
+    {!hideBottomRight && (
+      <Box sx={{
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: size,
+        height: size,
+        borderBottom: `3px solid ${color}`,
+        borderRight: `3px solid ${color}`,
+        borderBottomRightRadius: radius,
+        zIndex: 2
+      }} />
+    )}
   </>
 );
 
@@ -309,7 +325,7 @@ export default function JobPostingsPage() {
                   boxShadow: 8
                 }}
               >
-                <CornerBrackets color={tertiaryMain} radius={16} />
+                <CornerBrackets color={tertiaryMain} radius={16} hideTopLeft={true} />
                 <Stack spacing={3}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Box sx={{ p: 1.5, bgcolor: primaryMain, color: 'white', borderRadius: 2, display: 'flex' }}>
@@ -319,13 +335,13 @@ export default function JobPostingsPage() {
                       Boss Cargo University
                     </Typography>
                   </Box>
-                  
+
                   <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: '1.125rem', fontWeight: 500 }}>
                     Our aspiration to continually empower and educate our employees has led us to establish the <strong>Boss Cargo University</strong>.
                   </Typography>
-                  
+
                   <Divider sx={{ opacity: 0.2 }} />
-                  
+
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, fontSize: '1rem' }}>
                     Its primary mission is to provide the highest freight and logistic education to our employees continuously mastering our craft. The program is designed for existing and onboarding employees to understand Boss Cargo's Brand DNA, culture, and equip them with the right skills for smart and sustainable operations.
                   </Typography>
@@ -392,21 +408,21 @@ export default function JobPostingsPage() {
           </Box>
 
           <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-            <Card sx={{ 
-              boxShadow: 20, 
-              borderRadius: 4, 
-              overflow: 'hidden', 
+            <Card sx={{
+              borderRadius: 2,
+              overflow: 'hidden',
+              boxShadow: 15,
               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               position: 'relative'
             }}>
-              <CornerBrackets color={tertiaryMain} />
-              
+              <CornerBrackets color={tertiaryMain} radius={16} hideTopLeft={true} />
+
               {/* Table Header */}
               <Box
                 sx={{
                   px: 4,
                   py: 4,
-                  background: isDark 
+                  background: isDark
                     ? `linear-gradient(135deg, ${secondaryDark} 0%, ${primaryDark} 100%)`
                     : `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
                   color: 'white',
@@ -561,9 +577,9 @@ export default function JobPostingsPage() {
                             </Box>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="caption" sx={{ 
-                              px: 1.5, py: 0.5, borderRadius: 1, 
-                              bgcolor: alpha(secondaryMain, 0.1), 
+                            <Typography variant="caption" sx={{
+                              px: 1.5, py: 0.5, borderRadius: 1,
+                              bgcolor: alpha(secondaryMain, 0.1),
                               color: secondaryMain,
                               fontWeight: 700,
                               textTransform: 'uppercase'
@@ -581,14 +597,14 @@ export default function JobPostingsPage() {
                     )}
                   </TableBody>
                 </Table>
-                <TablePagination 
-                  component="div" 
-                  count={filteredAndSortedJobs.length} 
-                  page={page} 
-                  onPageChange={handleChangePage} 
-                  rowsPerPage={rowsPerPage} 
-                  onRowsPerPageChange={handleChangeRowsPerPage} 
-                  rowsPerPageOptions={[5, 10, 25]} 
+                <TablePagination
+                  component="div"
+                  count={filteredAndSortedJobs.length}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[5, 10, 25]}
                   sx={{ borderTop: `1px solid ${theme.palette.divider}` }}
                 />
               </TableContainer>
@@ -596,7 +612,8 @@ export default function JobPostingsPage() {
               {/* Mobile Card View */}
               <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2, bgcolor: alpha(paperColor, 0.5) }}>
                 {paginatedJobs.map((job) => (
-                  <Card key={job.id} sx={{ mb: 2, border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, position: 'relative' }}>
+                  <Card key={job.id} sx={{ mb: 2, border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, position: 'relative', borderRadius: 2 }}>
+                    <CornerBrackets color={tertiaryMain} radius={16} size={16} hideTopLeft={true} />
                     <CardContent sx={{ p: 2.5 }}>
                       <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5, color: primaryMain }}>{job.title}</Typography>
                       <Stack spacing={1.5} sx={{ mb: 3 }}>
@@ -668,113 +685,93 @@ export default function JobPostingsPage() {
           }} />
         </Box>
 
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 8 }}>
-            <Typography variant="h1" sx={{ mb: 2, fontWeight: 900, color: primaryMain, textTransform: 'uppercase', letterSpacing: -2 }}>
-              Join Our Team
-            </Typography>
-            <Typography variant="h5" color="text.secondary" sx={{ maxWidth: '800px', mx: 'auto', fontWeight: 400, lineHeight: 1.6 }}>
-              Explore exciting career opportunities at Boss Cargo Express. We're looking for talented
-              individuals to help us shape the future of logistics.
-            </Typography>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {/* Workforce Status Summary Bar - Optimized for large view */}
+          <Box sx={{ mb: 6, display: 'flex', justifyContent: 'center' }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                px: 4,
+                py: 2,
+                borderRadius: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                bgcolor: alpha(primaryMain, 0.05),
+                borderColor: alpha(primaryMain, 0.2),
+                backdropFilter: 'blur(12px)'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Users size={20} color={primaryMain} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2 }}>
+                  Workforce: <span style={{ color: primaryMain }}>ACTIVE</span>
+                </Typography>
+              </Box>
+              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto' }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Target size={20} color={tertiaryMain} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2 }}>
+                  Open Positions: <span style={{ color: primaryMain }}>{activeJobs.length}</span>
+                </Typography>
+              </Box>
+              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto' }} />
+              <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5 }}>
+                people@bosscargo.express
+              </Typography>
+            </Paper>
           </Box>
 
-          <Grid container spacing={4} alignItems="stretch">
-            {/* Left Column: Status Card */}
-            <Grid size={{ xs: 12, md: 5 }}>
+          <Grid container spacing={0}>
+            {/* Massive Hero CTA Card - Maximized View */}
+            <Grid size={{ xs: 12 }}>
               <Paper
                 sx={{
-                  p: 6,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  bgcolor: alpha(isDark ? primaryDark : primaryMain, 0.05),
-                  borderRadius: 6,
-                  textAlign: 'center',
-                  border: `1px solid ${alpha(primaryMain, 0.2)}`,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: 10
-                }}
-              >
-                <CornerBrackets color={tertiaryMain} />
-                <Box sx={{ p: 2, bgcolor: alpha(primaryMain, 0.1), borderRadius: '50%', color: primaryMain, mb: 3 }}>
-                  <Users size={48} />
-                </Box>
-                <Typography variant="h4" sx={{ mb: 1, fontWeight: 800, textTransform: 'uppercase' }}>
-                  Workforce Status
-                </Typography>
-                <Box sx={{ my: 4 }}>
-                  <Typography variant="subtitle1" sx={{ color: 'text.secondary', fontWeight: 700, mb: 1 }}>
-                    OPEN POSITIONS
-                  </Typography>
-                  <Typography variant="h1" sx={{ fontWeight: 900, color: primaryMain, fontSize: '6rem', lineHeight: 1 }}>
-                    {activeJobs.length}
-                  </Typography>
-                </Box>
-                {activeJobs.length === 0 && (
-                  <Paper variant="outlined" sx={{ p: 2, mt: 2, bgcolor: alpha(tertiaryMain, 0.1), borderColor: tertiaryMain, borderRadius: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 800, color: primaryDark }}>
-                      No open positions at the moment. Please check back later!
-                    </Typography>
-                  </Paper>
-                )}
-                <Typography variant="caption" sx={{ mt: 4, color: 'text.secondary', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  Inquiries: <span style={{ color: primaryMain }}>people@bosscargo.express</span>
-                </Typography>
-              </Paper>
-            </Grid>
-
-            {/* Right Column: CTA Combined Card */}
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Paper
-                sx={{
-                  p: { xs: 4, md: 6 },
-                  height: '100%',
+                  p: { xs: 4, md: 10 },
                   background: isDark
                     ? `linear-gradient(135deg, ${secondaryDark} 0%, ${primaryDark} 100%)`
                     : `linear-gradient(135deg, ${primaryDark} 0%, ${primaryMain} 100%)`,
                   color: 'white',
-                  borderRadius: 6,
-                  boxShadow: 20,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
+                  borderRadius: 2,
+                  boxShadow: 24,
                   position: 'relative',
                   overflow: 'hidden'
                 }}
               >
+                <CornerBrackets color={tertiaryMain} radius={16} size={48} hideTopLeft={true} />
                 {/* Decorative Pattern overlay */}
                 <Box sx={{
                   position: 'absolute',
                   inset: 0,
                   opacity: 0.1,
                   backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-                  backgroundSize: '24px 24px',
+                  backgroundSize: '32px 32px',
                   pointerEvents: 'none'
                 }} />
-                
-                <Grid container spacing={4} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <Box sx={{ position: 'relative' }}>
-                      {/* Bold Architectural Frame */}
+
+                <Grid container spacing={10} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                  <Grid size={{ xs: 12, md: 7 }}>
+                    <Box sx={{
+                      position: 'relative',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': { transform: 'scale(1.04) rotate(-0.5deg)' }
+                    }}>
+                      {/* Bold Architectural Frame - Expanded */}
                       <Box sx={{
                         position: 'absolute',
-                        inset: '-12px 12px 12px -12px',
-                        border: `3px solid ${tertiaryMain}`,
-                        borderRadius: '4px',
+                        inset: '-24px 24px 24px -24px',
+                        border: `6px solid ${tertiaryMain}`,
+                        borderRadius: '2px',
                         zIndex: 0,
-                        boxShadow: `6px 6px 0px ${alpha(secondaryDark, 0.3)}`
+                        boxShadow: `15px 15px 0px ${alpha(secondaryDark, 0.5)}`
                       }} />
                       {/* Secondary Glass Backing */}
                       <Box sx={{
                         position: 'absolute',
-                        inset: '8px -8px -8px 8px',
-                        bgcolor: alpha('#fff', 0.1),
-                        backdropFilter: 'blur(4px)',
-                        borderRadius: '4px',
+                        inset: '20px -20px -20px 20px',
+                        bgcolor: alpha('#fff', 0.2),
+                        backdropFilter: 'blur(12px)',
+                        borderRadius: '2px',
                         zIndex: 0,
                       }} />
                       <Box sx={{ position: 'relative', zIndex: 1 }}>
@@ -782,19 +779,18 @@ export default function JobPostingsPage() {
                           src={IMAGE_URLS.JOBS_CAREER_GROWTH.src}
                           alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
                           layout="responsive"
-                          rounded={4}
-                          shadow={12}
+                          rounded={2}
+                          shadow={24}
                         />
                       </Box>
                     </Box>
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <Typography variant="h3" sx={{ mb: 2, fontWeight: 900, letterSpacing: -1 }}>
-                      Don't See the Right Fit?
+                  <Grid size={{ xs: 12, md: 5 }} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                    <Typography variant="h1" sx={{ mb: 3, fontWeight: 900, letterSpacing: -3, lineHeight: 1, textTransform: 'uppercase' }}>
+                      Join Our <span style={{ color: tertiaryMain }}>Elite Team</span>
                     </Typography>
-                    <Typography variant="body1" sx={{ mb: 5, opacity: 0.9, lineHeight: 1.8, fontSize: '1.1rem' }}>
-                      We're always interested in hearing from talented professionals. Send us your resume
-                      and we'll keep you in mind for future opportunities.
+                    <Typography variant="h5" sx={{ mb: 6, opacity: 0.9, lineHeight: 1.8, fontWeight: 400 }}>
+                      We are constantly expanding our global team. Submit your professional credentials for future consideration.
                     </Typography>
                     <Button
                       component={Link}
@@ -808,17 +804,17 @@ export default function JobPostingsPage() {
                         px: 6,
                         py: 2,
                         fontSize: '1.1rem',
-                        borderRadius: 3,
-                        boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.3)}`,
+                        borderRadius: 2,
+                        boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.4)}`,
                         '&:hover': {
-                          bgcolor: alpha(tertiaryMain, 0.9),
-                          transform: 'translateY(-4px)',
-                          boxShadow: `0 12px 32px ${alpha(tertiaryMain, 0.4)}`,
+                          bgcolor: alpha(tertiaryMain, 1),
+                          transform: 'translateY(-4px) scale(1.0)',
+                          boxShadow: `0 16px 48px ${alpha(tertiaryMain, 0.6)}`,
                         },
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
-                      General Application
+                      Submit General Application
                     </Button>
                   </Grid>
                 </Grid>
