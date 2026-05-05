@@ -9,22 +9,23 @@ import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { AvatarOverlay } from "@/components/chat/AvatarOverlay";
 import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
+  const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
+
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
-    const isSequencePage = pathname === '/' || pathname === '/about-us' || pathname === '/why-us' || pathname === '/history' || pathname === '/partnerships' || pathname === '/careers';
     if (isSequencePage) {
       document.documentElement.classList.add('scroll-lock-active');
     } else {
       document.documentElement.classList.remove('scroll-lock-active');
     }
-  }, [pathname]);
+  }, [isSequencePage]);
 
   return (
     <NextThemeProvider
@@ -52,7 +53,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             </Suspense>
           </Box>
 
-          <ChatWidget />
+          {isSequencePage && (
+            <>
+              <ChatWidget />
+              <AvatarOverlay />
+            </>
+          )}
         </JobProvider>
       </MuiThemeProviderWrapper>
     </NextThemeProvider>
