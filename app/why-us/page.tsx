@@ -13,6 +13,7 @@ import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer } from '../../components/layout';
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
+import { SITE_CONTENT } from '../../constants/site-content';
 
 // Abstract squiggly shape for background variety
 const BLOB_PATHS = [
@@ -109,24 +110,7 @@ export default function WhyBossCargo() {
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
   const tertiaryDark = (theme.palette as any).tertiary?.dark || primaryDark;
 
-  const values = [
-    {
-      title: 'Transparent Communication',
-      description: 'Focus on openness and clarity in all our interactions and business dealings.'
-    },
-    {
-      title: 'Business Sustainability',
-      description: 'Commitment to long-term impact and sustainable business practices.'
-    },
-    {
-      title: 'Continuous Learning',
-      description: 'Embracing growth and education through our Boss Cargo University and ongoing development programs.'
-    },
-    {
-      title: 'Cohesive Teamwork',
-      description: 'Working as one unit towards our common goal of growth for our clients.'
-    }
-  ];
+  const values = SITE_CONTENT.missionVision.values;
 
   return (
     <Box>
@@ -247,7 +231,7 @@ export default function WhyBossCargo() {
                       Our Mission
                     </Typography>
                     <Typography variant="body2" sx={{ pl: 3, borderLeft: '2px solid', borderColor: tertiaryMain, py: 0.5, lineHeight: 1.7, color: 'text.primary' }}>
-                      To grow and empower businesses across the Philippines by providing customized logistics solutions and developing a highly sustainable business using state-of-the-art technology and creating unprecedented value for customers and employees while embracing the frame of CANI (Constant And Never Ending Improvement).
+                      {SITE_CONTENT.missionVision.mission}
                     </Typography>
                   </Box>
 
@@ -257,7 +241,7 @@ export default function WhyBossCargo() {
                       Our Dream (Vision)
                     </Typography>
                     <Typography variant="body2" sx={{ pl: 3, borderLeft: '2px solid', borderColor: 'primary.main', py: 0.5, lineHeight: 1.7, color: 'text.primary' }}>
-                      To be the country's preeminent and technologically driven logistics company.
+                      {SITE_CONTENT.missionVision.vision}
                     </Typography>
                   </Box>
                 </Stack>
@@ -449,7 +433,7 @@ export default function WhyBossCargo() {
                   }}
                 >
                   <Typography variant="body2" sx={{ lineHeight: 1.7, fontStyle: 'italic', position: 'relative', zIndex: 1 }}>
-                    "It's who we are. It's what we're about. Honestly, it's hard to describe culture. It's just something you feel. We work as one, towards one common goal: growth for our clients."
+                    "{SITE_CONTENT.missionVision.culture}"
                   </Typography>
                   <Box sx={{ position: 'absolute', top: -10, right: -10, width: 60, height: 60, bgcolor: 'tertiary.main', opacity: 0.1, borderRadius: '50%' }} />
                 </Paper>

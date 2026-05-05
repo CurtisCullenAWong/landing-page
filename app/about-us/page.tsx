@@ -20,6 +20,7 @@ import {
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import React from 'react';
+import { SITE_CONTENT } from '../../constants/site-content';
 
 export default function AboutPage() {
   usePageTitle('About Us');
@@ -38,71 +39,53 @@ export default function AboutPage() {
   const offices = [
     {
       name: 'Headquarters',
-      address: 'Unit B, Block 3 Lot 6, Angelina Canaynay Ave. BF Martinville Subdivision',
-      city: 'Barangay Manuyo Dos, Las Piñas 1744, Metro Manila, Philippines',
-      phone: '(02) 8805 2402',
-      email: 'info@bosscargo.express',
-      marketing: '(02) 8643 5469',
-      customerService: '(02) 8881 1948',
-      finance: '(02) 8887 2369',
-      mobile: ['(+63) 917 622 0068', '(+63) 925 770 0370']
+      address: SITE_CONTENT.contact.headquarters.address.split(', Barangay')[0],
+      city: 'Barangay' + SITE_CONTENT.contact.headquarters.address.split(', Barangay')[1],
+      phone: SITE_CONTENT.contact.phones.find(p => p.label === 'General Hotline')?.number,
+      email: SITE_CONTENT.contact.emails.find(e => e.label === 'General Inquiries')?.address,
+      marketing: SITE_CONTENT.contact.phones.find(p => p.label === 'Marketing')?.number,
+      customerService: SITE_CONTENT.contact.phones.find(p => p.label === 'Customer Service')?.number,
+      finance: SITE_CONTENT.contact.phones.find(p => p.label === 'Finance')?.number,
+      mobile: SITE_CONTENT.contact.phones.filter(p => p.label.includes('Mobile')).map(p => p.number)
     }
   ];
 
-  const officials = [
-    {
-      name: 'Aris Delos Reyes',
-      title: 'Founder, CEO',
-      image: '',
-      phones: ['09171360195', '09999900195'],
-      emails: ['aris@bosscargo.express', 'info@bosscargo.express'],
-      website: 'www.bosscargo.express',
-      address: 'Lot 6 unit B, Blk 3, A. Canaynay Ave. BF Martinville, Manuyo Dos, Las Pinas City.',
-    },
-    {
-      name: 'Curtis Cullen A. Wong',
-      title: 'KALMA! Testing palang ito!',
-      image: 'https://media.tenor.com/WX4TeHt4Xt8AAAAe/high-af-high.png',
-      phones: ['+63 999 999 9999', '+63 999 999 9999'],
-      emails: ['testing@email.com', 'testing@email.com'],
-      website: 'www.bosscargo.express',
-      address: 'AHH',
-    },
-    {
-      name: 'Curtis Cullen A. Wong',
-      title: 'KALMA! Testing palang ito!',
-      image: 'https://media.tenor.com/WX4TeHt4Xt8AAAAe/high-af-high.png',
-      phones: ['+63 999 999 9999', '+63 999 999 9999'],
-      emails: ['testing@email.com', 'testing@email.com'],
-      website: 'www.bosscargo.express',
-      address: 'AHH',
-    }
-  ];
+  const officials = SITE_CONTENT.leadership.map(leader => ({
+    name: leader.name,
+    title: leader.role,
+    image: '', // To be updated when assets are available
+    phones: [leader.phone],
+    emails: [leader.email],
+    website: 'www.bosscargo.express',
+    address: SITE_CONTENT.contact.headquarters.address,
+  }));
 
   // Shared "Corner Brackets" component
   const CornerBrackets = () => (
     <>
       <Box sx={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        width: 12,
-        height: 12,
+        top: -1,
+        left: -1,
+        width: 16,
+        height: 16,
         borderTop: `2px solid ${tertiaryMain}`,
         borderLeft: `2px solid ${tertiaryMain}`,
-        borderTopLeftRadius: 1.5,
-        zIndex: 2
+        borderTopLeftRadius: 'inherit',
+        zIndex: 2,
+        pointerEvents: 'none'
       }} />
       <Box sx={{
         position: 'absolute',
-        bottom: 0,
-        right: 0,
-        width: 12,
-        height: 12,
+        bottom: -1,
+        right: -1,
+        width: 16,
+        height: 16,
         borderBottom: `2px solid ${tertiaryMain}`,
         borderRight: `2px solid ${tertiaryMain}`,
-        borderBottomRightRadius: 1.5,
-        zIndex: 2
+        borderBottomRightRadius: 'inherit',
+        zIndex: 2,
+        pointerEvents: 'none'
       }} />
     </>
   );
@@ -182,7 +165,7 @@ export default function AboutPage() {
                   backdropFilter: 'blur(10px)',
                   border: `1px solid ${alpha(primaryMain, 0.2)}`,
                   position: 'relative',
-                  overflow: 'hidden'
+                  overflow: 'visible'
                 }}
               >
                 <CornerBrackets />
@@ -191,10 +174,10 @@ export default function AboutPage() {
                 </Typography>
                 <Stack spacing={1.5}>
                   <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.9375rem', lineHeight: 1.7 }}>
-                    Founded in 2014, Boss Cargo Express started its roots in Puerto Princesa City, Palawan. Since then, the company has grown and delivered the best cargo solutions to various clients across the Philippine archipelago.
+                    {SITE_CONTENT.company.story}
                   </Typography>
                   <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.9375rem', lineHeight: 1.7 }}>
-                    Coming up with corporate directives and initiatives that add value to existing and potential clients, strengthening the organization's functional areas, and making the corporation highly competitive are top priorities.
+                    {SITE_CONTENT.company.strategy.overview}
                   </Typography>
                 </Stack>
               </Paper>
@@ -208,7 +191,7 @@ export default function AboutPage() {
                         Our Mission
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        To provide world-class logistics solutions that exceed customer expectations while fostering a culture of excellence.
+                        {SITE_CONTENT.missionVision.mission}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -221,7 +204,7 @@ export default function AboutPage() {
                         Our Dreams
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        To be the most trusted and innovative logistics partner globally, setting industry standards for reliability and sustainability.
+                        {SITE_CONTENT.missionVision.vision}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -354,7 +337,7 @@ export default function AboutPage() {
                     boxShadow: isDark ? 4 : 2,
                     borderRadius: 1.5,
                     position: 'relative',
-                    overflow: 'hidden',
+                    overflow: 'visible',
                     border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
                   }}
                 >

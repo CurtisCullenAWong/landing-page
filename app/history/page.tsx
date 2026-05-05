@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
+import { SITE_CONTENT } from '../../constants/site-content';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -103,32 +104,15 @@ export default function HistoryPage() {
   const secondaryMain = theme.palette.secondary.main;
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
 
-  const milestones = [
-    {
-      year: '2014',
-      title: 'Company Founded',
-      description: 'Boss Cargo Express started its roots in Puerto Princesa City, Palawan, with a vision to deliver the best cargo solutions across the Philippine archipelago.',
-      color: primaryMain
-    },
-    {
-      year: '2015-2018',
-      title: 'Growth & Expansion',
-      description: 'Expanded operations across the Philippines, serving various clients across a wide range of industries. Built a team of skilled professionals with years of solid experience in handling ground freight, sea freight, and air freight.',
-      color: secondaryMain
-    },
-    {
-      year: '2019-2022',
-      title: 'Strategic Development',
-      description: 'Established corporate directives and initiatives that add value to existing and potential clients. Strengthened the organization\'s functional areas and made the corporation highly competitive.',
-      color: tertiaryMain
-    },
-    {
-      year: '2023-Present',
-      title: 'Technology & Sustainability',
-      description: 'Focused on adopting technology within supply chains, expanding geographical locations, and serving a wider market segment. Through effective resource management, sound financial planning, and sales prospecting, we continue to attain our objectives.',
-      color: primaryMain
-    }
-  ];
+  const milestones = SITE_CONTENT.company.strategy.milestones.map((m, index) => {
+    const colors = [primaryMain, secondaryMain, tertiaryMain];
+    return {
+      year: ('year' in m ? m.year : null) || (index === 1 ? '2015-2018' : index === 2 ? '2019-2022' : '2023-Present'),
+      title: m.title,
+      description: m.description,
+      color: colors[index % colors.length]
+    };
+  });
 
   // Scalable Milestone Grouping (2 per slide)
   const milestoneChunks = [];
@@ -184,10 +168,10 @@ export default function HistoryPage() {
                 </Typography>
                 <Stack spacing={2}>
                   <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.7, fontSize: '1.05rem', borderLeft: `4px solid ${tertiaryMain}`, pl: 3 }}>
-                    Founded in 2014, Boss Cargo Express started its roots in Puerto Princesa City, Palawan. Since then, the company has grown and delivered the best cargo solutions to various clients.
+                    {SITE_CONTENT.company.story}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, pl: 4 }}>
-                    Our key strategies for expansion, customer satisfaction, fiscal standing, and enterprise sustainability are geared towards extending our product scope and serving a wider market segment. We constantly listen to companies' overwhelming advocacy for the adoption of technology.
+                    {SITE_CONTENT.company.strategy.overview}
                   </Typography>
                 </Stack>
               </Box>

@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 import { ClientLayout } from "./client-layout";
 import "./globals.css";
+import { SITE_CONTENT } from "../constants/site-content";
 
 const secondaryFont = localFont({
   src: [
@@ -62,8 +63,8 @@ const primaryFont = localFont({
 });
 
 export const metadata = {
-  title: "Boss Cargo Express",
-  description: "Logistics Driven by Culture",
+  title: SITE_CONTENT.company.name,
+  description: SITE_CONTENT.company.slogan,
 };
 
 export default function RootLayout({

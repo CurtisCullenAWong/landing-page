@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { PageContainer, PageHeader } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
+import { SITE_CONTENT } from '../../constants/site-content';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -103,36 +104,33 @@ export default function PartnershipsPage() {
   const secondaryMain = theme.palette.secondary.main;
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
 
-  const industries = [
-    { name: 'Business Process Outsourcing', icon: Briefcase },
-    { name: 'Fast-moving Consumer Goods', icon: Package },
-    { name: 'Engineering Services', icon: Wrench },
-    { name: 'Food Services', icon: UtensilsCrossed },
-    { name: 'Financial Services', icon: DollarSign },
-    { name: 'Retail', icon: Store }
-  ];
+  const industries = SITE_CONTENT.partnerships.industries.map(industry => {
+    let icon = Briefcase;
+    if (industry.name.includes('Consumer Goods')) icon = Package;
+    if (industry.name.includes('Engineering')) icon = Wrench;
+    if (industry.name.includes('Food')) icon = UtensilsCrossed;
+    if (industry.name.includes('Financial')) icon = DollarSign;
+    if (industry.name.includes('Retail')) icon = Store;
+    return { ...industry, icon };
+  });
 
-  const memberships = [
-    {
-      name: 'SCMAP',
-      fullName: 'Supply Chain Management Association of the Philippines',
-      description: 'Active member of the premier supply chain and logistics association in the Philippines.',
-      image: IMAGE_URLS.MEMBERSHIP_SCMAP,
-    },
-    {
-      name: 'PEZA',
-      fullName: 'Philippine Economic Zone Authority',
-      description: 'Accredited partner for PEZA facilitation services, supporting economic zone operations.',
-      image: IMAGE_URLS.MEMBERSHIP_PEZA,
-      whiteBackground: true
-    },
-    {
-      name: 'JCtrans',
-      fullName: 'JCtrans Network',
-      description: 'Premium Member of the international freight forwarders network, connecting us to global logistics partners.',
-      image: IMAGE_URLS.MEMBERSHIP_JCTRANS,
+  const memberships = SITE_CONTENT.partnerships.memberships.map(m => {
+    let image = IMAGE_URLS.MEMBERSHIP_SCMAP;
+    let whiteBackground = false;
+    if (m.name.includes('PEZA')) {
+      image = IMAGE_URLS.MEMBERSHIP_PEZA;
+      whiteBackground = true;
     }
-  ];
+    if (m.name.includes('JCtrans')) image = IMAGE_URLS.MEMBERSHIP_JCTRANS;
+    
+    return {
+      name: m.name,
+      fullName: m.name,
+      description: m.role,
+      image,
+      whiteBackground
+    };
+  });
 
   return (
     <Box>
@@ -156,7 +154,7 @@ export default function PartnershipsPage() {
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <PageHeader
             title="Strategic Alliances"
-            subtitle="We believe in the power of collaboration. By partnering with industry leaders and regulatory bodies, we deliver world-class logistics solutions tailored to your unique needs."
+            subtitle={SITE_CONTENT.partnerships.description}
             bottomSpacing={5}
           />
 
@@ -265,8 +263,7 @@ export default function PartnershipsPage() {
                   <span style={{ color: primaryMain }}>Cost-Effective</span>
                 </Typography>
                 <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', mb: 4 }}>
-                  We take pride in growing the business together with firms by being dependable, cost-effective, and on-time. 
-                  Our business is built on and guided by our brand values. Partner with a brand that will revolutionize the industry.
+                  {SITE_CONTENT.partnerships.description}
                 </Typography>
                 <Paper
                   elevation={0}

@@ -38,6 +38,7 @@ import {
 import Link from 'next/link';
 import { JobListingsSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../lib/usePageTitle';
+import { SITE_CONTENT } from '../../constants/site-content';
 
 type SortField = 'title' | 'department' | 'location' | 'type' | 'postedDate';
 type SortDirection = 'asc' | 'desc';
@@ -347,13 +348,13 @@ export default function JobPostingsPage() {
                   </Box>
 
                   <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: '1.125rem', fontWeight: 500 }}>
-                    Our aspiration to continually empower and educate our employees has led us to establish the <strong>Boss Cargo University</strong>.
+                    {SITE_CONTENT.careers.university.description}
                   </Typography>
 
                   <Divider sx={{ opacity: 0.2 }} />
 
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, fontSize: '1rem' }}>
-                    Its primary mission is to provide the highest freight and logistic education to our employees continuously mastering our craft. The program is designed for existing and onboarding employees to understand Boss Cargo's Brand DNA, culture, and equip them with the right skills for smart and sustainable operations.
+                    {SITE_CONTENT.careers.university.details}
                   </Typography>
 
                   <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
@@ -758,7 +759,7 @@ export default function JobPostingsPage() {
               </Box>
               <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto' }} />
               <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5 }}>
-                people@bosscargo.express
+                {SITE_CONTENT.careers.application.email}
               </Typography>
             </Paper>
           </Box>

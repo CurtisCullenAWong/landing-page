@@ -53,5 +53,23 @@ export const ollamaService = {
     });
     return response.json();
   },
+
+  /**
+   * Check if the service is available.
+   */
+  async checkStatus() {
+    try {
+      const response = await fetch(`${BASE_URL}/ollama/status`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000),
+      });
+      const data = await response.json();
+      return data.status === 'online';
+    } catch (e) {
+      return false;
+    }
+  },
 };
+
+
 

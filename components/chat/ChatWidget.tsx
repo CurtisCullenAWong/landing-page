@@ -29,6 +29,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Volume2, VolumeX, UserCircle, UserCircle2 } from 'lucide-react';
+
 
 export const ChatWidget = ({
   isOpen,
@@ -49,6 +51,167 @@ export const ChatWidget = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Speech State
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
+  const [voiceGender, setVoiceGender] = useState<'male' | 'female'>('female');
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [isServiceOnline, setIsServiceOnline] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const online = await ollamaService.checkStatus();
+      setIsServiceOnline(online);
+    };
+    checkStatus();
+    const timer = setInterval(checkStatus, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Dictate latest message if speech is enabled or toggled on/changed
+  useEffect(() => {
+    if (isSpeechEnabled && messages.length > 0) {
+      const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
+      if (lastAssistantMessage) {
+        speak(lastAssistantMessage.content);
+      }
+    } else if (!isSpeechEnabled) {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+  }, [isSpeechEnabled, voiceGender, isOpen]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setAvailableVoices(voices);
+        }
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+
+  const speak = (
+    text: string,
+    forceGender?: 'male' | 'female',
+    forceEnabled?: boolean
+  ) => {
+    const activeEnabled = forceEnabled !== undefined ? forceEnabled : isSpeechEnabled;
+    const activeGender = forceGender !== undefined ? forceGender : voiceGender;
+
+    if (!activeEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    // 1. Always get the freshest voice list directly from the API
+    const freshVoices = window.speechSynthesis.getVoices();
+    const voicePool = freshVoices.length > 0 ? freshVoices : availableVoices;
+
+    // Sync state if needed
+    if (freshVoices.length > 0 && availableVoices.length === 0) {
+      setAvailableVoices(freshVoices);
+    }
+
+    // 2. Thorough text clean
+    const cleanText = text
+      .replace(/[#*`_~]/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/⚠️|🤖|👤|✨|🚀|✅/g, '')
+      .replace(/https?:\/\/\S+/g, 'link')
+      .trim();
+
+    // 3. Language detection
+    let detectedLang = 'en';
+    const tlWords = ['mga', 'ang', 'ng', 'sa', 'ay', 'para', 'na', 'may', 'ni', 'po', 'opo', 'kumusta', 'salamat'];
+    const lowerText = cleanText.toLowerCase();
+    const tlMatch = tlWords.filter(w => new RegExp(`\\b${w}\\b`).test(lowerText)).length;
+    if (tlMatch >= 2) detectedLang = 'fil';
+
+    window.speechSynthesis.cancel();
+
+    // 4. Sentence splitting
+    const sentences = cleanText.split(/(?<=[.!?])\s+/);
+
+    // 5. Human-like American English voice selection
+    let targetVoice: SpeechSynthesisVoice | undefined;
+
+    if (detectedLang === 'fil') {
+      // Filipino: find a matching locale voice
+      targetVoice = voicePool.find(v =>
+        v.lang.startsWith('fil') || v.lang.startsWith('tl')
+      );
+    }
+
+    if (!targetVoice) {
+      const isAmericanEnglish = (v: SpeechSynthesisVoice) =>
+        v.lang === 'en-US' || v.lang === 'en_US';
+
+      // Female voice name keywords (American neural/natural voices)
+      const femaleKeywords = ['aria', 'jenny', 'ana', 'zira', 'samantha', 'emma', 'michelle',
+        'monica', 'ava', 'allison', 'susan', 'victoria', 'female'];
+
+      // Male voice name keywords (American neural/natural voices)
+      const maleKeywords = ['guy', 'davis', 'david', 'daniel', 'brian', 'andrew', 'ryan',
+        'jason', 'mark', 'eric', 'james', 'male', 'stefan'];
+
+      const genderKeywords = activeGender === 'female' ? femaleKeywords : maleKeywords;
+
+      const genderMatch = (v: SpeechSynthesisVoice) => {
+        const n = v.name.toLowerCase();
+        return genderKeywords.some(k => n.includes(k));
+      };
+
+      const isNeural = (v: SpeechSynthesisVoice) => {
+        const n = v.name.toLowerCase();
+        return n.includes('google') || n.includes('natural') ||
+          n.includes('neural') || n.includes('online');
+      };
+
+      const usVoices = voicePool.filter(isAmericanEnglish);
+      const googleUSVoices = usVoices.filter(v => v.name.toLowerCase().includes('google'));
+      const neuralUSVoices = usVoices.filter(isNeural);
+      const anyEnglish = voicePool.filter(v => v.lang.startsWith('en'));
+
+      // Priority order: Google US + gender → Google US any → Neural US + gender →
+      //                 Neural US any → US + gender → US any → English any
+      targetVoice =
+        googleUSVoices.find(genderMatch) ||
+        googleUSVoices[0] ||
+        neuralUSVoices.find(genderMatch) ||
+        neuralUSVoices[0] ||
+        usVoices.find(genderMatch) ||
+        usVoices[0] ||
+        anyEnglish.find(genderMatch) ||
+        anyEnglish[0] ||
+        voicePool[0];
+    }
+
+    // 6. Sequential playback with natural prosody
+    sentences.forEach((sentence) => {
+      if (!sentence.trim()) return;
+
+      const utterance = new SpeechSynthesisUtterance(sentence);
+      if (targetVoice) utterance.voice = targetVoice;
+
+      utterance.lang = targetVoice?.lang || (detectedLang === 'fil' ? 'fil-PH' : 'en-US');
+
+      // Slightly varied rate/pitch per sentence for more natural delivery
+      utterance.rate = 0.90 + (Math.random() * 0.08);
+      utterance.pitch = (activeGender === 'female' ? 1.05 : 0.92) + (Math.random() * 0.06);
+      utterance.volume = 1.0;
+
+      window.speechSynthesis.speak(utterance);
+    });
+  };
+
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -59,13 +222,16 @@ export const ChatWidget = ({
     }
   }, [messages, isOpen]);
 
-  const toggleChat = async () => {
+  const toggleChat = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (isOpen) {
       onToggle(false);
       setIsExpanded(false);
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       return;
     }
-
 
     // If it's the first time and we only have the default placeholder message
     if (messages.length === 1 && messages[0].role === 'assistant' && messages[0].content.includes("Hello! I'm your Boss Cargo Express assistant")) {
@@ -82,18 +248,22 @@ export const ChatWidget = ({
         if (response && (response.response || response.content || response.message?.content)) {
           const greeting = response.response || response.content || response.message?.content;
           setMessages([{ role: 'assistant', content: greeting }]);
+          if (isSpeechEnabled) speak(greeting);
         }
+
         onToggle(true);
       } catch (error: any) {
         console.error('Greeting error:', error);
         const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
         if (isFetchError) {
+          const errorMsg = "⚠️ **Connection Error**: I'm unable to reach my AI service. Please try again later.";
           setMessages([{
             role: 'assistant',
-            content: "⚠️ **Connection Error**: I'm unable to reach my AI service. Please try again later."
+            content: errorMsg
           }]);
+          if (isSpeechEnabled) speak(errorMsg);
         }
-        // On error, still open so the user sees the error message
+
         onToggle(true);
       } finally {
         setIsPreloading(false);
@@ -128,13 +298,16 @@ export const ChatWidget = ({
 
       if (response && response.message) {
         setMessages(prev => [...prev, response.message]);
+        if (isSpeechEnabled) speak(response.message.content);
       } else if (response && (response.content || response.response)) {
-        // Handle different possible response formats
+        const content = response.content || response.response;
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: response.content || response.response
+          content: content
         }]);
+        if (isSpeechEnabled) speak(content);
       }
+
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('Chat request aborted');
@@ -145,16 +318,18 @@ export const ChatWidget = ({
       } else {
         console.error('Chat error:', error);
         const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
+        const errorMsg = isFetchError
+          ? "⚠️ **Connection Error**: I'm unable to reach my AI service. Please ensure the server is running and accessible, then try again."
+          : "I'm sorry, I encountered an unexpected error. Please try again in a moment.";
 
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: isFetchError
-            ? "⚠️ **Connection Error**: I'm unable to reach my AI service. Please ensure the server is running and accessible, then try again."
-            : "I'm sorry, I encountered an unexpected error. Please try again in a moment."
+          content: errorMsg
         }]);
+        if (isSpeechEnabled) speak(errorMsg);
       }
-    } finally {
 
+    } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
@@ -164,6 +339,9 @@ export const ChatWidget = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
   };
 
@@ -180,7 +358,7 @@ export const ChatWidget = ({
         position: 'fixed',
         bottom: 20,
         right: 20,
-        zIndex: 9999,
+        zIndex: 11000,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-end',
@@ -234,7 +412,7 @@ export const ChatWidget = ({
               </Box>
               <Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                  Boss AI Assistant
+                  Bosco AI Assistant
                 </Typography>
                 <Typography variant="caption" sx={{ opacity: 0.8, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Box
@@ -242,28 +420,87 @@ export const ChatWidget = ({
                       width: 6,
                       height: 6,
                       borderRadius: '50%',
-                      bgcolor: '#4caf50',
+                      bgcolor: isServiceOnline === true ? '#4caf50' : (isServiceOnline === false ? '#f44336' : '#ff9800'),
+                      boxShadow: isServiceOnline === true ? '0 0 4px #4caf50' : 'none',
                     }}
                   />
-                  Always active
+                  {isServiceOnline === true ? 'Always active' : (isServiceOnline === false ? 'Service offline' : 'Checking status...')}
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <IconButton
-                size="small"
-                onClick={toggleExpand}
-                sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-              >
-                {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={toggleChat}
-                sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-              >
-                <X size={18} />
-              </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title={isSpeechEnabled ? "Turn Off Voice" : "Turn On Voice"} arrow placement="top">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const nextEnabled = !isSpeechEnabled;
+                      setIsSpeechEnabled(nextEnabled);
+                      if (nextEnabled) {
+                        const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
+                        if (lastMsg) speak(lastMsg.content, voiceGender, true);
+                      } else {
+                        window.speechSynthesis.cancel();
+                      }
+                    }}
+                    sx={{
+                      color: isSpeechEnabled ? 'inherit' : 'rgba(255,255,255,0.5)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {isSpeechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Tooltip title={`Switch to ${voiceGender === 'female' ? 'Male' : 'Female'} Narrator`} arrow placement="top">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const nextGender = voiceGender === 'female' ? 'male' : 'female';
+                      setVoiceGender(nextGender);
+                      if (isSpeechEnabled) {
+                        const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
+                        // Pass nextGender and forceEnabled=true to avoid stale closure
+                        if (lastMsg) speak(lastMsg.content, nextGender, true);
+                      }
+                    }}
+                    sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+                  >
+                    {voiceGender === 'female' ? <UserCircle2 size={18} /> : <UserCircle size={18} />}
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Box sx={{ width: 8 }} />
+
+              <Tooltip title={isExpanded ? "Minimize Chat" : "Expand Chat"} arrow placement="top">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={toggleExpand}
+                    sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+                  >
+                    {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                  </IconButton>
+                </span>
+              </Tooltip>
+
+              <Tooltip title="Close Chat" arrow placement="top">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => toggleChat(e)}
+                    sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+                  >
+                    <X size={18} />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </Box>
           </Box>
 
@@ -305,7 +542,6 @@ export const ChatWidget = ({
                       border: msg.content.includes('⚠️') ? '1px solid' : 'none',
                       borderColor: 'error.main',
                       boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-
                       overflowX: 'auto',
                       '& p': { m: 0 },
                       '& p + p': { mt: 1 },
