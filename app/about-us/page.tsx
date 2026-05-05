@@ -78,7 +78,8 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 }
+          py: { xs: 4, md: 0 },
+          position: 'relative'
         }}
       >
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
@@ -156,6 +157,18 @@ export default function AboutPage() {
             </Grid>
           </Grid>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Company Officials */}
@@ -167,7 +180,8 @@ export default function AboutPage() {
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: 'background.paper',
-          py: { xs: 4, md: 0 }
+          py: { xs: 4, md: 0 },
+          position: 'relative'
         }}
       >
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
@@ -263,6 +277,18 @@ export default function AboutPage() {
             ))}
           </Grid>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 3: Contact Information */}

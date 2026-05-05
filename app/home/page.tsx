@@ -68,25 +68,45 @@ export default function HomePage() {
             color: isDark ? 'text.primary' : 'primary.contrastText',
           }}
         >
-          {/* Background Image */}
+          {/* Background Image with Bottom Fade */}
           <Box
             sx={{
               position: 'absolute',
               inset: 0,
-              opacity: 0.25,
               zIndex: 0,
               overflow: 'hidden',
             }}
           >
-            <ImageWithFallback
-              src={IMAGE_URLS.HERO_BACKGROUND.src}
-              alt={getImageMetadata(IMAGE_URLS.HERO_BACKGROUND).alt}
-              layout="fill"
-              objectFit="cover"
-              style={{
-                objectPosition: 'left 1%',
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                opacity: 0.25,
+                zIndex: 0,
               }}
-              priority
+            >
+              <ImageWithFallback
+                src={IMAGE_URLS.HERO_BACKGROUND.src}
+                alt={getImageMetadata(IMAGE_URLS.HERO_BACKGROUND).alt}
+                layout="fill"
+                objectFit="cover"
+                style={{
+                  objectPosition: 'left 1%',
+                }}
+                priority
+              />
+            </Box>
+            {/* Smooth transition to the next section */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '20vh',
+                background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+                zIndex: 1,
+              }}
             />
           </Box>
           <Container

@@ -64,7 +64,8 @@ export default function PartnershipsPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 8, md: 0 }
+          py: { xs: 8, md: 0 },
+          position: 'relative'
         }}
       >
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
@@ -156,6 +157,20 @@ export default function PartnershipsPage() {
             </Grid>
           </Box>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: isDark 
+              ? `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`
+              : `linear-gradient(to bottom, transparent, ${theme.palette.grey[50]})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Recognition & Opportunities */}
@@ -292,6 +307,18 @@ export default function PartnershipsPage() {
             </Grid>
           </Grid>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
     </Box>
   );

@@ -55,7 +55,8 @@ export default function HistoryPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 }
+          py: { xs: 4, md: 0 },
+          position: 'relative'
         }}
       >
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
@@ -103,6 +104,18 @@ export default function HistoryPage() {
             </Grid>
           </Grid>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Early Milestones (Alternating) */}
@@ -173,6 +186,18 @@ export default function HistoryPage() {
             </Grid>
           </Stack>
         </PageContainer>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 3: Recent Milestones & Vision (Alternating) */}

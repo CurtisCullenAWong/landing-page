@@ -229,6 +229,20 @@ export default function JobPostingsPage() {
             </Grid>
           </Grid>
         </Container>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15vh',
+            background: isDark 
+              ? `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`
+              : `linear-gradient(to bottom, transparent, ${theme.palette.action.selected})`,
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
       </Box>
 
       {/* Slide 2: Career Opportunities (Conditional) */}
@@ -241,7 +255,8 @@ export default function JobPostingsPage() {
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: isDark ? 'background.default' : 'action.selected',
-            py: { xs: 8, md: 4 }
+            py: { xs: 8, md: 4 },
+            position: 'relative'
           }}
         >
           <Container maxWidth="lg">
@@ -405,6 +420,18 @@ export default function JobPostingsPage() {
               </Box>
             </Card>
           </Container>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '15vh',
+              background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          />
         </Box>
       )}
 
