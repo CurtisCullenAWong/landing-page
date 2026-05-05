@@ -332,4 +332,4 @@ For inquiries about Boss Cargo Express:
 
 ---
 
-**Boss Cargo Express** - Synergy beyond compare
+**Boss Cargo Express** - Logistics Driven by People

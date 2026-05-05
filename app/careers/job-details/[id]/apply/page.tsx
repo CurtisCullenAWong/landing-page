@@ -1,20 +1,11 @@
 import { Suspense } from 'react';
-import JobApplicationClient from './JobApplicationClient';
 import { JobDetailsSkeleton } from '@/components/loading';
+import JobApplicationClient from './JobApplicationClient';
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
-
-export default function Page({ params }: Props) {
+export default function Page() {
   return (
     <Suspense fallback={<JobDetailsSkeleton />}>
-      <JobApplicationContainer params={params} />
+      <JobApplicationClient />
     </Suspense>
   );
 }
-
-async function JobApplicationContainer({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return <JobApplicationClient id={id} />;
-}

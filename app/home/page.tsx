@@ -135,7 +135,7 @@ export default function HomePage() {
                 textShadow: '0 2px 10px rgba(0,0,0,0.1)',
               }}
             >
-              Synergy beyond compare
+              Logistics Driven by Culture
             </Typography>
 
             {/* Subheading / Description */}
@@ -151,16 +151,16 @@ export default function HomePage() {
                 opacity: 0.9,
               }}
             >
-              Boss Cargo Express is focused on building partnerships that inspire growth.
-              We take pride in what we do and are always there when you need us the most.
-              Our goal is to help you grow your business by working holistically with our partners and our team.
+              At Boss Cargo Express, we believe that taking care of our people is the key to delivering exceptional logistics.
+              By empowering our team and building partnerships that inspire growth, we ensure your business is
+              supported by a community that truly cares about your success.
             </Typography>
 
             {/* Buttons */}
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 component={Link}
-                href="/#careers"
+                href="/#why-us"
                 variant="contained"
                 size="large"
                 sx={{
@@ -180,7 +180,7 @@ export default function HomePage() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                View Open Careers
+                Why Boss Cargo?
               </Button>
 
               <Button
@@ -231,7 +231,7 @@ export default function HomePage() {
               <Grid container spacing={4} alignItems="center">
                 <Grid size={{ xs: 12, md: 7 }}>
                   <Typography variant="h2" sx={{ mb: 3, fontWeight: 600 }}>
-                    The Boss Cargo Philosophy
+                    A People-First Philosophy
                   </Typography>
                   <Paper
                     sx={{
@@ -243,7 +243,7 @@ export default function HomePage() {
                       variant="body1"
                       sx={{ fontSize: '1rem', lineHeight: 1.6 }}
                     >
-                      The heart of Boss Cargo Express is centered on businesses. We understand that you have your top priorities in order to stay competitive and financially sound. Outsource your logistics requirements to us so you can focus on your core. Our ability to integrate proven cargo handling expertise and provide flexible and personalized customer services enables Boss Cargo Express to deliver the most efficient and economical cargo solutions that is ideally fit to your needs.
+                      The heart of Boss Cargo Express is our people. We believe that a supported, empowered team is the foundation of a resilient logistics industry. By prioritizing the well-being and growth of our staff, we deliver the flexible, personalized, and efficient cargo solutions that keep your business competitive and financially sound. When we take care of our people, they take better care of you.
                     </Typography>
                   </Paper>
                 </Grid>
@@ -320,7 +320,7 @@ export default function HomePage() {
                   Partner with Boss Cargo Express
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
-                  We take pride in growing the business together with firms by being dependable, cost-effective, and on-time.
+                  We grow by empowering our people and our partners, ensuring a logistics experience that is as dependable as it is human.
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
                   <Button

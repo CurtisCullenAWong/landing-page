@@ -310,7 +310,8 @@ export default function AboutPage() {
           />
           <Grid container spacing={4} alignItems="center">
             {offices.map((office, index) => (
-              <React.Fragment key={index}>                {/* Left side: Contact Details */}
+              <React.Fragment key={index}>
+                {/* Left side: Contact Details */}
                 <Grid size={{ xs: 12, md: 5 }}>
                   <Stack spacing={2.5}>
                     <Box>

@@ -3,12 +3,13 @@ import { OllamaController } from '../../../../../backend/app/Controllers/OllamaC
 
 const controller = new OllamaController();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
-) {
-  const { path } = await params;
-  const endpoint = path[0];
+function getEndpoint(request: NextRequest) {
+  const segments = new URL(request.url).pathname.split('/').filter(Boolean);
+  return segments[segments.length - 1];
+}
+
+export async function GET(request: NextRequest) {
+  const endpoint = getEndpoint(request);
 
   try {
     switch (endpoint) {
@@ -24,12 +25,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
-) {
-  const { path } = await params;
-  const endpoint = path[0];
+export async function POST(request: NextRequest) {
+  const endpoint = getEndpoint(request);
   const body = await request.json();
 
   try {

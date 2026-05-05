@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useJobs } from '../../../../../contexts/JobContext';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState, useCallback } from 'react';
@@ -48,10 +49,11 @@ interface ApplicationFormData {
 }
 
 interface Props {
-    id: string;
 }
 
-export default function JobApplicationClient({ id }: Props) {
+export default function JobApplicationClient() {
+    const params = useParams<{ id: string }>();
+    const id = params?.id ?? '';
     const router = useRouter();
 
     const { getJobById, isLoading: contextLoading } = useJobs();
