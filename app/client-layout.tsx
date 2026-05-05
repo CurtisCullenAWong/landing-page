@@ -12,11 +12,13 @@ import { ChatWidget } from "@/components/chat/ChatWidget";
 import { AvatarOverlay } from "@/components/chat/AvatarOverlay";
 import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
+
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
@@ -55,8 +57,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
           {isSequencePage && (
             <>
-              <ChatWidget />
-              <AvatarOverlay />
+              <ChatWidget isOpen={isChatOpen} onToggle={setIsChatOpen} />
+              {isChatOpen && <AvatarOverlay />}
             </>
           )}
         </JobProvider>

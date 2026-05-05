@@ -30,9 +30,15 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-export const ChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ChatWidget = ({
+  isOpen,
+  onToggle
+}: {
+  isOpen: boolean;
+  onToggle: (open: boolean) => void;
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: "Hello! I'm your Boss Cargo Express assistant. How can I help you today?" }
@@ -55,10 +61,11 @@ export const ChatWidget = () => {
 
   const toggleChat = async () => {
     if (isOpen) {
-      setIsOpen(false);
+      onToggle(false);
       setIsExpanded(false);
       return;
     }
+
 
     // If it's the first time and we only have the default placeholder message
     if (messages.length === 1 && messages[0].role === 'assistant' && messages[0].content.includes("Hello! I'm your Boss Cargo Express assistant")) {
@@ -76,17 +83,24 @@ export const ChatWidget = () => {
           const greeting = response.response || response.content || response.message?.content;
           setMessages([{ role: 'assistant', content: greeting }]);
         }
-        setIsOpen(true);
-      } catch (error) {
+        onToggle(true);
+      } catch (error: any) {
         console.error('Greeting error:', error);
-        // On error, still open with fallback
-        setIsOpen(true);
+        const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
+        if (isFetchError) {
+          setMessages([{
+            role: 'assistant',
+            content: "⚠️ **Connection Error**: I'm unable to reach my AI service. Please try again later."
+          }]);
+        }
+        // On error, still open so the user sees the error message
+        onToggle(true);
       } finally {
         setIsPreloading(false);
         abortControllerRef.current = null;
       }
     } else {
-      setIsOpen(true);
+      onToggle(true);
     }
   };
 
@@ -126,16 +140,21 @@ export const ChatWidget = () => {
         console.log('Chat request aborted');
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: "Request cancelled."
+          content: "*Request cancelled.*"
         }]);
       } else {
         console.error('Chat error:', error);
+        const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
+
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later."
+          content: isFetchError
+            ? "⚠️ **Connection Error**: I'm unable to reach my AI service. Please ensure the server is running and accessible, then try again."
+            : "I'm sorry, I encountered an unexpected error. Please try again in a moment."
         }]);
       }
     } finally {
+
       setIsLoading(false);
       abortControllerRef.current = null;
     }
@@ -275,9 +294,18 @@ export const ChatWidget = () => {
                     sx={{
                       p: 1.5,
                       borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                      bgcolor: msg.role === 'user' ? 'primary.main' : (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-                      color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                      bgcolor: msg.role === 'user' ? 'primary.main' : (
+                        msg.content.includes('⚠️')
+                          ? (theme.palette.mode === 'dark' ? 'rgba(211, 47, 47, 0.2)' : 'rgba(211, 47, 47, 0.05)')
+                          : (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100')
+                      ),
+                      color: msg.role === 'user' ? 'primary.contrastText' : (
+                        msg.content.includes('⚠️') ? 'error.main' : 'text.primary'
+                      ),
+                      border: msg.content.includes('⚠️') ? '1px solid' : 'none',
+                      borderColor: 'error.main',
                       boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+
                       overflowX: 'auto',
                       '& p': { m: 0 },
                       '& p + p': { mt: 1 },
@@ -384,9 +412,9 @@ export const ChatWidget = () => {
               slotProps={{
                 input: {
                   endAdornment: (
-                    <Tooltip 
-                      title={isLoading ? "Stop Generating" : "Send Message"} 
-                      placement="top" 
+                    <Tooltip
+                      title={isLoading ? "Stop Generating" : "Send Message"}
+                      placement="top"
                       arrow
                       slotProps={{
                         popper: {
