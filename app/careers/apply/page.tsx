@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { useState, useCallback } from 'react';
-import { ArrowLeft, Upload, FileText, Link as LinkIcon, X } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { ArrowLeft, Upload, FileText, Link as LinkIcon, X, ChevronRight, ShieldCheck, Info } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import {
   Box,
@@ -23,6 +23,8 @@ import {
   IconButton,
   Divider,
   Stack,
+  alpha,
+  Breadcrumbs,
 } from '@mui/material';
 import { usePageTitle } from '@/lib/usePageTitle';
 
@@ -37,6 +39,34 @@ interface ApplicationFormData {
   portfolio_url: string;
 }
 
+// Shared "Corner Brackets" component for architectural emphasis
+const CornerBrackets = ({ color }: { color: string }) => (
+  <>
+    <Box sx={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 16,
+      height: 16,
+      borderTop: `2px solid ${color}`,
+      borderLeft: `2px solid ${color}`,
+      borderTopLeftRadius: 2,
+      zIndex: 2
+    }} />
+    <Box sx={{
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 16,
+      height: 16,
+      borderBottom: `2px solid ${color}`,
+      borderRight: `2px solid ${color}`,
+      borderBottomRightRadius: 2,
+      zIndex: 2
+    }} />
+  </>
+);
+
 export default function GeneralApplicationPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +78,17 @@ export default function GeneralApplicationPage() {
   const [isUploading, setIsUploading] = useState(false);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+
+  // Defensive Theme Extraction
+  const primaryMain = theme.palette.primary?.main || '#00A39D';
+  const primaryDark = theme.palette.primary?.dark || '#007A76';
+  const tertiaryMain = (theme.palette as any).tertiary?.main || '#FCE200';
+  const bgColor = theme.palette.background?.default || '#ffffff';
+
+  // Ensure page starts at the top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     first_name: '',
@@ -128,7 +169,7 @@ export default function GeneralApplicationPage() {
     }
   };
 
-  usePageTitle('General Application');
+  usePageTitle('Employment Application');
 
   const handleInputChange = (field: keyof ApplicationFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -224,35 +265,50 @@ export default function GeneralApplicationPage() {
 
   if (submitSuccess && applicationId) {
     return (
-      <Box sx={{ py: 8 }}>
+      <Box sx={{ py: 12, minHeight: '100vh', bgcolor: bgColor }}>
         <Container maxWidth="md">
-          <Card>
-            <CardContent sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, color: 'success.main' }}>
-                Application Submitted Successfully!
+          <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 4 }}>
+            <CornerBrackets color={tertiaryMain} />
+            <CardContent sx={{ p: 6, textAlign: 'center' }}>
+              <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+                <Box sx={{ p: 2, bgcolor: alpha('success.main', 0.1), color: 'success.main', borderRadius: '50%' }}>
+                  <ShieldCheck size={64} />
+                </Box>
+              </Box>
+              <Typography variant="h3" sx={{ mb: 2, fontWeight: 900, color: 'success.main', letterSpacing: -1 }}>
+                Submission Successful
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                Thank you for your interest in Boss Cargo Express. Your general application has been received and is under review.
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 4, fontWeight: 400 }}>
+                Thank you for your interest in Boss Cargo Express. Your professional application has been formally received and queued for review by our talent acquisition team.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                Your application ID: <strong>{applicationId}</strong>
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Paper variant="outlined" sx={{ p: 2, mb: 4, bgcolor: alpha(bgColor, 0.5), borderRadius: 2 }}>
+                <Typography variant="caption" sx={{ textTransform: 'uppercase', fontWeight: 800, color: 'text.disabled', display: 'block', mb: 0.5 }}>
+                  Application Reference ID
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 800, fontFamily: 'monospace', letterSpacing: 1 }}>
+                  {applicationId}
+                </Typography>
+              </Paper>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
                 <Button
                   component={Link}
                   href={`/my-application/${applicationId}`}
                   variant="contained"
+                  size="large"
+                  sx={{ px: 4, fontWeight: 700 }}
                 >
-                  View My Application
+                  View My Status
                 </Button>
                 <Button
                   component={Link}
                   href="/careers"
                   variant="outlined"
+                  size="large"
+                  sx={{ px: 4, fontWeight: 700 }}
                 >
-                  Browse Careers
+                  Return to Careers
                 </Button>
-              </Box>
+              </Stack>
             </CardContent>
           </Card>
         </Container>
@@ -261,125 +317,178 @@ export default function GeneralApplicationPage() {
   }
 
   return (
-    <Box sx={{ py: 8 }}>
+    <Box sx={{ py: { xs: 4, md: 8 }, minHeight: '100vh', bgcolor: bgColor }}>
       <Container maxWidth="md">
+        {/* Navigation Breadcrumbs */}
+        <Breadcrumbs
+          separator={<ChevronRight size={14} />}
+          sx={{ mb: 4, '& .MuiBreadcrumbs-li': { color: 'text.secondary' } }}
+        >
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Home</Typography>
+          </Link>
+          <Link href="/careers" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Careers</Typography>
+          </Link>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: primaryMain }}>Employment Application</Typography>
+        </Breadcrumbs>
+
         {/* Back Button */}
         <Button
           component={Link}
           href="/careers"
-          startIcon={<ArrowLeft size={20} />}
-          sx={{ mb: 4 }}
+          variant="text"
+          startIcon={<ArrowLeft size={18} />}
+          sx={{ mb: 4, fontWeight: 700, color: 'text.secondary', '&:hover': { color: primaryMain } }}
         >
-          Back to Careers
+          Back to Career Listings
         </Button>
 
-        {/* General Application Info Card */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
-              General Application
+        {/* Formal Header Section */}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h2" sx={{ fontWeight: 900, mb: 1, letterSpacing: -2, textTransform: 'uppercase', color: primaryMain }}>
+            Employment Application
+          </Typography>
+          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
+            Submit your professional credentials for future consideration at Boss Cargo Express.
+          </Typography>
+        </Box>
+
+        {/* Formal Guidance Section */}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 3,
+            mb: 4,
+            bgcolor: alpha(primaryMain, 0.03),
+            borderColor: alpha(primaryMain, 0.2),
+            borderRadius: 2,
+            display: 'flex',
+            gap: 3,
+            alignItems: 'flex-start'
+          }}
+        >
+          <Box sx={{ p: 1, bgcolor: primaryMain, color: 'white', borderRadius: 1.5, display: 'flex' }}>
+            <Info size={24} />
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: primaryDark, mb: 0.5 }}>
+              Professional Consideration
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Don't see the right position? Submit a general application and we'll keep you in mind for future opportunities.
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              Our talent acquisition team carefully reviews every general submission. If your skills and professional experience align with future organizational requirements, a representative will contact you directly for a formal interview.
             </Typography>
-          </CardContent>
-        </Card>
+          </Box>
+        </Paper>
 
         {/* Application Form */}
-        <Card>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-              Application Form
-            </Typography>
+        <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 3, border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <CornerBrackets color={tertiaryMain} />
+          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, letterSpacing: -0.5 }}>
+                Candidate Information
+              </Typography>
+              <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                Personal & Contact Details
+              </Typography>
+              <Divider sx={{ mt: 2, opacity: 0.4 }} />
+            </Box>
 
             {submitError && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }}>
                 {submitError}
               </Alert>
             )}
 
             <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {/* Name Fields */}
-                <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
                   <TextField
                     fullWidth
                     label="First Name"
+                    variant="outlined"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
                     required
                     disabled={isSubmitting}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <TextField
                     fullWidth
                     label="Last Name"
+                    variant="outlined"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
                     required
                     disabled={isSubmitting}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </Box>
 
                 {/* Contact Fields */}
-                <TextField
-                  fullWidth
-                  label="Email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                />
-                <TextField
-                  fullWidth
-                  label="Phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  disabled={isSubmitting}
-                />
+                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    type="email"
+                    variant="outlined"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    type="tel"
+                    variant="outlined"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    disabled={isSubmitting}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                </Box>
 
                 {/* Resume Section Container */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
-                    Resume Upload {!formData.resume_url.trim() && !resumeFile && <span style={{ color: 'red' }}>*</span>}
-                  </Typography>
+                <Box>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, letterSpacing: -0.2 }}>
+                      Professional Credentials (Resume/CV) {!formData.resume_url.trim() && !resumeFile && <span style={{ color: 'red' }}>*</span>}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Please provide your professional history in PDF format or via a secure link.
+                    </Typography>
+                  </Box>
 
-                  <Stack spacing={2}>
-
+                  <Stack spacing={3}>
                     {/* Option A: File Upload */}
                     <Box sx={{ position: 'relative' }}>
                       {resumeFile ? (
-                        /* 1. Selected File View */
                         <Paper
                           variant="outlined"
                           sx={{
-                            p: 2,
+                            p: 3,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            bgcolor: isDark ? 'action.selected' : 'primary.50',
-                            borderColor: 'primary.main',
+                            bgcolor: alpha(primaryMain, 0.05),
+                            borderColor: primaryMain,
+                            borderRadius: 2
                           }}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box
-                              sx={{
-                                p: 1,
-                                borderRadius: 1,
-                                bgcolor: 'background.paper',
-                                color: 'primary.main',
-                                display: 'flex'
-                              }}
-                            >
+                            <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.paper', color: primaryMain, display: 'flex', boxShadow: 1 }}>
                               <FileText size={24} />
                             </Box>
                             <Box>
-                              <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 200 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                 {resumeFile.name}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                                Document Type: PDF • Size: {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
                               </Typography>
                             </Box>
                           </Box>
@@ -388,171 +497,176 @@ export default function GeneralApplicationPage() {
                             size="small"
                             onClick={() => setResumeFile(null)}
                             disabled={isSubmitting || isUploading}
-                            color="error"
+                            sx={{ color: 'error.main', '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.1) } }}
                           >
-                            <X size={18} />
+                            <X size={20} />
                           </IconButton>
                         </Paper>
                       ) : (
-                        /* 2. Dropzone View */
                         <Paper
                           {...getRootProps()}
                           variant="outlined"
                           sx={{
-                            p: 4,
+                            p: 5,
                             borderStyle: 'dashed',
                             borderWidth: 2,
-                            borderColor: isDragActive ? 'primary.main' : 'divider',
-                            bgcolor: isDragActive
-                              ? (isDark ? 'rgba(25, 118, 210, 0.08)' : 'rgba(25, 118, 210, 0.04)')
-                              : 'transparent',
+                            borderRadius: 2,
+                            borderColor: isDragActive ? primaryMain : 'divider',
+                            bgcolor: isDragActive ? alpha(primaryMain, 0.05) : 'transparent',
                             cursor: (isSubmitting || isUploading || formData.resume_url) ? 'not-allowed' : 'pointer',
                             textAlign: 'center',
-                            transition: 'all 0.2s ease-in-out',
-                            opacity: formData.resume_url ? 0.5 : 1, // Dim if URL is present
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            opacity: formData.resume_url ? 0.5 : 1,
                             '&:hover': {
-                              borderColor: (isSubmitting || isUploading || formData.resume_url)
-                                ? 'divider'
-                                : 'primary.main',
-                              bgcolor: (isSubmitting || isUploading || formData.resume_url)
-                                ? 'transparent'
-                                : (isDark ? 'action.hover' : 'grey.50'),
+                              borderColor: (isSubmitting || isUploading || formData.resume_url) ? 'divider' : primaryMain,
+                              bgcolor: (isSubmitting || isUploading || formData.resume_url) ? 'transparent' : alpha(primaryMain, 0.02),
                             },
                           }}
                         >
                           <input {...getInputProps({ disabled: !!formData.resume_url })} />
                           <Box sx={{
                             mx: 'auto',
-                            width: 48,
-                            height: 48,
-                            borderRadius: '50%',
+                            width: 56,
+                            height: 56,
+                            borderRadius: 2,
                             bgcolor: isDark ? 'action.hover' : 'grey.100',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             mb: 2,
-                            color: isDragActive ? 'primary.main' : 'text.secondary'
+                            color: isDragActive ? primaryMain : 'text.secondary'
                           }}>
-                            <Upload size={24} />
+                            <Upload size={28} />
                           </Box>
-
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {isDragActive ? 'Drop PDF here' : 'Click to upload or drag and drop'}
+                          <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
+                            {isDragActive ? 'Release to Upload PDF' : 'Upload Resume/CV'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            PDF (max 10MB)
+                            PDF format only • Maximum file size: 10MB
                           </Typography>
                         </Paper>
                       )}
 
-                      {/* Progress Bar (Absolute positioned or integrated) */}
                       {isUploading && (
-                        <Box sx={{ mt: 1 }}>
-                          <LinearProgress variant="determinate" value={uploadProgress} sx={{ borderRadius: 1, height: 6 }} />
-                          <Typography variant="caption" color="text.secondary" align="right" sx={{ display: 'block', mt: 0.5 }}>
-                            {uploadProgress}%
+                        <Box sx={{ mt: 2 }}>
+                          <LinearProgress variant="determinate" value={uploadProgress} sx={{ borderRadius: 1, height: 6, bgcolor: alpha(primaryMain, 0.1) }} />
+                          <Typography variant="caption" color="text.secondary" align="right" sx={{ display: 'block', mt: 1, fontWeight: 700 }}>
+                            Transferring Data: {uploadProgress}%
                           </Typography>
                         </Box>
                       )}
                     </Box>
 
-                    {/* Clear "OR" Divider */}
-                    <Divider sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>OR</Divider>
+                    <Divider sx={{ color: 'text.disabled', fontSize: '0.75rem', fontWeight: 800 }}>OR PROVIDE EXTERNAL LINK</Divider>
 
-                    {/* Option B: URL Input */}
                     <TextField
                       fullWidth
-                      size="small"
-                      label="Link to Resume"
-                      placeholder="https://drive.google.com/file/..."
+                      label="Document URL"
+                      placeholder="Enter a secure link to your resume (e.g., Google Drive, Dropbox)"
+                      variant="outlined"
                       value={formData.resume_url}
                       onChange={(e) => handleInputChange('resume_url', e.target.value)}
-                      disabled={isSubmitting || isUploading || !!resumeFile} // Disable if file selected
+                      disabled={isSubmitting || isUploading || !!resumeFile}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LinkIcon size={18} />
+                            <LinkIcon size={18} color={primaryMain} />
                           </InputAdornment>
                         ),
+                        sx: { borderRadius: 2 }
                       }}
-                      helperText={
-                        !!resumeFile
-                          ? "Remove the uploaded file above to use a URL."
-                          : "Useful for Google Drive, Dropbox, or Portfolio links."
-                      }
+                      helperText={!!resumeFile ? "Remove the attached file to utilize a URL." : "Ensure the document has appropriate viewing permissions."}
                     />
                   </Stack>
                 </Box>
 
                 {/* Cover Letter */}
-                <TextField
-                  fullWidth
-                  label="Cover Letter"
-                  value={formData.cover_letter}
-                  onChange={(e) => handleInputChange('cover_letter', e.target.value)}
-                  multiline
-                  rows={6}
-                  disabled={isSubmitting}
-                  placeholder="Tell us about yourself and why you're interested in joining Boss Cargo Express..."
-                />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5 }}>
+                    Professional Summary / Cover Letter
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    label="Executive Summary"
+                    variant="outlined"
+                    value={formData.cover_letter}
+                    onChange={(e) => handleInputChange('cover_letter', e.target.value)}
+                    multiline
+                    rows={8}
+                    disabled={isSubmitting}
+                    placeholder="Provide a brief overview of your professional background and motivation for joining Boss Cargo Express..."
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                </Box>
 
-                {/* LinkedIn URL */}
-                <TextField
-                  fullWidth
-                  label="LinkedIn Profile URL (Optional)"
-                  value={formData.linkedin_url}
-                  onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="https://linkedin.com/in/yourprofile"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LinkIcon size={20} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                {/* Portfolio URL */}
-                <TextField
-                  fullWidth
-                  label="Portfolio URL (Optional)"
-                  value={formData.portfolio_url}
-                  onChange={(e) => handleInputChange('portfolio_url', e.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="https://yourportfolio.com"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LinkIcon size={20} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                {/* URLs Section */}
+                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
+                  <TextField
+                    fullWidth
+                    label="LinkedIn Profile"
+                    variant="outlined"
+                    value={formData.linkedin_url}
+                    onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="https://linkedin.com/in/profile"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LinkIcon size={18} color={primaryMain} />
+                        </InputAdornment>
+                      ),
+                      sx: { borderRadius: 2 }
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Professional Portfolio"
+                    variant="outlined"
+                    value={formData.portfolio_url}
+                    onChange={(e) => handleInputChange('portfolio_url', e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="https://yourportfolio.com"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LinkIcon size={18} color={primaryMain} />
+                        </InputAdornment>
+                      ),
+                      sx: { borderRadius: 2 }
+                    }}
+                  />
+                </Box>
 
                 {/* Submit Button */}
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 4, mt: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
                   <Button
                     component={Link}
                     href="/careers"
-                    variant="outlined"
+                    variant="text"
                     disabled={isSubmitting}
+                    sx={{ fontWeight: 700, px: 3 }}
                   >
-                    Cancel
+                    Discard
                   </Button>
                   <Button
                     type="submit"
                     variant="contained"
                     disabled={isSubmitting}
-                    startIcon={isSubmitting ? <CircularProgress size={20} /> : <Upload size={20} />}
+                    size="large"
+                    startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Upload size={20} />}
+                    sx={{ px: 5, fontWeight: 800, borderRadius: 2 }}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                    {isSubmitting ? 'Processing Submission...' : 'Submit Application'}
                   </Button>
                 </Box>
               </Box>
             </form>
           </CardContent>
         </Card>
+
+        <Typography variant="caption" color="text.disabled" sx={{ mt: 4, display: 'block', textAlign: 'center', fontWeight: 600 }}>
+          By submitting this application, you authorize Boss Cargo Express to process your personal data for recruitment purposes in accordance with our Privacy Policy.
+        </Typography>
       </Container>
     </Box>
   );

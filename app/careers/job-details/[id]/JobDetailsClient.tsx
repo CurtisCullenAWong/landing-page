@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useJobs, Job } from '../../../../contexts/JobContext';
-import { MapPin, Briefcase, Clock, ArrowLeft, Banknote, FileText } from 'lucide-react';
+import { MapPin, Briefcase, Clock, ArrowLeft, Banknote, FileText, ChevronRight, Calendar } from 'lucide-react';
 import {
   Box,
   Container,
@@ -15,14 +15,44 @@ import {
   List,
   ListItem,
   ListItemText,
+  Breadcrumbs,
+  alpha,
+  Divider,
+  Stack,
+  Paper,
 } from '@mui/material';
 import { JobDetailsSkeleton } from '@/components/loading';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { usePageTitle } from '../../../../lib/usePageTitle';
 
-interface Props {
-}
+// Shared "Corner Brackets" component for architectural emphasis
+const CornerBrackets = ({ color }: { color: string }) => (
+  <>
+    <Box sx={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 16,
+      height: 16,
+      borderTop: `2px solid ${color}`,
+      borderLeft: `2px solid ${color}`,
+      borderTopLeftRadius: 2,
+      zIndex: 2
+    }} />
+    <Box sx={{
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 16,
+      height: 16,
+      borderBottom: `2px solid ${color}`,
+      borderRight: `2px solid ${color}`,
+      borderBottomRightRadius: 2,
+      zIndex: 2
+    }} />
+  </>
+);
 
 export default function JobDetailsClient() {
   const params = useParams<{ id: string }>();
@@ -31,6 +61,15 @@ export default function JobDetailsClient() {
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const theme = useTheme();
+
+  // Ensure page starts at the top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const primaryMain = theme.palette.primary?.main || '#00A39D';
+  const tertiaryMain = (theme.palette as any).tertiary?.main || '#FCE200';
+  const bgColor = theme.palette.background?.default || '#ffffff';
 
   useEffect(() => {
     if (!id) {
@@ -158,16 +197,16 @@ export default function JobDetailsClient() {
 
   if (!job) {
     return (
-      <Box sx={{ py: 8 }}>
-        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-          <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
-            Job Not Found
+      <Box sx={{ py: 12, minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
+        <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
+          <Typography variant="h3" sx={{ mb: 2, fontWeight: 900, letterSpacing: -1 }}>
+            Position Not Found
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            The position you're looking for doesn't exist.
+            The career opportunity you are seeking is either no longer available or has been relocated.
           </Typography>
-          <Button component={Link} href="/careers" variant="contained">
-            View All Positions
+          <Button component={Link} href="/careers" variant="contained" size="large" sx={{ px: 4, fontWeight: 700 }}>
+            Return to Career Listings
           </Button>
         </Container>
       </Box>
@@ -175,87 +214,158 @@ export default function JobDetailsClient() {
   }
 
   return (
-    <Box sx={{ py: 8 }}>
+    <Box sx={{ py: { xs: 4, md: 8 }, bgcolor: bgColor, minHeight: '100vh' }}>
       <Container maxWidth="md">
-        <Button component={Link} href="/careers" startIcon={<ArrowLeft size={20} />} sx={{ mb: 4 }}>
-          Back to All Positions
+        {/* Navigation Breadcrumbs */}
+        <Breadcrumbs 
+          separator={<ChevronRight size={14} />} 
+          sx={{ mb: 4, '& .MuiBreadcrumbs-li': { color: 'text.secondary' } }}
+        >
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Home</Typography>
+          </Link>
+          <Link href="/careers" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Careers</Typography>
+          </Link>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: primaryMain }}>Position Specification</Typography>
+        </Breadcrumbs>
+
+        <Button 
+          component={Link} 
+          href="/careers" 
+          variant="text"
+          startIcon={<ArrowLeft size={18} />} 
+          sx={{ mb: 4, fontWeight: 700, color: 'text.secondary', '&:hover': { color: primaryMain } }}
+        >
+          Back to Career Listings
         </Button>
-        <Card sx={{ mb: 4 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h3" sx={{ mb: 3, fontWeight: 700 }}>
-              {job.title}
-            </Typography>
 
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Briefcase size={18} color={theme.palette.primary.main} />
-                <Typography variant="body2">{job.department}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <MapPin size={18} color={theme.palette.primary.main} />
-                <Typography variant="body2">{job.location}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Clock size={18} color={theme.palette.primary.main} />
-                <Typography variant="body2">{job.type}</Typography>
-              </Box>
-              {job.salary && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Banknote size={18} color={theme.palette.primary.main} />
-                  <Typography variant="body2">{job.salary}</Typography>
-                </Box>
-              )}
+        {/* formal header section */}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, letterSpacing: -2, textTransform: 'uppercase', color: primaryMain }}>
+            {job.title}
+          </Typography>
+          
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ color: 'text.secondary' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Briefcase size={18} color={primaryMain} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.department}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <MapPin size={18} color={primaryMain} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.location}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Clock size={18} color={primaryMain} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.type}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Calendar size={18} color={primaryMain} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Posted: {job.postedDate}</Typography>
+            </Box>
+          </Stack>
+        </Box>
+
+        <Card sx={{ position: 'relative', boxShadow: 12, borderRadius: 3, border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <CornerBrackets color={tertiaryMain} />
+          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+            
+            {/* Overview Section */}
+            <Box sx={{ mb: 6 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+                Position Overview
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary', whiteSpace: 'pre-wrap' }}>
+                {job.description}
+              </Typography>
             </Box>
 
-            <Typography variant="body1" sx={{ mb: 4, whiteSpace: 'pre-wrap' }}>
-              {job.description}
-            </Typography>
+            <Divider sx={{ mb: 6, opacity: 0.5 }} />
 
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                Responsibilities
+            {/* Responsibilities Section */}
+            <Box sx={{ mb: 6 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+                Key Responsibilities
               </Typography>
-              <List>
+              <List sx={{ p: 0 }}>
                 {job.responsibilities.map((responsibility, index) => (
-                  <ListItem key={index} sx={{ py: 0.5 }}>
-                    <ListItemText primary={responsibility} />
+                  <ListItem key={index} sx={{ py: 1.5, px: 0, alignItems: 'flex-start' }}>
+                    <Box sx={{ mt: 1, mr: 2, width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, flexShrink: 0 }} />
+                    <ListItemText 
+                      primary={responsibility} 
+                      primaryTypographyProps={{ variant: 'body1', sx: { fontWeight: 500, color: 'text.primary' } }} 
+                    />
                   </ListItem>
                 ))}
               </List>
             </Box>
 
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                Requirements
+            <Divider sx={{ mb: 6, opacity: 0.5 }} />
+
+            {/* Requirements Section */}
+            <Box sx={{ mb: 6 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+                Professional Requirements
               </Typography>
-              <List>
+              <List sx={{ p: 0 }}>
                 {job.requirements.map((requirement, index) => (
-                  <ListItem key={index} sx={{ py: 0.5 }}>
-                    <ListItemText primary={requirement} />
+                  <ListItem key={index} sx={{ py: 1.5, px: 0, alignItems: 'flex-start' }}>
+                    <Box sx={{ mt: 1, mr: 2, width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, flexShrink: 0 }} />
+                    <ListItemText 
+                      primary={requirement} 
+                      primaryTypographyProps={{ variant: 'body1', sx: { fontWeight: 500, color: 'text.primary' } }} 
+                    />
                   </ListItem>
                 ))}
               </List>
             </Box>
 
-            {job.application_url && (
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                  Apply Now
-                </Typography>
-                <Button
-                  variant="contained"
-                  href={job.application_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  startIcon={<FileText size={18} />}
-                >
-                  External Application
-                </Button>
-              </Box>
+            {job.salary && (
+              <>
+                <Divider sx={{ mb: 6, opacity: 0.5 }} />
+                <Box sx={{ mb: 6 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, letterSpacing: -0.5 }}>
+                    Compensation
+                  </Typography>
+                  <Paper variant="outlined" sx={{ p: 2, display: 'inline-flex', alignItems: 'center', gap: 1.5, bgcolor: alpha(primaryMain, 0.03), borderColor: alpha(primaryMain, 0.2) }}>
+                    <Banknote size={24} color={primaryMain} />
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{job.salary}</Typography>
+                  </Paper>
+                </Box>
+              </>
             )}
+
+            <Box sx={{ pt: 4, mt: 4, borderTop: `1px solid ${theme.palette.divider}`, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+              <Button
+                component={Link}
+                href={job.application_url || `/careers/apply?jobId=${job.id}`}
+                variant="contained"
+                size="large"
+                fullWidth={false}
+                sx={{ px: 6, py: 1.5, fontWeight: 800, borderRadius: 2 }}
+                startIcon={<FileText size={20} />}
+                target={job.application_url ? "_blank" : undefined}
+                rel={job.application_url ? "noopener noreferrer" : undefined}
+              >
+                Submit Application
+              </Button>
+              <Button
+                component={Link}
+                href="/careers"
+                variant="outlined"
+                size="large"
+                sx={{ px: 4, py: 1.5, fontWeight: 700, borderRadius: 2 }}
+              >
+                Return to Listings
+              </Button>
+            </Box>
           </CardContent>
         </Card>
+
+        <Typography variant="caption" color="text.disabled" sx={{ mt: 4, display: 'block', textAlign: 'center', fontWeight: 600 }}>
+          Boss Cargo Express is an equal opportunity employer. We value diversity and are committed to creating an inclusive environment for all employees.
+        </Typography>
       </Container>
     </Box>
   );
-}
+}
