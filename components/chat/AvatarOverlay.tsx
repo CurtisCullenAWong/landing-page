@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useGLTF, Float, PerspectiveCamera, Stage, Center, useAnimations } from '@react-three/drei';
+import { useGLTF, Float, PerspectiveCamera, Stage, Center } from '@react-three/drei';
+import { SkeletonUtils } from 'three-stdlib';
+
 
 // Abstract squiggly paths for morphing - more organic and abstract
 const SQUIGGLY_PATHS = [
@@ -35,7 +37,10 @@ const SECTION_CHANGE_DEBOUNCE = 100; // ms to wait before committing to a sectio
 // Sub-component for the Avatar with refined animation logic and modern Three.js practices
 const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
   const group = useRef<THREE.Group>(null);
-  const { scene, animations } = useGLTF('/models/avatar.glb');
+  const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
+
+  // Clone the scene to prevent cumulative offsets when navigating
+  const scene = useMemo(() => SkeletonUtils.clone(originalScene), [originalScene]);
 
   // Manual Mixer and Timer to avoid THREE.Clock deprecation and fix playback
   const [mixer] = useState(() => new THREE.AnimationMixer(scene));
@@ -46,6 +51,7 @@ const AvatarModel = ({ sectionIndex }: { sectionIndex: number }) => {
       return null;
     }
   }, []);
+
 
   const currentActionRef = useRef<THREE.AnimationAction | null>(null);
 
