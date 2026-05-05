@@ -177,522 +177,363 @@ export default function JobPostingsPage() {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: 'calc(100vh - 80px)',
-        display: 'flex',
-        alignItems: 'center',
-        py: { xs: 8, md: 0 }
-      }}
-    >
-      <Container maxWidth="lg">
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" sx={{ mb: 2, fontWeight: 700 }}>
-            Join Our Team
+    <Box>
+      {/* Slide 1: Professional Development (Boss Cargo University) */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          py: { xs: 8, md: 0 }
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography variant="h3" sx={{ mb: 6, fontWeight: 700, textAlign: 'center', color: 'primary.main' }}>
+            Professional Development
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '800px', mx: 'auto', mb: 4 }}>
-            Explore exciting career opportunities at Boss Cargo Express. We're looking for talented
-            individuals to help us shape the future of logistics. For Job and Intern Inquiries: please write to people@bosscargo.express
-          </Typography>
-        </Box>
-
-        {/* Jobs Count */}
-        <Paper
-          sx={{
-            p: 3,
-            mb: 4,
-            bgcolor: isDark ? 'action.hover' : 'action.selected',
-            textAlign: 'center',
-          }}
-        >
-          <Typography
-            variant="h5"
-            sx={{ ml: 1, mr: 1, display: 'inline', color: 'text.primary' }}
-          >
-            Open Position(s):
-          </Typography>
-          <Typography
-            variant="h3"
-            sx={{ color: 'primary.main', fontWeight: 700, display: 'inline' }}
-          >
-            {filteredAndSortedJobs.length}
-          </Typography>
-        </Paper>
-
-        {/* Job Listings */}
-        {activeJobs.length > 0 ? (
-          <Card>
-            {/* Table Title */}
-            <Box
-              sx={{
-                px: 3,
-                py: 2,
-                bgcolor: isDark ? 'primary.dark' : 'primary.main',
-                color: isDark ? 'text.primary' : 'primary.contrastText',
-              }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                Careers ({filteredAndSortedJobs.length} of {activeJobs.length})
-              </Typography>
-            </Box>
-
-            {/* Search and Filters */}
-            <Paper sx={{ p: 3, mb: 0, borderRadius: 0 }}>
-              {/* Expandable Header */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                }}
-                onClick={() => setFiltersExpanded(!filtersExpanded)}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Search size={20} style={{ color: theme.palette.text.secondary }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                    Search & Filter
-                  </Typography>
-                  {(searchQuery || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        ml: 1,
-                        px: 1,
-                        py: 0.25,
-                        borderRadius: 1,
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {[
-                        searchQuery ? 'Search' : null,
-                        filterDepartment !== 'all' ? 'Dept' : null,
-                        filterType !== 'all' ? 'Type' : null,
-                        filterLocation !== 'all' ? 'Loc' : null,
-                      ].filter(Boolean).length} active
-                    </Typography>
-                  )}
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {(searchQuery || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleResetFilters();
-                      }}
-                      startIcon={<X size={16} />}
-                      sx={{ mr: 1 }}
-                    >
-                      Reset
-                    </Button>
-                  )}
-                  {filtersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </Box>
-              </Box>
-
-              {/* Expandable Content */}
-              <Collapse in={filtersExpanded}>
-                <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
-                  <Grid container spacing={2} alignItems="flex-end">
-                    {/* Search */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Search jobs by title, department, location..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          setPage(0);
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Search size={20} />
-                            </InputAdornment>
-                          ),
-                        }}
-                        size="small"
-                      />
-                    </Grid>
-
-                    {/* Department Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Department</InputLabel>
-                        <Select
-                          value={filterDepartment}
-                          label="Department"
-                          onChange={(e) => {
-                            setFilterDepartment(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueDepartments.map((dept) => (
-                            <MenuItem key={dept} value={dept}>
-                              {dept}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    {/* Type Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Type</InputLabel>
-                        <Select
-                          value={filterType}
-                          label="Type"
-                          onChange={(e) => {
-                            setFilterType(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueTypes.map((type) => (
-                            <MenuItem key={type} value={type}>
-                              {type}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    {/* Location Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Location</InputLabel>
-                        <Select
-                          value={filterLocation}
-                          label="Location"
-                          onChange={(e) => {
-                            setFilterLocation(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueLocations.map((location) => (
-                            <MenuItem key={location} value={location}>
-                              {location}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Collapse>
-            </Paper>
-
-            <>
-              {/* Desktop Table View */}
-              <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={sortField === 'title'}
-                          direction={sortField === 'title' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('title')}
-                        >
-                          Position
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={sortField === 'department'}
-                          direction={sortField === 'department' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('department')}
-                        >
-                          Department
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={sortField === 'location'}
-                          direction={sortField === 'location' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('location')}
-                        >
-                          Location
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={sortField === 'type'}
-                          direction={sortField === 'type' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('type')}
-                        >
-                          Type
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>
-                        <TableSortLabel
-                          active={sortField === 'postedDate'}
-                          direction={sortField === 'postedDate' ? sortDirection : 'asc'}
-                          onClick={() => handleSort('postedDate')}
-                        >
-                          Posted
-                        </TableSortLabel>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginatedJobs.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                          <Typography variant="body1" color="text.secondary">
-                            No careers found matching your criteria.
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      paginatedJobs.map((job) => (
-                        <TableRow
-                          key={job.id}
-                          sx={{
-                            '&:hover': { bgcolor: 'action.hover' },
-                          }}
-                        >
-                          <TableCell>
-                            <Box>
-                              <Typography variant="body1" fontWeight={500}>
-                                {job.title}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {job.salary}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2">{job.department}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2">{job.location}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Clock size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2">{job.type}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2">
-                                {new Date(job.postedDate).toLocaleDateString()}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              component={Link}
-                              href={`/careers/job-details/${job.id}`}
-                              variant="contained"
-                              size="small"
-                            >
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-                {/* Pagination */}
-                <TablePagination
-                  component="div"
-                  count={filteredAndSortedJobs.length}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  rowsPerPage={rowsPerPage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                  labelRowsPerPage="Rows per page:"
-                />
-              </TableContainer>
-
-              {/* Mobile Card View */}
-              <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 4 }}>
-                {paginatedJobs.length === 0 ? (
-                  <Paper sx={{ p: 4, textAlign: 'center' }}>
-                    <Typography variant="body1" color="text.secondary">
-                      No careers found matching your criteria.
-                    </Typography>
-                  </Paper>
-                ) : (
-                  <>
-                    {paginatedJobs.map((job) => (
-                      <Card key={job.id} sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                            {job.title}
-                          </Typography>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Briefcase size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2" color="text.secondary">
-                                {job.department}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <MapPin size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2" color="text.secondary">
-                                {job.location}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Clock size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2" color="text.secondary">
-                                {job.type}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Calendar size={16} style={{ color: theme.palette.text.secondary }} />
-                              <Typography variant="body2" color="text.secondary">
-                                {new Date(job.postedDate).toLocaleDateString()}
-                              </Typography>
-                            </Box>
-                            <Typography variant="body2" fontWeight={500}>
-                              {job.salary}
-                            </Typography>
-                          </Box>
-                          <Button
-                            component={Link}
-                            href={`/careers/job-details/${job.id}`}
-                            variant="contained"
-                            fullWidth
-                          >
-                            View Details
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    {/* Pagination for Mobile */}
-                    <Paper sx={{ mt: 2, p: 2 }}>
-                      <TablePagination
-                        component="div"
-                        count={filteredAndSortedJobs.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        rowsPerPageOptions={[5, 10, 25, 50, 100]}
-                        labelRowsPerPage="Rows per page:"
-                      />
-                    </Paper>
-                  </>
-                )}
-              </Box>
-            </>
-          </Card>
-        ) : (
-          <Paper sx={{ p: 6, textAlign: 'center', mb: 4 }}>
-            <Typography variant="h6" color="text.secondary">
-              No open positions at the moment. Please check back later!
-            </Typography>
-          </Paper>
-        )}
-        {/* Boss Cargo University Section */}
-        <Box sx={{ mb: 6 }}>
-          <Typography variant="h4" sx={{ mb: 4, fontWeight: 600, textAlign: 'center' }}>
-            About Boss Cargo University
-          </Typography>
-          <Grid container spacing={4}>
+          <Grid container spacing={6} alignItems="center">
             <Grid size={{ xs: 12, md: 6 }}>
               <ImageWithFallback
                 src={IMAGE_URLS.JOBS_OFFICE_ENVIRONMENT}
                 alt={getImageMetadata(IMAGE_URLS.JOBS_OFFICE_ENVIRONMENT).alt}
                 layout="responsive"
                 aspectRatio="4:3"
-                rounded={8}
-                shadow={2}
+                rounded={12}
+                shadow={4}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
                 sx={{
-                  p: 4,
-                  height: '100%',
+                  p: 5,
                   bgcolor: isDark ? 'action.hover' : 'action.selected',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
+                  borderRadius: 3,
+                  boxShadow: 2
                 }}
               >
-                <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
-                  Empowering Our Team
+                <Typography variant="h4" sx={{ mb: 3, fontWeight: 700, color: 'primary.main' }}>
+                  Boss Cargo University
                 </Typography>
-                <Typography variant="body1" color="text.primary" sx={{ mb: 2, lineHeight: 1.8 }}>
-                  Our aspiration to continually empower and educate our employees has led us to establish the Boss Cargo University. Its primary mission is to provide the highest freight and logistic education to our employees continuously mastering our craft. All classes in the freight and logistics management certificate program are taught by Boss Cargo University faculty members who have a combination of academic and professional expertise.
+                <Typography variant="body1" color="text.primary" sx={{ mb: 3, lineHeight: 1.8, fontSize: '1.1rem' }}>
+                  Our aspiration to continually empower and educate our employees has led us to establish the Boss Cargo University. Its primary mission is to provide the highest freight and logistic education to our employees continuously mastering our craft.
                 </Typography>
-                <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8 }}>
+                <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
                   The program is designed for existing and onboarding employees to understand Boss Cargo's Brand DNA, culture, and equip them with the right skills for smart and sustainable operations.
                 </Typography>
               </Paper>
             </Grid>
           </Grid>
-        </Box>
+        </Container>
+      </Box>
 
-        {/* Additional Info / CTA Section */}
-        <Paper
+      {/* Slide 2: Career Opportunities (Conditional) */}
+      {activeJobs.length > 0 && (
+        <Box
           sx={{
-            p: 4,
-            background: isDark
-              ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-            color: isDark ? 'text.primary' : 'primary.contrastText',
-            textAlign: 'center',
+            minHeight: 'calc(100vh - 80px)',
+            display: 'flex',
+            alignItems: 'center',
+            scrollSnapAlign: 'start',
+            scrollSnapStop: 'always',
+            bgcolor: isDark ? 'background.default' : 'action.selected',
+            py: { xs: 8, md: 4 }
           }}
         >
-          <Box sx={{ mb: 4 }}>
-            <ImageWithFallback
-              src={IMAGE_URLS.JOBS_CAREER_GROWTH.src}
-              alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
-              layout="responsive"
-              rounded={8}
-              shadow={2}
-            />
+          <Container maxWidth="lg">
+            <Card sx={{ boxShadow: 8, borderRadius: 3 }}>
+              {/* Table Title */}
+              <Box
+                sx={{
+                  px: 4,
+                  py: 3,
+                  bgcolor: isDark ? 'primary.dark' : 'primary.main',
+                  color: isDark ? 'text.primary' : 'primary.contrastText',
+                }}
+              >
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  Active Opportunities
+                </Typography>
+                <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+                  Showing {filteredAndSortedJobs.length} position(s)
+                </Typography>
+              </Box>
+
+              {/* Search and Filters */}
+              <Paper sx={{ p: 3, mb: 0, borderRadius: 0, borderBottom: `1px solid ${theme.palette.divider}` }}>
+                {/* Expandable Header */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                  onClick={() => setFiltersExpanded(!filtersExpanded)}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Search size={22} style={{ color: theme.palette.text.secondary }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: 1.5 }}>
+                      Refine Your Search
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {(searchQuery || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleResetFilters();
+                        }}
+                        startIcon={<X size={18} />}
+                        sx={{ mr: 1, fontWeight: 700 }}
+                      >
+                        Clear All
+                      </Button>
+                    )}
+                    {filtersExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  </Box>
+                </Box>
+
+                <Collapse in={filtersExpanded}>
+                  <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <TextField
+                          fullWidth
+                          placeholder="Search positions..."
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setPage(0);
+                          }}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Search size={20} />
+                              </InputAdornment>
+                            ),
+                          }}
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Dept</InputLabel>
+                          <Select value={filterDepartment} label="Dept" onChange={(e) => { setFilterDepartment(e.target.value); setPage(0); }}>
+                            <MenuItem value="all">All</MenuItem>
+                            {uniqueDepartments.map((dept) => <MenuItem key={dept} value={dept}>{dept}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Type</InputLabel>
+                          <Select value={filterType} label="Type" onChange={(e) => { setFilterType(e.target.value); setPage(0); }}>
+                            <MenuItem value="all">All</MenuItem>
+                            {uniqueTypes.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Location</InputLabel>
+                          <Select value={filterLocation} label="Location" onChange={(e) => { setFilterLocation(e.target.value); setPage(0); }}>
+                            <MenuItem value="all">All</MenuItem>
+                            {uniqueLocations.map((loc) => <MenuItem key={loc} value={loc}>{loc}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Collapse>
+              </Paper>
+
+              <TableContainer sx={{ display: { xs: 'none', md: 'block' }, maxHeight: '50vh' }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, bgcolor: 'action.hover' }}>
+                        <TableSortLabel active={sortField === 'title'} direction={sortField === 'title' ? sortDirection : 'asc'} onClick={() => handleSort('title')}>Position</TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, bgcolor: 'action.hover' }}>
+                        <TableSortLabel active={sortField === 'department'} direction={sortField === 'department' ? sortDirection : 'asc'} onClick={() => handleSort('department')}>Department</TableSortLabel>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, bgcolor: 'action.hover' }}>Location</TableCell>
+                      <TableCell sx={{ fontWeight: 700, bgcolor: 'action.hover' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 700, bgcolor: 'action.hover' }}>Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedJobs.length === 0 ? (
+                      <TableRow><TableCell colSpan={5} align="center" sx={{ py: 8 }}><Typography color="text.secondary">No matching careers found.</Typography></TableCell></TableRow>
+                    ) : (
+                      paginatedJobs.map((job) => (
+                        <TableRow key={job.id} hover>
+                          <TableCell><Typography variant="body1" fontWeight={600}>{job.title}</Typography><Typography variant="caption" color="text.secondary">{job.salary}</Typography></TableCell>
+                          <TableCell><Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><Briefcase size={16} />{job.department}</Box></TableCell>
+                          <TableCell><Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><MapPin size={16} />{job.location}</Box></TableCell>
+                          <TableCell><Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><Clock size={16} />{job.type}</Box></TableCell>
+                          <TableCell><Button component={Link} href={`/careers/job-details/${job.id}`} variant="contained" size="small">Details</Button></TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                <TablePagination component="div" count={filteredAndSortedJobs.length} page={page} onPageChange={handleChangePage} rowsPerPage={rowsPerPage} onRowsPerPageChange={handleChangeRowsPerPage} rowsPerPageOptions={[5, 10, 25]} />
+              </TableContainer>
+
+              <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2 }}>
+                {paginatedJobs.map((job) => (
+                  <Card key={job.id} sx={{ mb: 2, border: `1px solid ${theme.palette.divider}` }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>{job.title}</Typography>
+                      <Grid container spacing={1} sx={{ mb: 2 }}>
+                        <Grid size={6}><Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.75rem' }}><Briefcase size={14} />{job.department}</Box></Grid>
+                        <Grid size={6}><Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.75rem' }}><MapPin size={14} />{job.location}</Box></Grid>
+                      </Grid>
+                      <Button component={Link} href={`/careers/job-details/${job.id}`} variant="contained" fullWidth size="small">View Details</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Card>
+          </Container>
+        </Box>
+      )}
+
+      {/* Slide 3: Final Overview & CTA (The Last Section) */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          py: { xs: 8, md: 0 }
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Header Combined Section */}
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h2" sx={{ mb: 2, fontWeight: 800, color: 'primary.main' }}>
+              Join Our Team
+            </Typography>
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '800px', mx: 'auto' }}>
+              Explore exciting career opportunities at Boss Cargo Express. We're looking for talented
+              individuals to help us shape the future of logistics.
+            </Typography>
           </Box>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
-            Don't See the Right Position?
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4, maxWidth: '700px', mx: 'auto' }}>
-            We're always interested in hearing from talented professionals. Send us your resume
-            and we'll keep you in mind for future opportunities.
-          </Typography>
-          <Button
-            component={Link}
-            href="/careers/apply"
-            variant="contained"
-            size="large"
-            sx={{
-              bgcolor: 'background.paper',
-              color: isDark ? 'text.primary' : 'primary.main',
-              '&:hover': {
-                bgcolor: isDark ? 'action.hover' : 'action.selected',
-                color: isDark ? 'text.primary' : 'primary.main',
-              },
-            }}
-          >
-            Submit General Application
-          </Button>
-        </Paper>
-      </Container>
+
+          <Grid container spacing={4} alignItems="stretch">
+            {/* Left Column: Status Card */}
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Paper
+                sx={{
+                  p: 4,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  bgcolor: isDark ? 'action.hover' : 'action.selected',
+                  borderRadius: 4,
+                  textAlign: 'center',
+                  border: `2px solid ${theme.palette.primary.main}`,
+                  boxShadow: 4
+                }}
+              >
+                <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
+                  Current Status
+                </Typography>
+                <Box sx={{ my: 2 }}>
+                  <Typography variant="h6" sx={{ display: 'inline', color: 'text.secondary' }}>
+                    Open Position(s):
+                  </Typography>
+                  <Typography variant="h2" sx={{ display: 'inline', ml: 2, fontWeight: 800, color: 'primary.main' }}>
+                    {activeJobs.length}
+                  </Typography>
+                </Box>
+                {activeJobs.length === 0 && (
+                  <Paper sx={{ p: 2, mt: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      No open positions at the moment. Please check back later!
+                    </Typography>
+                  </Paper>
+                )}
+                <Typography variant="caption" sx={{ mt: 3, display: 'block', color: 'text.secondary', fontStyle: 'italic' }}>
+                  For Job and Intern Inquiries: please write to people@bosscargo.express
+                </Typography>
+              </Paper>
+            </Grid>
+
+            {/* Right Column: CTA Combined Card */}
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Paper
+                sx={{
+                  p: 4,
+                  height: '100%',
+                  background: isDark
+                    ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  color: isDark ? 'text.primary' : 'primary.contrastText',
+                  borderRadius: 4,
+                  boxShadow: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}
+              >
+                <Grid container spacing={3} alignItems="center">
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <ImageWithFallback
+                      src={IMAGE_URLS.JOBS_CAREER_GROWTH.src}
+                      alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
+                      layout="responsive"
+                      rounded={4}
+                      shadow={2}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 8 }}>
+                    <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
+                      Don't See the Right Position?
+                    </Typography>
+                    <Typography variant="body1" sx={{ mb: 4, opacity: 0.9, lineHeight: 1.6 }}>
+                      We're always interested in hearing from talented professionals. Send us your resume
+                      and we'll keep you in mind for future opportunities.
+                    </Typography>
+                    <Button
+                      component={Link}
+                      href="/careers/apply"
+                      variant="contained"
+                      size="large"
+                      sx={{
+                        bgcolor: 'background.paper',
+                        color: isDark ? 'text.primary' : 'primary.main',
+                        fontWeight: 800,
+                        px: 4,
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s'
+                      }}
+                    >
+                      General Application
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
     </Box>
   );
 }

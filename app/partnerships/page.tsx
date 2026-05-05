@@ -6,7 +6,6 @@ import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
   Box,
-  Container,
   Typography,
   Button,
   Grid,
@@ -15,6 +14,7 @@ import {
   Paper,
   useTheme,
 } from '@mui/material';
+import { PageContainer, PageHeader } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 
 export default function PartnershipsPage() {
@@ -55,188 +55,244 @@ export default function PartnershipsPage() {
 
 
   return (
-    <Box
-      sx={{
-        minHeight: 'calc(100vh - 80px)',
-        display: 'flex',
-        alignItems: 'center',
-        py: { xs: 8, md: 0 }
-      }}
-    >
-      <Container maxWidth="lg">
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Typography variant="h2" sx={{ mb: 2, fontWeight: 700 }}>
-            Our Partnerships
-          </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '800px', mx: 'auto' }}>
-            Logistics is a critical component of firms' value chain. However, not all organizations have the capacity to perform the movement and storage of goods within the supply chain. Outsource these capabilities to us. We're experts in these fields.
-          </Typography>
-        </Box>
+    <Box>
+      {/* Slide 1: Introduction & Industries */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          py: { xs: 8, md: 0 }
+        }}
+      >
+        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
+          {/* Header */}
+          <PageHeader
+            title="Our Partnerships"
+            subtitle="Logistics is a critical component of firms' value chain. However, not all organizations have the capacity to perform the movement and storage of goods within the supply chain. Outsource these capabilities to us. We're experts in these fields."
+            bottomSpacing={4}
+          />
 
-        {/* Partnership Philosophy */}
-        <Paper
-          sx={{
-            mb: 8,
-            overflow: 'hidden',
-            background: isDark
-              ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
-              : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-            color: isDark ? 'text.primary' : 'primary.contrastText',
-          }}
-        >
-          <Grid container>
-            <Grid size={{ xs: 12, lg: 6 }} sx={{ p: { xs: 4, md: 6 }, display: 'flex', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="h3" sx={{ mb: 3, fontWeight: 600 }}>
-                  Strategic Partnerships
-                </Typography>
-                <Typography variant="h6">
-                  We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings. We are no ordinary entity. Our business is built on and guided by our brand values. Partner with a brand that will revolutionize the industry.
-                </Typography>
-              </Box>
+          {/* Partnership Philosophy */}
+          <Paper
+            sx={{
+              mb: 4,
+              overflow: 'hidden',
+              background: isDark
+                ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.primary.dark} 100%)`
+                : `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              color: isDark ? 'text.primary' : 'primary.contrastText',
+              borderRadius: 3,
+            }}
+          >
+            <Grid container>
+              <Grid size={{ xs: 12, lg: 7 }} sx={{ p: { xs: 3, md: 4 }, display: 'flex', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
+                    Strategic Partnerships
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontSize: '1.05rem', lineHeight: 1.6, opacity: 0.9 }}>
+                    We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings. We are no ordinary entity. Our business is built on and guided by our brand values. Partner with a brand that will revolutionize the industry.
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12, lg: 5 }} sx={{ minHeight: { xs: '200px', lg: 'auto' }, p: 2 }}>
+                <ImageWithFallback
+                  src={IMAGE_URLS.PARTNERSHIPS_HANDSHAKE}
+                  alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
+                  layout="responsive"
+                  aspectRatio="16:9"
+                  objectFit="cover"
+                  rounded={4}
+                  shadow={false}
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, lg: 6 }} sx={{ minHeight: { xs: '300px', lg: 'auto' }, p: { xs: 2, md: 3 } }}>
-              <ImageWithFallback
-                src={IMAGE_URLS.PARTNERSHIPS_HANDSHAKE}
-                alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
-                layout="responsive"
-                aspectRatio="4:3"
-                objectFit="contain"
-                rounded={8}
-                shadow={false}
-              />
-            </Grid>
-          </Grid>
-        </Paper>
+          </Paper>
 
-        {/* Industries Served */}
-        <Box sx={{ mb: 8 }}>
-          <Typography variant="h3" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
-            Industries That We Serve
-          </Typography>
-          <Grid container spacing={3}>
-            {industries.map((industry, index) => {
-              const IconComponent = industry.icon;
-              return (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                  <Card sx={{ height: '100%', transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 } }}>
-                    <CardContent sx={{ p: 3, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: 'primary.main',
-                          color: 'primary.contrastText',
+          {/* Industries Served */}
+          <Box>
+            <Typography variant="h5" sx={{ textAlign: 'center', mb: 3, fontWeight: 700, color: 'primary.main' }}>
+              Industries That We Serve
+            </Typography>
+            <Grid container spacing={2}>
+              {industries.map((industry, index) => {
+                const IconComponent = industry.icon;
+                return (
+                  <Grid size={{ xs: 6, sm: 4, md: 2 }} key={index}>
+                    <Card 
+                      elevation={0}
+                      sx={{ 
+                        height: '100%', 
+                        bgcolor: isDark ? 'action.hover' : 'action.selected',
+                        transition: 'transform 0.2s', 
+                        '&:hover': { transform: 'translateY(-4px)' } 
+                      }}
+                    >
+                      <CardContent sx={{ p: 2, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                        <Box
+                          sx={{
+                            p: 1.5,
+                            borderRadius: '50%',
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <IconComponent size={20} />
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', lineHeight: 1.2 }}>
+                          {industry.name}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
+        </PageContainer>
+      </Box>
+
+      {/* Slide 2: Recognition & Opportunities */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          bgcolor: isDark ? 'background.default' : 'grey.50',
+          py: { xs: 8, md: 0 }
+        }}
+      >
+        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%' }}>
+          <Grid container spacing={4}>
+            {/* Memberships */}
+            <Grid size={12}>
+              <Typography variant="h4" sx={{ textAlign: 'center', mb: 4, fontWeight: 700, color: 'primary.main' }}>
+                Memberships & Accreditations
+              </Typography>
+              <Grid container spacing={3}>
+                {memberships.map((membership, index) => (
+                  <Grid size={{ xs: 12, md: 4 }} key={index}>
+                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 2 }}>
+                      <Box 
+                        sx={{ 
+                          p: (membership as any).whiteBackground ? 3 : 2, 
+                          pb: (membership as any).whiteBackground ? 3 : 0,
                           display: 'flex',
-                          alignItems: 'center',
                           justifyContent: 'center',
+                          alignItems: 'center',
+                          height: 140,
+                          position: 'relative',
+                          ...( (membership as any).whiteBackground && {
+                            bgcolor: 'white',
+                            borderRadius: 2,
+                            m: 2,
+                            aspectRatio: '1/1',
+                            height: 'auto',
+                            maxHeight: 120
+                          })
                         }}
                       >
-                        <IconComponent size={32} />
+                        <ImageWithFallback
+                          src={membership.image}
+                          alt={membership.imageAlt}
+                          layout={(membership as any).whiteBackground ? "fill" : "responsive"}
+                          aspectRatio="auto"
+                          objectFit="contain"
+                        />
                       </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        {industry.name}
+                      <CardContent sx={{ p: 3, pt: 2, flexGrow: 1 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 1, color: 'primary.main', fontWeight: 700, lineHeight: 1.3 }}>
+                          {membership.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                          {membership.description}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+
+            {/* Opportunities & CTA */}
+            <Grid size={12}>
+              <Grid container spacing={4}>
+                <Grid size={{ xs: 12, lg: 6 }}>
+                  <Paper
+                    sx={{
+                      p: 4,
+                      height: '100%',
+                      bgcolor: isDark ? 'action.hover' : 'white',
+                      borderLeft: `6px solid ${theme.palette.primary.main}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                      Investment Opportunities
+                    </Typography>
+                    <Typography variant="body1" sx={{ mb: 3, fontSize: '1rem', lineHeight: 1.6 }}>
+                      Join Us: We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings.
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      Contact us to learn more about Investment or Partnership Opportunities.
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid size={{ xs: 12, lg: 6 }}>
+                  <Card 
+                    sx={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      background: isDark
+                        ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.background.paper} 100%)`
+                        : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                      color: 'primary.contrastText'
+                    }}
+                  >
+                    <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                      <Handshake size={48} style={{ marginBottom: 16, opacity: 0.9 }} />
+                      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
+                        Interested in Partnering?
                       </Typography>
+                      <Typography variant="body2" sx={{ mb: 3, opacity: 0.9 }}>
+                        We're always looking for innovative companies to join our network and create mutually beneficial partnerships.
+                      </Typography>
+                      <Link href="/about-us" style={{ textDecoration: 'none' }}>
+                        <Button 
+                          variant="contained" 
+                          size="large" 
+                          sx={{
+                            bgcolor: 'white',
+                            color: 'primary.main',
+                            fontWeight: 700,
+                            '&:hover': {
+                              bgcolor: 'rgba(255,255,255,0.9)',
+                            },
+                          }}
+                        >
+                          Contact Us Today
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
                 </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
-
-        {/* Memberships & Accreditations */}
-        <Box sx={{ mb: 8 }}>
-          <Typography variant="h3" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
-            Memberships & Accreditations
-          </Typography>
-          <Grid container spacing={4}>
-            {memberships.map((membership, index) => (
-              <Grid size={{ xs: 12, md: 4 }} key={index}>
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box 
-                    sx={{ 
-                      p: (membership as any).whiteBackground ? 3 : 2, 
-                      pb: (membership as any).whiteBackground ? 3 : 0,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      position: 'relative',
-                      ...( (membership as any).whiteBackground && {
-                        bgcolor: 'white',
-                        borderRadius: 2,
-                        m: 2,
-                        aspectRatio: '1/1',
-                      })
-                    }}
-                  >
-                    <ImageWithFallback
-                      src={membership.image}
-                      alt={membership.imageAlt}
-                      layout={(membership as any).whiteBackground ? "fill" : "responsive"}
-                      aspectRatio="auto"
-                      objectFit="contain"
-                    />
-                  </Box>
-                  <CardContent sx={{ p: 3, pt: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h6" sx={{ mb: 2, color: 'primary.main', fontWeight: 600 }}>
-                      {membership.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
-                      {membership.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
               </Grid>
-            ))}
+            </Grid>
           </Grid>
-        </Box>
-
-        {/* Partnership & Investment Opportunities */}
-        <Paper
-          sx={{
-            p: 4,
-            mb: 8,
-            bgcolor: isDark ? 'action.hover' : 'action.selected',
-          }}
-        >
-          <Typography variant="h3" sx={{ textAlign: 'center', mb: 4, fontWeight: 600 }}>
-            Partnership & Investment Opportunities
-          </Typography>
-          <Typography variant="body1" color="text.primary" sx={{ mb: 3, fontSize: '1.1rem', textAlign: 'center' }}>
-            Join Us: We take pride in growing the business together with firms by being dependable, cost-effective, and on-time in Domestic, International Forwarding, and Brokerage settings. We are no ordinary entity. Our business is built on and guided by our brand values. Partner with a brand that will revolutionize the industry.
-          </Typography>
-          <Typography variant="body1" color="text.primary" sx={{ textAlign: 'center' }}>
-            <strong>For Investment or Partnership Opportunities:</strong> Contact us to learn more.
-          </Typography>
-        </Paper>
-
-        {/* CTA */}
-        <Card>
-          <CardContent sx={{ p: 6, textAlign: 'center' }}>
-            <Handshake size={64} style={{ color: theme.palette.primary.main, margin: '0 auto 24px' }} />
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
-              Interested in Partnering with Us?
-            </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
-              We're always looking for innovative companies to join our network and create 
-              mutually beneficial partnerships. Contact us to learn more about investment or partnership opportunities.
-            </Typography>
-            <Link href="/about-us" style={{ textDecoration: 'none' }}>
-              <Button variant="contained" size="large" sx={{
-                color: theme.palette.primary.contrastText,
-                '&:hover': {
-                  color: theme.palette.primary.contrastText,
-                  bgcolor: theme.palette.primary.main,
-                },
-              }}>
-                Contact Us for Partnership Opportunities
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </Container>
+        </PageContainer>
+      </Box>
     </Box>
   );
 }

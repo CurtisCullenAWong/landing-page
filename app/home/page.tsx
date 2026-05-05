@@ -45,9 +45,9 @@ export default function HomePage() {
   return (
     <Box>
       {/* Hero Section */}
-      <Box 
+      <Box
         id="home"
-        sx={{ 
+        sx={{
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           minHeight: 'calc(100vh - 80px)',
@@ -193,8 +193,8 @@ export default function HomePage() {
       </Box>
 
       {/* Compressed Overview Section (Philosophy + CTA + Services) */}
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           minHeight: 'calc(100vh - 80px)',
           display: 'flex',
           alignItems: 'center',
