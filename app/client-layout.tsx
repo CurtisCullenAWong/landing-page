@@ -19,7 +19,13 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
 
   const [isChatOpen, setIsChatOpen] = useState(false);
-
+  if (typeof window !== 'undefined') {
+    const _warn = console.warn.bind(console);
+    console.warn = (...args: unknown[]) => {
+      if (typeof args[0] === 'string' && args[0].includes('THREE.Clock')) return;
+      _warn(...args);
+    };
+  }
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
     if (isSequencePage) {

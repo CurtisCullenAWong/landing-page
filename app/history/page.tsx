@@ -231,13 +231,15 @@ export default function HistoryPage() {
             height: { xs: 'auto', md: 'calc(100vh - 80px)' },
             minHeight: { xs: '100vh', md: 'auto' },
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: { xs: 'flex-start', md: 'center' },
             alignItems: 'center',
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: slideIndex % 2 === 0 ? 'background.paper' : 'background.default',
-            py: { xs: 6, md: 10 },
+            py: { xs: 4, md: 8 },
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'visible'
           }}
         >
           {/* Alternating Background Blobs */}
@@ -277,7 +279,7 @@ export default function HistoryPage() {
                 <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
                   CHRONICLES
                 </Typography>
-                <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', md: '2.75rem' } }}>
+                <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' } }}>
                   Early Milestones
                 </Typography>
               </Box>
@@ -306,10 +308,10 @@ export default function HistoryPage() {
                           }
                         }}
                       >
-                        <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: isLeft ? 'left' : 'right' }}>
-                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1 }}>{milestone.year}</Typography>
-                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>{milestone.title}</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{milestone.description}</Typography>
+                        <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: isLeft ? 'left' : 'right' }}>
+                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1, fontSize: { xs: '1.75rem', md: '3rem' } }}>{milestone.year}</Typography>
+                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700, fontSize: { xs: '1.1rem', md: '1.5rem' } }}>{milestone.title}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: { xs: '0.85rem', md: '0.875rem' } }}>{milestone.description}</Typography>
                         </CardContent>
                       </Card>
                     </Grid>
@@ -368,7 +370,7 @@ export default function HistoryPage() {
                     <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>
                       OUR VISION
                     </Typography>
-                    <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.5rem', md: '2rem' } }}>
+                    <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}>
                       Looking Ahead
                     </Typography>
                     <Typography variant="body1" sx={{ maxWidth: '750px', mx: 'auto', lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.1rem' }, color: 'text.primary', fontWeight: 500 }}>

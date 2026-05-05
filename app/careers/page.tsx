@@ -247,14 +247,15 @@ export default function JobPostingsPage() {
       {/* Slide 1: Professional Development */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          py: { xs: 4, md: 8 },
           display: 'flex',
+          flexDirection: 'column',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 8, md: 0 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'visible'
         }}
       >
         {/* Background Architectural Elements */}
@@ -340,7 +341,7 @@ export default function JobPostingsPage() {
                     <Box sx={{ p: 1.5, bgcolor: primaryMain, color: 'white', borderRadius: 2, display: 'flex' }}>
                       <GraduationCap size={28} />
                     </Box>
-                    <Typography variant="h3" sx={{ fontWeight: 800, color: primaryMain, letterSpacing: -1 }}>
+                    <Typography variant="h3" sx={{ fontWeight: 800, color: primaryMain, letterSpacing: -1, fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' } }}>
                       Boss Cargo University
                     </Typography>
                   </Box>
@@ -392,13 +393,15 @@ export default function JobPostingsPage() {
           sx={{
             minHeight: 'calc(100vh - 80px)',
             display: 'flex',
+            flexDirection: 'column',
+            justifyContent: { xs: 'flex-start', md: 'center' },
             alignItems: 'center',
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: paperColor,
-            py: { xs: 8, md: 4 },
+            py: { xs: 4, md: 8 },
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'visible'
           }}
         >
           {/* Background Elements */}
@@ -454,7 +457,7 @@ export default function JobPostingsPage() {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
                   <Target size={32} color={tertiaryMain} />
-                  <Typography variant="h3" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: -1 }}>
+                  <Typography variant="h3" sx={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: -1, fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' } }}>
                     Active Opportunities
                   </Typography>
                 </Box>
@@ -550,7 +553,7 @@ export default function JobPostingsPage() {
                 </Collapse>
               </Paper>
 
-              <TableContainer sx={{ display: { xs: 'none', md: 'block' }, maxHeight: '50vh' }}>
+              <TableContainer sx={{ display: { xs: 'none', md: 'block' }, maxHeight: { xs: '40vh', lg: '50vh' } }}>
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow>
@@ -682,14 +685,15 @@ export default function JobPostingsPage() {
       {/* Slide 3: Final Overview & CTA */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          py: { xs: 4, md: 8 },
           display: 'flex',
+          flexDirection: 'column',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 8, md: 0 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'visible'
         }}
       >
         {/* Background Architectural Elements */}
@@ -722,9 +726,9 @@ export default function JobPostingsPage() {
           }} />
         </Box>
 
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: { xs: 'flex-start', md: 'center' }, py: { xs: 2, md: 0 } }}>
           {/* Workforce Status Summary Bar - Optimized for large view */}
-          <Box sx={{ mb: 6, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ mb: { xs: 3, md: 6 }, display: 'flex', justifyContent: 'center' }}>
             <Paper
               variant="outlined"
               sx={{
@@ -764,7 +768,7 @@ export default function JobPostingsPage() {
             <Grid size={{ xs: 12 }}>
               <Paper
                 sx={{
-                  p: { xs: 4, md: 10 },
+                  p: { xs: 3, md: 6 },
                   background: isDark
                     ? `linear-gradient(135deg, ${secondaryDark} 0%, ${primaryDark} 100%)`
                     : `linear-gradient(135deg, ${primaryDark} 0%, ${primaryMain} 100%)`,
@@ -786,7 +790,7 @@ export default function JobPostingsPage() {
                   pointerEvents: 'none'
                 }} />
 
-                <Grid container spacing={10} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                <Grid container spacing={{ xs: 4, md: 10 }} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
                   <Grid size={{ xs: 12, md: 7 }}>
                     <Box sx={{
                       position: 'relative',

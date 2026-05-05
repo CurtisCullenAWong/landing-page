@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, TypographyProps } from '@mui/material';
+import { Box, Typography, TypographyProps, SxProps, Theme } from '@mui/material';
 import { TYPOGRAPHY_SPACING, SECTION_SPACING } from '@/constants/layout';
 
 export interface PageHeaderProps {
@@ -41,6 +41,10 @@ export interface PageHeaderProps {
    * Additional content to render after subtitle
    */
   children?: React.ReactNode;
+  /**
+   * System style overrides
+   */
+  sx?: SxProps<Theme>;
 }
 
 /**
@@ -56,12 +60,14 @@ export function PageHeader({
   subtitleMaxWidth = '800px',
   bottomSpacing = SECTION_SPACING.large,
   children,
+  sx,
 }: PageHeaderProps) {
   return (
     <Box
       sx={{
         textAlign: align,
         mb: bottomSpacing,
+        ...sx,
       }}
     >
       <Typography

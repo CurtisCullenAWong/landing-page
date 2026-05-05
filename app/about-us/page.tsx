@@ -279,13 +279,13 @@ export default function AboutPage() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: paperColor,
-          py: { xs: 10, md: 12 }, // Increased vertical padding
+          py: { xs: 4, md: 8 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'visible'
         }}
       >
         {/* Background Architectural Elements */}
@@ -324,6 +324,7 @@ export default function AboutPage() {
           <PageHeader
             title="Company Officials"
             titleVariant="h3"
+            sx={{ '& .MuiTypography-h3': { fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } } }}
             bottomSpacing={SECTION_SPACING.medium}
             align="center"
           />
@@ -361,7 +362,7 @@ export default function AboutPage() {
                   <Box
                     sx={{
                       width: '100%',
-                      height: 260,
+                      height: { xs: 180, sm: 220, md: 260 },
                       bgcolor: isDark ? 'action.hover' : 'grey.50',
                       display: 'flex',
                       alignItems: 'center',

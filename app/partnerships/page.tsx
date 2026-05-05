@@ -320,12 +320,14 @@ export default function PartnershipsPage() {
           height: { xs: 'auto', md: 'calc(100vh - 80px)' },
           minHeight: { xs: '100vh', md: 'auto' },
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, md: 8 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'visible'
         }}
       >
         <AbstractBlob color={primaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.1} />
@@ -336,7 +338,7 @@ export default function PartnershipsPage() {
             <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
               ACCREDITATIONS
             </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', md: '2.75rem' } }}>
+            <Typography variant="h3" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' } }}>
               Global Networks
             </Typography>
           </Box>
@@ -370,7 +372,7 @@ export default function PartnershipsPage() {
                       borderRadius: '16px 16px 0 0'
                     }}
                   >
-                    <Box sx={{ position: 'relative', width: '80%', height: '80%' }}>
+                    <Box sx={{ position: 'relative', width: '80%', height: '80%', maxHeight: { xs: 80, md: '100%' } }}>
                       <ImageWithFallback
                         src={membership.image}
                         alt={membership.fullName}
@@ -380,7 +382,7 @@ export default function PartnershipsPage() {
                     </Box>
                   </Box>
                   <CardContent sx={{ p: 4, flexGrow: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main', fontWeight: 800 }}>
+                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main', fontWeight: 800, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                       {membership.fullName}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
@@ -411,7 +413,7 @@ export default function PartnershipsPage() {
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 8 }}>
                 <Box sx={{ textAlign: 'left' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                     Ready to Expand Your Reach?
                   </Typography>
                   <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem', maxWidth: '600px' }}>
