@@ -115,7 +115,7 @@ export function AdminHeader() {
                 src={IMAGE_URLS.LOGO.src}
                 alt="Boss Cargo Express"
                 sx={{
-                  height: 40,
+                  height: 50,
                   width: 'auto',
                   display: 'block',
                   transition: 'transform 0.3s ease',

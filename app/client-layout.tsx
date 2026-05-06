@@ -8,11 +8,25 @@ import { Footer } from "@/components/layout";
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
-import { ChatWidget } from "@/components/chat/ChatWidget";
-import { AvatarOverlay } from "@/components/chat/AvatarOverlay";
+import dynamic from "next/dynamic";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
+// Dynamic imports for heavy components
+const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget").then(mod => mod.ChatWidget), {
+  ssr: false,
+});
+
+const AvatarOverlay = dynamic(() => import("@/components/chat/AvatarOverlay").then(mod => mod.AvatarOverlay), {
+  ssr: false,
+});
+
+// Pre-loading triggers for background loading
+const preloadChatComponents = () => {
+  import("@/components/chat/ChatWidget");
+  import("@/components/chat/AvatarOverlay");
+};
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -34,6 +48,16 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
     setMounted(true);
+
+    // Background pre-load chat components after initial mount
+    // This fetches the chunks in the background without blocking the main render
+    if (typeof window !== 'undefined') {
+      const idleCallback = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 1000));
+      idleCallback(() => {
+        preloadChatComponents();
+      });
+    }
+
     if (isSequencePage) {
       document.documentElement.classList.add('scroll-lock-active');
     } else {
@@ -75,7 +99,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 gender={gender}
                 onGenderToggle={() => setGender(prev => prev === 'female' ? 'male' : 'female')}
               />
-              {isChatOpen && <AvatarOverlay gender={gender} />}
+              <AvatarOverlay
+                gender={gender}
+                isVisible={isChatOpen && isSequencePage}
+              />
             </>
           )}
 

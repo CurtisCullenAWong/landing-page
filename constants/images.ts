@@ -1,5 +1,6 @@
 import HeroBackground from '@/assets/images/home/HERO_BACKGROUND.jpg';
 import Logo from '@/assets/images/logo.png';
+import LogoAlt from '@/assets/images/logo-alt.png';
 
 import HomeLogisticsServices from '@/assets/images/home/HOME_LOGISTICS_SERVICES.jpg';
 import HomeTeamCollaboration from '@/assets/images/home/HOME_TEAM_COLLABORATION.jpg';
@@ -29,6 +30,7 @@ import JobDetailsProfessional from '@/assets/images/job-details/JOB_DETAILS_PROF
 export const IMAGE_URLS = {
   // Branding
   LOGO: Logo,
+  LOGO_ALT: LogoAlt,
 
   // Hero & Landing Images
 

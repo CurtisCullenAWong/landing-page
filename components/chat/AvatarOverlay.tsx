@@ -5,7 +5,7 @@ import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useGLTF, Float, PerspectiveCamera, Stage, Center } from '@react-three/drei';
+import { useGLTF, Float, PerspectiveCamera, Stage, Center, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 
 // Abstract squiggly paths for morphing - more organic and abstract
@@ -18,14 +18,15 @@ const SQUIGGLY_PATHS = [
   "M0,-110C45,-115,90,-110,115,-75C140,-40,125,10,115,55C105,100,135,140,90,150C45,160,0,130,-45,140C-90,150,-135,160,-150,125C-165,90,-140,45,-125,0C-110,-45,-85,-105,0,-110Z",
 ];
 
+// Preload the 3D model in the background
+useGLTF.preload('/models/avatar.glb');
+
 const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-align"]';
 const SECTION_CHANGE_DEBOUNCE = 100; // ms
 
 // ─── AvatarModel ─────────────────────────────────────────────────────────────
-const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: 'male' | 'female' }) => {
+const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: number, gender: 'male' | 'female', manualIndex: number }) => {
   const group = useRef<THREE.Group>(null);
-
-  const [manualIndex, setManualIndex] = useState(0);
   const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
 
   // Clone scene to prevent cumulative transform drift across navigation
@@ -64,7 +65,7 @@ const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: '
 
   useEffect(() => {
     if (!animations || animations.length === 0) return;
-    
+
     const keywords = ['dance', 'walk', 'idle', 'wave', 'nod', 'clap', 'sit', 'stand', 'run'];
     const pool = animations.filter((clip) =>
       keywords.some(k => clip.name.toLowerCase().includes(k))
@@ -79,7 +80,7 @@ const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: '
     console.log(`[AvatarModel] Playing: ${clip.name}`);
 
     const prevAction = currentActionRef.current;
-    
+
     // Smooth transition
     nextAction.reset();
     nextAction.setEffectiveTimeScale(0.5); // Reduced speed to half
@@ -98,14 +99,9 @@ const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: '
     };
   }, [currentClipIndex, animations, mixer]);
 
-  const handleClick = (e: any) => {
-    console.log(`[AvatarModel] Interaction triggered`);
-    e.stopPropagation();
-    setManualIndex((prev) => prev + 1);
-  };
 
   return (
-    <group ref={group} dispose={null} onClick={handleClick}>
+    <group ref={group} dispose={null}>
       <Float
         speed={1.5}
         rotationIntensity={0.2}
@@ -119,32 +115,29 @@ const AvatarModel = ({ sectionIndex, gender }: { sectionIndex: number, gender: '
 };
 
 // ─── AvatarOverlay ────────────────────────────────────────────────────────────
-export const AvatarOverlay = ({ gender }: { gender: 'male' | 'female' }) => {
+export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | 'female', isVisible?: boolean }) => {
   const theme = useTheme();
 
-
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [manualIndex, setManualIndex] = useState(0);
   const [currentPos, setCurrentPos] = useState<{ x: string; y: string }>({
-    x: '24px',
-    y: '24px',
+    x: '30px',
+    y: 'calc(50vh - 160px)',
   });
 
   const sectionsRef = useRef<Element[]>([]);
   const lastSectionRef = useRef<Element | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reposition on section change — avoids chat widget (bottom-right)
+  // Reposition on section change — strictly left side to avoid chat overlap
   useEffect(() => {
-    // Force it away from the bottom-right chat area
-    const isLeft = Math.random() > 0.3; // 70% left side
-    if (isLeft) {
-      const randomY = Math.floor(Math.random() * 60) + 15;
-      setCurrentPos({ x: '40px', y: `calc(${randomY}vh - 160px)` });
-    } else {
-      // Top Right - avoids the chat window at the bottom
-      const randomY = Math.floor(Math.random() * 20) + 5;
-      setCurrentPos({ x: 'calc(100vw - 360px)', y: `calc(${randomY}vh - 160px)` });
-    }
+    // Randomize vertical position (25vh to 65vh) to stay safely in viewport
+    const randomY = Math.floor(Math.random() * 40) + 25;
+    // Vary x slightly (30px to 60px) for an organic feel
+    const randomX = Math.floor(Math.random() * 30) + 30;
+
+    const newPos = { x: `${randomX}px`, y: `calc(${randomY}vh - 160px)` };
+    setCurrentPos(newPos);
   }, [activeSectionIndex]);
 
 
@@ -166,22 +159,24 @@ export const AvatarOverlay = ({ gender }: { gender: 'male' | 'female' }) => {
 
     const scheduleUpdate = (index: number) => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = setTimeout(() => setActiveSectionIndex(index), SECTION_CHANGE_DEBOUNCE);
+      debounceTimerRef.current = setTimeout(() => {
+        setActiveSectionIndex(index);
+      }, SECTION_CHANGE_DEBOUNCE);
     };
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const best = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (best && best.target !== lastSectionRef.current) {
-          lastSectionRef.current = best.target;
-          const idx = sectionsRef.current.indexOf(best.target);
-          if (idx !== -1) scheduleUpdate(idx);
+        const intersecting = entries.filter((e) => e.isIntersecting);
+        if (intersecting.length > 0) {
+          const best = intersecting.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (best && best.target !== lastSectionRef.current) {
+            lastSectionRef.current = best.target;
+            const idx = sectionsRef.current.indexOf(best.target);
+            if (idx !== -1) scheduleUpdate(idx);
+          }
         }
       },
-      { threshold: [0.2, 0.5, 0.8], rootMargin: '-10% 0px -10% 0px' }
+      { threshold: [0.1, 0.5, 0.9], rootMargin: '-10% 0px -10% 0px' }
     );
 
     sectionsRef.current.forEach((el) => observer.observe(el));
@@ -198,151 +193,181 @@ export const AvatarOverlay = ({ gender }: { gender: 'male' | 'female' }) => {
 
   return (
     <motion.div
-      animate={{ x: currentPos.x, y: currentPos.y, opacity: 1 }}
-      initial={{ opacity: 0 }}
-      transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+      animate={{
+        x: currentPos.x,
+        y: currentPos.y,
+        opacity: isVisible ? 1 : 0,
+        scale: isVisible ? 1 : 0.8,
+      }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         zIndex: 12000,
         width: 320,
-
         height: 320,
-        pointerEvents: 'none', // Base overlay is transparent to clicks
+        pointerEvents: isVisible ? 'auto' : 'none',
+        willChange: 'transform, opacity',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        willChange: 'transform, opacity',
-        overflow: 'visible',
       }}
     >
-      <Box
-        sx={{
-          position: 'relative',
+      <motion.div
+        drag
+        dragMomentum={false}
+        dragElastic={0}
+        whileDrag={{ scale: 1.08 }}
+        onTap={() => setManualIndex(prev => prev + 1)}
+        style={{
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          cursor: isVisible ? 'grab' : 'default',
           overflow: 'visible',
-          pointerEvents: 'none',
         }}
       >
-        {/* Ambient glow — breathing pulse */}
-        <motion.div
-          animate={{
-            scale: [1, 1.08, 1.15, 1.05, 1],
-            opacity: [0.15, 0.4, 0.6, 0.35, 0.15],
-          }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            position: 'absolute',
-            inset: 10,
-            background: `radial-gradient(circle, ${currentColor}66 0%, transparent 70%)`,
-            filter: 'blur(30px)',
-            zIndex: -1,
-            willChange: 'transform, opacity',
-          }}
-        />
-
-        {/* Morphing blob SVG */}
-        <motion.svg
-          animate={{ y: [0, -10, 5, -5, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          viewBox="-200 -200 400 400"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            width: '110%',
-            height: '110%',
-            filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.3))',
-            overflow: 'visible',
-            willChange: 'transform',
-            pointerEvents: 'none',
-          }}
-        >
-          <defs>
-            <linearGradient id="squiggly-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <motion.stop
-                offset="0%"
-                animate={{ stopColor: currentColor }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-              />
-              <motion.stop
-                offset="100%"
-                animate={{ stopColor: nextColor }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-              />
-            </linearGradient>
-          </defs>
-
-          <motion.path
-            initial={false}
-            animate={{ d: currentPath, fill: 'url(#squiggly-gradient)' }}
-            transition={{
-              d: { duration: 1.2, ease: [0.22, 1, 0.36, 1] },
-              fill: { duration: 0.8, ease: 'easeInOut' },
-            }}
-            style={{ opacity: 0.95, stroke: 'none', willChange: 'd' }}
-          />
-
-          {/* Fallback circle so avatar is never unmasked if blob morphs narrow */}
-          <motion.circle
-            cx={0}
-            cy={0}
-            initial={{ r: 54, opacity: 0.95 }}
-            animate={{ r: [54, 58, 52, 54], opacity: [0.95, 0.98, 0.95] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            fill="url(#squiggly-gradient)"
-            style={{ pointerEvents: 'none' }}
-          />
-        </motion.svg>
-
-        {/* 3D Avatar canvas */}
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: 'relative',
             width: '100%',
             height: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            pointerEvents: 'auto', 
-            cursor: 'pointer',
-            zIndex: 5,
             overflow: 'visible',
-            clipPath: 'circle(35%)', // Minimize the area that blocks background clicks
-
+            pointerEvents: 'none', // Critical: Let drag events pass to the motion.div
           }}
         >
-          <Canvas
-            shadows={{ type: THREE.PCFShadowMap }}
-            dpr={[1, 1.5]}
-            camera={{ fov: 35, near: 0.1, far: 1000 }}
-            style={{ pointerEvents: 'auto' }}
-            gl={{ antialias: true, powerPreference: 'high-performance', alpha: true }}
+          {/* Ambient glow — breathing pulse */}
+          <motion.div
+            animate={{
+              opacity: isVisible ? 1 : 0,
+            }}
+            initial={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            style={{
+              position: 'absolute',
+              inset: 10,
+              background: `radial-gradient(circle, ${currentColor}66 0%, transparent 70%)`,
+              filter: 'blur(30px)',
+              zIndex: -1,
+              willChange: 'transform, opacity',
+            }}
+          />
+
+          {/* Morphing blob SVG */}
+          <motion.svg
+            animate={{ y: [0, -10, 5, -5, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            viewBox="-200 -200 400 400"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              width: '110%',
+              height: '110%',
+              filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.3))',
+              overflow: 'visible',
+              willChange: 'transform',
+              pointerEvents: 'none',
+            }}
           >
-            <PerspectiveCamera makeDefault position={[0, 0, 5.5]} fov={30} />
+            <defs>
+              <linearGradient id="squiggly-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <motion.stop
+                  offset="0%"
+                  animate={{ stopColor: currentColor }}
+                  transition={{ duration: 0.8, ease: 'easeInOut' }}
+                />
+                <motion.stop
+                  offset="100%"
+                  animate={{ stopColor: nextColor }}
+                  transition={{ duration: 0.8, ease: 'easeInOut' }}
+                />
+              </linearGradient>
+            </defs>
 
-            <React.Suspense fallback={null}>
-              <Stage
-                intensity={0.6}
-                environment="city"
-                adjustCamera={false}
-                shadows="contact"
-              >
-                <Center>
-                  <AvatarModel sectionIndex={activeSectionIndex} gender={gender} />
-                </Center>
-              </Stage>
+            <motion.path
+              initial={false}
+              animate={{ d: currentPath, fill: 'url(#squiggly-gradient)' }}
+              transition={{
+                d: { duration: 1.2, ease: [0.22, 1, 0.36, 1] },
+                fill: { duration: 0.8, ease: 'easeInOut' },
+              }}
+              style={{ opacity: 0.95, stroke: 'none', willChange: 'd' }}
+            />
 
-            </React.Suspense>
-          </Canvas>
+            {/* Fallback circle so avatar is never unmasked if blob morphs narrow */}
+            <motion.circle
+              cx={0}
+              cy={0}
+              initial={{ r: 54, opacity: 0.95 }}
+              animate={{ r: [54, 58, 52, 54], opacity: [0.95, 0.98, 0.95] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              fill="url(#squiggly-gradient)"
+              style={{ pointerEvents: 'none' }}
+            />
+          </motion.svg>
+
+          {/* 3D Avatar canvas */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none', // Critical: Let drag events pass to the motion.div
+              zIndex: 5,
+              overflow: 'visible',
+              clipPath: 'circle(48%)',
+            }}
+          >
+            <Canvas
+              shadows={{ type: THREE.PCFShadowMap }}
+              dpr={[1, 2]}
+              camera={{ fov: 35, near: 0.1, far: 1000 }}
+              style={{ pointerEvents: 'none' }} // Critical: Let drag events pass to the motion.div
+              gl={{
+                antialias: true,
+                powerPreference: 'high-performance',
+                alpha: true,
+                stencil: false,
+                depth: true,
+              }}
+              frameloop="always"
+            >
+              <AdaptiveDpr pixelated />
+              <AdaptiveEvents />
+              <PerspectiveCamera makeDefault position={[0, 0, 5.5]} fov={30} />
+
+              <React.Suspense fallback={null}>
+                <Stage
+                  intensity={0.6}
+                  environment="city"
+                  adjustCamera={false}
+                  shadows="contact"
+                >
+                  <Center position={[0.4, -0.3, 0]}>
+                    <AvatarModel
+                      sectionIndex={activeSectionIndex}
+                      gender={gender}
+                      manualIndex={manualIndex}
+                    />
+                  </Center>
+                </Stage>
+              </React.Suspense>
+            </Canvas>
+          </Box>
         </Box>
-      </Box>
+      </motion.div>
     </motion.div>
   );
 };

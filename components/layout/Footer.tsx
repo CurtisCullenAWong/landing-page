@@ -38,16 +38,16 @@ export function Footer() {
 
   // Footer uses dark background with light text for proper contrast
   const footerStyles = {
-    bg: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.primary.dark,
-    text: theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.primary.contrastText,
+    bg: theme.palette.mode === 'dark' ? theme.palette.background.default : '#0B0F14',
+    text: theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.common.white,
     // Secondary text with appropriate opacity
     secondaryText: theme.palette.mode === 'dark'
       ? alpha(theme.palette.text.primary, 0.7)
-      : alpha(theme.palette.primary.contrastText, 0.8),
+      : alpha(theme.palette.common.white, 0.7),
     // Border color
     border: theme.palette.mode === 'dark'
       ? theme.palette.divider
-      : alpha(theme.palette.primary.contrastText, 0.1),
+      : alpha(theme.palette.common.white, 0.1),
   };
 
   return (
@@ -79,7 +79,7 @@ export function Footer() {
                   outline: 'none',
                   textDecoration: 'none',
                   '&:hover .logo-container': {
-                    background: alpha(theme.palette.common.white, 0.3),
+                    background: alpha(theme.palette.common.white, 1),
                     transform: 'scale(1.02)',
                   }
                 }}
@@ -89,9 +89,9 @@ export function Footer() {
                   sx={{
                     position: 'relative',
                     overflow: 'hidden',
-                    borderRadius: '12px',
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
-                    p: 1,
+                    borderRadius: '16px',
+                    background: theme.palette.common.white,
+                    p: 2,
                     border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
                     boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
                     transition: 'all 0.3s ease',
@@ -99,12 +99,14 @@ export function Footer() {
                 >
                   <Box
                     component="img"
-                    src={IMAGE_URLS.LOGO.src}
+                    src={IMAGE_URLS.LOGO_ALT.src}
                     alt="Logo"
                     sx={{
-                      h: 40,
+                      height: 72,
                       width: 'auto',
                       display: 'block',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       transition: 'transform 0.3s ease',
                       '.logo-container:hover &': { transform: 'scale(1.05)' }
                     }}

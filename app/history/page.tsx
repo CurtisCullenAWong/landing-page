@@ -147,7 +147,7 @@ export default function HistoryPage() {
             bottomSpacing={SECTION_SPACING.small}
           />
 
-          <Grid container spacing={6} alignItems="center">
+          <Grid container spacing={{ xs: 4, lg: 6 }} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }}>
               <Box sx={{ position: 'relative' }}>
                 <Box
@@ -167,10 +167,10 @@ export default function HistoryPage() {
                   The Boss Cargo Express Story
                 </Typography>
                 <Stack spacing={2}>
-                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.7, fontSize: '1.05rem', borderLeft: `4px solid ${tertiaryMain}`, pl: 3 }}>
+                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.7, fontSize: { xs: '1rem', md: '1.05rem' }, borderLeft: `4px solid ${tertiaryMain}`, pl: { xs: 2, md: 3 } }}>
                     {SITE_CONTENT.company.story}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, pl: 4 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, pl: { xs: 2, md: 4 } }}>
                     {SITE_CONTENT.company.strategy.overview}
                   </Typography>
                 </Stack>
@@ -199,7 +199,7 @@ export default function HistoryPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '15vh',
+            height: { xs: '8vh', md: '15vh' },
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
             zIndex: 0, // Lower z-index so content isn't covered
@@ -282,20 +282,26 @@ export default function HistoryPage() {
                         elevation={0}
                         sx={{
                           bgcolor: isDark ? alpha(milestone.color, 0.15) : alpha(milestone.color, 0.06),
-                          borderLeft: isLeft ? `5px solid ${milestone.color}` : 'none',
-                          borderRight: !isLeft ? `5px solid ${milestone.color}` : 'none',
-                          borderRadius: isLeft ? '0 20px 20px 0' : '20px 0 0 20px',
+                          borderLeft: { xs: `5px solid ${milestone.color}`, md: isLeft ? `5px solid ${milestone.color}` : 'none' },
+                          borderRight: { xs: 'none', md: !isLeft ? `5px solid ${milestone.color}` : 'none' },
+                          borderRadius: {
+                            xs: '0 20px 20px 0',
+                            md: isLeft ? '0 20px 20px 0' : '20px 0 0 20px'
+                          },
                           transition: 'all 0.3s ease',
                           '&:hover': {
-                            transform: isLeft ? 'translateX(10px)' : 'translateX(-10px)',
+                            transform: {
+                              xs: 'translateX(5px)',
+                              md: isLeft ? 'translateX(10px)' : 'translateX(-10px)'
+                            },
                             bgcolor: alpha(milestone.color, 0.2)
                           }
                         }}
                       >
-                        <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 }, textAlign: isLeft ? 'left' : 'right' }}>
-                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1, fontSize: { xs: '1.75rem', md: '3rem' } }}>{milestone.year}</Typography>
-                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700, fontSize: { xs: '1.1rem', md: '1.5rem' } }}>{milestone.title}</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: { xs: '0.85rem', md: '0.875rem' } }}>{milestone.description}</Typography>
+                        <CardContent sx={{ p: { xs: 2.5, sm: 3, md: 4 }, textAlign: { xs: 'left', md: isLeft ? 'left' : 'right' } }}>
+                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1, fontSize: { xs: '2rem', md: '3rem' } }}>{milestone.year}</Typography>
+                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>{milestone.title}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: { xs: '0.9rem', md: '0.875rem' } }}>{milestone.description}</Typography>
                         </CardContent>
                       </Card>
                     </Grid>
@@ -316,8 +322,8 @@ export default function HistoryPage() {
                       />
                     </Grid>
 
-                    {/* Empty Space for Alternating */}
-                    <Grid size={{ xs: 12, md: 5 }} sx={{ order: isLeft ? 3 : 1 }} />
+                    {/* Empty Space for Alternating - Hidden on mobile */}
+                    <Grid size={{ xs: 0, md: 5 }} sx={{ display: { xs: 'none', md: 'block' }, order: isLeft ? 3 : 1 }} />
                   </Grid>
                 );
               })}
@@ -375,7 +381,7 @@ export default function HistoryPage() {
               bottom: 0,
               left: 0,
               right: 0,
-              height: '15vh',
+              height: { xs: '8vh', md: '15vh' },
               background: `linear-gradient(to bottom, transparent, ${slideIndex === milestoneChunks.length - 1 ? theme.palette.background.default : theme.palette.background.paper})`,
               pointerEvents: 'none',
               zIndex: 0,
