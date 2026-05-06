@@ -10,16 +10,19 @@ import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { AvatarOverlay } from "@/components/chat/AvatarOverlay";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [gender, setGender] = useState<'male' | 'female'>('female');
+  const [mounted, setMounted] = useState(false);
 
   if (typeof window !== 'undefined') {
     const _warn = console.warn.bind(console);
@@ -30,6 +33,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   }
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
+    setMounted(true);
     if (isSequencePage) {
       document.documentElement.classList.add('scroll-lock-active');
     } else {
@@ -63,7 +67,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             </Suspense>
           </Box>
 
-          {isSequencePage && (
+          {mounted && isSequencePage && isDesktop && (
             <>
               <ChatWidget
                 isOpen={isChatOpen}
