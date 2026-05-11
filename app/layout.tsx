@@ -65,7 +65,11 @@ const primaryFont = localFont({
 export const metadata = {
   title: SITE_CONTENT.company.name,
   description: SITE_CONTENT.company.slogan,
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
+
 
 export default function RootLayout({
   children,

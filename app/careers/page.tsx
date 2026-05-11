@@ -89,7 +89,7 @@ const CornerBrackets = ({
 
 export default function JobPostingsPage() {
   usePageTitle('Careers');
-  const { jobs, isLoading } = useJobs();
+  const { jobs, departments, isLoading } = useJobs();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -121,11 +121,10 @@ export default function JobPostingsPage() {
 
 
 
-  // Get unique values for filter dropdowns
+  // Get values for filter dropdowns from context
   const uniqueDepartments = useMemo(() => {
-    const depts = new Set(activeJobs.map(job => job.department));
-    return Array.from(depts).sort();
-  }, [activeJobs]);
+    return departments.map(d => d.name);
+  }, [departments]);
 
   const uniqueTypes = useMemo(() => {
     const types = new Set(activeJobs.map(job => job.type));
@@ -542,7 +541,7 @@ export default function JobPostingsPage() {
                         <FormControl fullWidth size="small">
                           <InputLabel>Location</InputLabel>
                           <Select value={filterLocation} label="Location" onChange={(e) => { setFilterLocation(e.target.value); setPage(0); }} sx={{ borderRadius: 2 }}>
-                            <MenuItem value="all">All Regions</MenuItem>
+                            <MenuItem value="all">All Areas</MenuItem>
                             {uniqueLocations.map((loc) => <MenuItem key={loc} value={loc}>{loc}</MenuItem>)}
                           </Select>
                         </FormControl>

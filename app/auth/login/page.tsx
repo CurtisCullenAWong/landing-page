@@ -12,11 +12,44 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, LockOutlined, EmailOutlined } from "@mui/icons-material";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { Container, useTheme, Alert, Stack } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import { INPUT_LIMITS } from "@/lib/input-utils";
+
+
+// Shared "Corner Brackets" component for architectural emphasis
+const CornerBrackets = ({ color, size = 24, radius = 16 }: { color: string, size?: number, radius?: number }) => (
+  <>
+    <Box sx={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: size,
+      height: size,
+      borderTop: `3px solid ${color}`,
+      borderLeft: `3px solid ${color}`,
+      borderTopLeftRadius: radius,
+      zIndex: 2
+    }} />
+    <Box sx={{
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: size,
+      height: size,
+      borderBottom: `3px solid ${color}`,
+      borderRight: `3px solid ${color}`,
+      borderBottomRightRadius: radius,
+      zIndex: 2
+    }} />
+  </>
+);
+
 
 export default function Page() {
   usePageTitle('Login');
@@ -49,90 +82,170 @@ export default function Page() {
     }
   };
 
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const primaryMain = theme.palette.primary.main;
+  const tertiaryMain = (theme.palette as any).tertiary?.main || '#FCE200';
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Login
+    <Box sx={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      bgcolor: isDark ? 'background.default' : '#f5f5f5',
+      background: isDark 
+        ? `radial-gradient(circle at 20% 20%, ${alpha(primaryMain, 0.05)} 0%, transparent 40%), radial-gradient(circle at 80% 80%, ${alpha(primaryMain, 0.05)} 0%, transparent 40%)`
+        : `radial-gradient(circle at 20% 20%, ${alpha(primaryMain, 0.03)} 0%, transparent 40%), radial-gradient(circle at 80% 80%, ${alpha(primaryMain, 0.03)} 0%, transparent 40%)`,
+      p: 3
+    }}>
+      <Container maxWidth="sm">
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography variant="h2" sx={{ 
+            fontWeight: 900, 
+            mb: 1, 
+            letterSpacing: -2, 
+            textTransform: 'uppercase', 
+            color: primaryMain,
+            fontSize: { xs: '2.5rem', md: '3.5rem' }
+          }}>
+            Boss Cargo
+          </Typography>
+          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, letterSpacing: 1, textTransform: 'uppercase' }}>
+            Administrative Portal
+          </Typography>
+        </Box>
+
+        <Card sx={{ 
+          position: 'relative', 
+          boxShadow: 24, 
+          borderRadius: 4, 
+          overflow: 'visible',
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          backdropFilter: 'blur(10px)',
+          bgcolor: alpha(theme.palette.background.paper, 0.8)
+        }}>
+          <CornerBrackets color={tertiaryMain} radius={32} size={40} />
+          <CardContent sx={{ p: { xs: 4, md: 6 } }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: -1 }}>
+              Welcome Back
             </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-              Enter your email below to login to your account
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 5 }}>
+              Please enter your credentials to access the management dashboard.
             </Typography>
+
             <form onSubmit={handleLogin}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <Stack spacing={4}>
                 <TextField
-                  id="email"
-                  label="Email"
+                  label="Email Address"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="admin@bosscargo.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   fullWidth
+                  variant="outlined"
+                  inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailOutlined sx={{ color: primaryMain }} />
+                      </InputAdornment>
+                    ),
+                    sx: { borderRadius: 3 }
+                  }}
                 />
+                
                 <Box>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                    <Typography component="label" htmlFor="password" variant="body2">
-                      Password
-                    </Typography>
-                    <Link
-                      href="/auth/forgot-password"
-                      style={{ fontSize: "0.875rem", textDecoration: "underline" }}
-                    >
-                      Forgot your password?
-                    </Link>
-                  </Box>
                   <TextField
-                    id="password"
+                    label="Password"
                     type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     fullWidth
+                    variant="outlined"
+                    inputProps={{ maxLength: 100 }}
                     InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockOutlined sx={{ color: primaryMain }} />
+                        </InputAdornment>
+                      ),
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
+                            sx={{ color: 'text.secondary' }}
                           >
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
                         </InputAdornment>
                       ),
+                      sx: { borderRadius: 3 }
                     }}
                   />
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1.5 }}>
+                    <Link
+                      href="/auth/forgot-password"
+                      style={{ 
+                        fontSize: "0.875rem", 
+                        color: primaryMain, 
+                        textDecoration: "none",
+                        fontWeight: 700 
+                      }}
+                    >
+                      Forgot your password?
+                    </Link>
+                  </Box>
                 </Box>
+
                 {error && (
-                  <Typography variant="body2" color="error">
+                  <Alert severity="error" sx={{ borderRadius: 2 }}>
                     {error}
-                  </Typography>
+                  </Alert>
                 )}
+
                 <Button 
                   type="submit" 
                   variant="contained" 
+                  size="large"
                   fullWidth 
                   disabled={isLoading}
-                  startIcon={isLoading ? <CircularProgress size={16} /> : null}
+                  startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <LockOutlined />}
+                  sx={{ 
+                    py: 2, 
+                    borderRadius: 3, 
+                    fontWeight: 800, 
+                    fontSize: '1rem',
+                    boxShadow: `0 8px 16px ${alpha(primaryMain, 0.3)}`,
+                    '&:hover': {
+                      boxShadow: `0 12px 20px ${alpha(primaryMain, 0.4)}`,
+                    }
+                  }}
                 >
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "Authenticating..." : "Authorize Access"}
                 </Button>
-              </Box>
-              <Box sx={{ mt: 2, textAlign: "center" }}>
-                <Typography variant="body2">
-                  Don't have an account?{" "}
-                  <Link href="/auth/sign-up" style={{ textDecoration: "underline" }}>
-                    Sign up
+              </Stack>
+
+              <Box sx={{ mt: 4, textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">
+                  Unauthorized access is strictly prohibited.{" "}
+                  <Link href="/auth/sign-up" style={{ color: primaryMain, fontWeight: 700, textDecoration: 'none' }}>
+                    Request Access
                   </Link>
                 </Typography>
               </Box>
             </form>
           </CardContent>
         </Card>
-      </div>
-    </div>
+
+        <Typography variant="caption" color="text.disabled" sx={{ mt: 4, display: 'block', textAlign: 'center', fontWeight: 600 }}>
+          © {new Date().getFullYear()} Boss Cargo Express Administrative Division. All Rights Reserved.
+        </Typography>
+      </Container>
+    </Box>
   );
 }
+

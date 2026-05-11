@@ -31,6 +31,8 @@ export const IMAGE_URLS = {
   // Branding
   LOGO: Logo,
   LOGO_ALT: LogoAlt,
+  FAVICON: '/favicon.ico',
+
 
   // Hero & Landing Images
 

@@ -20,7 +20,7 @@ import JobTable from '@/components/admin/JobTable';
 import Link from 'next/link';
 
 interface JobApplicant {
-  id: string;
+  id: string; // This is the UUID
   job_id: string | null;
   first_name: string;
   last_name: string;

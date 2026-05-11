@@ -18,6 +18,11 @@ export interface Job {
   application_url?: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+}
+
 // Database job type (snake_case)
 interface DatabaseJob {
   id: string;
@@ -37,6 +42,7 @@ interface DatabaseJob {
 
 interface JobContextType {
   jobs: Job[];
+  departments: Department[];
   isLoading: boolean;
   addJob: (job: Omit<Job, 'id' | 'postedDate'>) => Promise<void>;
   addJobs: (jobs: Omit<Job, 'id' | 'postedDate'>[]) => Promise<void>;
@@ -77,11 +83,17 @@ function mapDatabaseJobToJob(dbJob: DatabaseJob): Job {
 
 export function JobProvider({ children }: { children: ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load jobs from database on mount and set up realtime subscription
+  // Load jobs and departments from database on mount and set up realtime subscription
   useEffect(() => {
-    loadJobs();
+    const initData = async () => {
+      setIsLoading(true);
+      await Promise.all([loadJobs(), loadDepartments()]);
+      setIsLoading(false);
+    };
+    initData();
 
     // Set up realtime subscription for jobs table
     const supabase = createClient();
@@ -165,8 +177,26 @@ export function JobProvider({ children }: { children: ReactNode }) {
         stack: error.stack
       } : error);
       setJobs([]);
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const loadDepartments = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading departments:', error);
+        setDepartments([]);
+      } else if (data) {
+        setDepartments(data);
+      }
+    } catch (error) {
+      console.error('Error loading departments:', error);
+      setDepartments([]);
     }
   };
 
@@ -312,7 +342,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
   // Don't block rendering - let children handle their own loading states
   return (
-    <JobContext.Provider value={{ jobs, isLoading, addJob, addJobs, updateJob, deleteJob, getJobById }}>
+    <JobContext.Provider value={{ jobs, departments, isLoading, addJob, addJobs, updateJob, deleteJob, getJobById }}>
       {children}
     </JobContext.Provider>
   );

@@ -38,10 +38,15 @@ import {
   Stack,
   Divider,
   CardActions,
+  Alert,
 } from '@mui/material';
+
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../../lib/usePageTitle';
 import { formatStatus } from '@/lib/utils';
+import { sanitizeString, cleanList, formatName, isValidUrl, INPUT_LIMITS } from '@/lib/input-utils';
+
+
 
 
 type SortField = 'title' | 'department' | 'location' | 'postedDate' | 'status';
@@ -66,8 +71,10 @@ type JobFormData = {
 
 export default function AdminPage() {
   usePageTitle('Admin');
-  const { jobs, isLoading, addJobs, updateJob, deleteJob } = useJobs();
+  const { jobs, departments, isLoading, addJobs, updateJob, deleteJob } = useJobs();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
@@ -84,7 +91,7 @@ export default function AdminPage() {
       salary: '',
       status: 'active',
       application_url: '',
-      expanded: false,
+      expanded: true,
     }
   ]);
   const theme = useTheme();
@@ -106,11 +113,10 @@ export default function AdminPage() {
   // Filter out any null jobs
   const validJobs = jobs.filter(job => job !== null && job !== undefined);
 
-  // Get unique values for filter dropdowns
+  // Use departments from context for filters
   const uniqueDepartments = useMemo(() => {
-    const depts = new Set(validJobs.map(job => job.department));
-    return Array.from(depts).sort();
-  }, [validJobs]);
+    return departments.map(d => d.name);
+  }, [departments]);
 
   const uniqueTypes = useMemo(() => {
     const types = new Set(validJobs.map(job => job.type));
@@ -259,7 +265,7 @@ export default function AdminPage() {
       salary: '',
       status: 'active',
       application_url: '',
-      expanded: false,
+      expanded: true,
     }]);
   };
 
@@ -279,19 +285,27 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     if (editingJob) {
-      // Single edit mode (keep existing behavior)
+      // Single edit mode
       const entry = jobEntries[0];
+      
+      // Validate URLs if provided
+      if (entry.application_url && !isValidUrl(entry.application_url)) {
+        setFormError('Please enter a valid Application URL');
+        return;
+      }
+
       const jobData = {
-        title: entry.title,
-        department: entry.department,
-        location: entry.location,
+        title: sanitizeString(entry.title),
+        department: formatName(entry.department),
+        location: formatName(entry.location),
         type: entry.type,
-        description: entry.description,
-        responsibilities: entry.responsibilities.split('\n').filter(r => r.trim()),
-        requirements: entry.requirements.split('\n').filter(r => r.trim()),
-        salary: entry.salary,
+        description: sanitizeString(entry.description),
+        responsibilities: cleanList(entry.responsibilities),
+        requirements: cleanList(entry.requirements),
+        salary: sanitizeString(entry.salary),
         status: entry.status,
         application_url: entry.application_url.trim() || undefined,
       };
@@ -302,18 +316,25 @@ export default function AdminPage() {
       // Bulk create mode
       const jobsToAdd = jobEntries
         .filter(entry => entry.title.trim() && entry.department.trim() && entry.location.trim())
-        .map(entry => ({
-          title: entry.title,
-          department: entry.department,
-          location: entry.location,
-          type: entry.type,
-          description: entry.description,
-          responsibilities: entry.responsibilities.split('\n').filter(r => r.trim()),
-          requirements: entry.requirements.split('\n').filter(r => r.trim()),
-          salary: entry.salary,
-          status: 'active' as 'active' | 'closed',
-          application_url: entry.application_url.trim() || undefined,
-        }));
+        .map(entry => {
+          // Internal validation
+          if (entry.application_url && !isValidUrl(entry.application_url)) {
+             // In bulk mode, we might want to skip or alert
+          }
+          
+          return {
+            title: sanitizeString(entry.title),
+            department: formatName(entry.department),
+            location: formatName(entry.location),
+            type: entry.type,
+            description: sanitizeString(entry.description),
+            responsibilities: cleanList(entry.responsibilities),
+            requirements: cleanList(entry.requirements),
+            salary: sanitizeString(entry.salary),
+            status: entry.status,
+            application_url: entry.application_url.trim() || undefined,
+          };
+        });
 
       if (jobsToAdd.length > 0) {
         await addJobs(jobsToAdd);
@@ -321,6 +342,8 @@ export default function AdminPage() {
       }
     }
   };
+
+
 
   const handleEdit = (job: Job) => {
     setEditingJob(job);
@@ -367,11 +390,13 @@ export default function AdminPage() {
       salary: '',
       status: 'active',
       application_url: '',
-      expanded: false,
+      expanded: true,
     }]);
     setIsFormOpen(false);
     setEditingJob(null);
+    setFormError(null);
   };
+
 
   return (
     <Box>
@@ -466,7 +491,14 @@ export default function AdminPage() {
                 </Box>
               </Box>
 
+              {formError && (
+                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                  {formError}
+                </Alert>
+              )}
+
               <form onSubmit={handleSubmit}>
+
                 {isMobile ? (
                   /* Mobile Card View */
                   <Stack spacing={2} sx={{ mb: 2 }}>
@@ -506,16 +538,24 @@ export default function AdminPage() {
                               value={entry.title}
                               onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
                               required
+                              inputProps={{ maxLength: INPUT_LIMITS.TITLE }}
                             />
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Department"
-                              placeholder="Department"
-                              value={entry.department}
-                              onChange={(e) => handleInputChange(entry.id, 'department', e.target.value)}
-                              required
-                            />
+
+                            <FormControl fullWidth size="small" required>
+                              <InputLabel>Department</InputLabel>
+                              <Select
+                                value={entry.department}
+                                label="Department"
+                                onChange={(e) => handleSelectChange(entry.id, 'department', e.target.value)}
+                              >
+                                {departments.map((dept) => (
+                                  <MenuItem key={dept.id} value={dept.name}>
+                                    {dept.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+
                             <TextField
                               fullWidth
                               size="small"
@@ -524,7 +564,9 @@ export default function AdminPage() {
                               value={entry.location}
                               onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
                               required
+                              inputProps={{ maxLength: INPUT_LIMITS.LOCATION }}
                             />
+
                             <FormControl fullWidth size="small" required>
                               <InputLabel>Type</InputLabel>
                               <Select
@@ -546,20 +588,20 @@ export default function AdminPage() {
                               value={entry.salary}
                               onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
                               required
+                              inputProps={{ maxLength: INPUT_LIMITS.SALARY }}
                             />
-                            {editingJob && (
-                              <FormControl fullWidth size="small" required>
-                                <InputLabel>Status</InputLabel>
-                                <Select
-                                  value={entry.status}
-                                  label="Status"
-                                  onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
-                                >
-                                  <MenuItem value="active">Active</MenuItem>
-                                  <MenuItem value="closed">Closed</MenuItem>
-                                </Select>
-                              </FormControl>
-                            )}
+
+                            <FormControl fullWidth size="small" required>
+                              <InputLabel>Status</InputLabel>
+                              <Select
+                                value={entry.status}
+                                label="Status"
+                                onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
+                              >
+                                <MenuItem value="active">Active</MenuItem>
+                                <MenuItem value="closed">Closed</MenuItem>
+                              </Select>
+                            </FormControl>
                           </Stack>
                           <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
                             <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
@@ -573,7 +615,10 @@ export default function AdminPage() {
                                   required
                                   multiline
                                   rows={3}
+                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                  helperText={`${entry.description.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                 />
+
                                 <TextField
                                   fullWidth
                                   size="small"
@@ -584,7 +629,10 @@ export default function AdminPage() {
                                   multiline
                                   rows={4}
                                   placeholder="Enter each responsibility on a new line"
+                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                  helperText={`${entry.responsibilities.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                 />
+
                                 <TextField
                                   fullWidth
                                   size="small"
@@ -595,7 +643,10 @@ export default function AdminPage() {
                                   multiline
                                   rows={4}
                                   placeholder="Enter each requirement on a new line"
+                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                  helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                 />
+
                                 <TextField
                                   fullWidth
                                   size="small"
@@ -603,7 +654,10 @@ export default function AdminPage() {
                                   value={entry.application_url}
                                   onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
                                   placeholder="https://example.com/apply"
+                                  inputProps={{ maxLength: INPUT_LIMITS.URL }}
+                                  helperText={`${entry.application_url.length}/${INPUT_LIMITS.URL}`}
                                 />
+
                               </Stack>
                             </Box>
                           </Collapse>
@@ -623,7 +677,7 @@ export default function AdminPage() {
                           <TableCell sx={{ fontWeight: 600, p: 1 }}>Location</TableCell>
                           <TableCell sx={{ fontWeight: 600, p: 1 }}>Type</TableCell>
                           <TableCell sx={{ fontWeight: 600, p: 1 }}>Salary</TableCell>
-                          {editingJob && <TableCell sx={{ fontWeight: 600, p: 1 }}>Status</TableCell>}
+                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Status</TableCell>
                           <TableCell sx={{ width: 50, p: 1 }}></TableCell>
                         </TableRow>
                       </TableHead>
@@ -648,19 +702,26 @@ export default function AdminPage() {
                                   value={entry.title}
                                   onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
                                   required
+                                  inputProps={{ maxLength: INPUT_LIMITS.TITLE }}
                                   sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                 />
                               </TableCell>
                               <TableCell sx={{ p: 0.5 }}>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  placeholder="Department"
-                                  value={entry.department}
-                                  onChange={(e) => handleInputChange(entry.id, 'department', e.target.value)}
-                                  required
-                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                />
+                                <FormControl fullWidth size="small" required>
+                                  <Select
+                                    value={entry.department}
+                                    onChange={(e) => handleSelectChange(entry.id, 'department', e.target.value)}
+                                    displayEmpty
+                                    sx={{ fontSize: '0.875rem' }}
+                                  >
+                                    <MenuItem value="" disabled>Select Department</MenuItem>
+                                    {departments.map((dept) => (
+                                      <MenuItem key={dept.id} value={dept.name} sx={{ fontSize: '0.875rem' }}>
+                                        {dept.name}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
                               </TableCell>
                               <TableCell sx={{ p: 0.5 }}>
                                 <TextField
@@ -670,6 +731,7 @@ export default function AdminPage() {
                                   value={entry.location}
                                   onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
                                   required
+                                  inputProps={{ maxLength: INPUT_LIMITS.LOCATION }}
                                   sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                 />
                               </TableCell>
@@ -695,23 +757,22 @@ export default function AdminPage() {
                                   value={entry.salary}
                                   onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
                                   required
+                                  inputProps={{ maxLength: INPUT_LIMITS.SALARY }}
                                   sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                 />
                               </TableCell>
-                              {editingJob && (
-                                <TableCell sx={{ p: 0.5 }}>
-                                  <FormControl fullWidth size="small" required>
-                                    <Select
-                                      value={entry.status}
-                                      onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
-                                      sx={{ fontSize: '0.875rem' }}
-                                    >
-                                      <MenuItem value="active">Active</MenuItem>
-                                      <MenuItem value="closed">Closed</MenuItem>
-                                    </Select>
-                                  </FormControl>
-                                </TableCell>
-                              )}
+                              <TableCell sx={{ p: 0.5 }}>
+                                <FormControl fullWidth size="small" required>
+                                  <Select
+                                    value={entry.status}
+                                    onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
+                                    sx={{ fontSize: '0.875rem' }}
+                                  >
+                                    <MenuItem value="active">Active</MenuItem>
+                                    <MenuItem value="closed">Closed</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              </TableCell>
                               <TableCell sx={{ p: 0.5 }}>
                                 {jobEntries.length > 1 && !editingJob && (
                                   <IconButton
@@ -726,7 +787,7 @@ export default function AdminPage() {
                               </TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableCell colSpan={editingJob ? 8 : 7} sx={{ py: 0, px: 1, border: 0 }}>
+                              <TableCell colSpan={8} sx={{ py: 0, px: 1, border: 0 }}>
                                 <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
                                   <Box sx={{ py: 2, px: 1 }}>
                                     <Grid container spacing={2}>
@@ -740,6 +801,8 @@ export default function AdminPage() {
                                           required
                                           multiline
                                           rows={3}
+                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                          helperText={`${entry.description.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
                                       </Grid>
@@ -754,6 +817,8 @@ export default function AdminPage() {
                                           multiline
                                           rows={4}
                                           placeholder="Enter each responsibility on a new line"
+                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                          helperText={`${entry.responsibilities.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
                                       </Grid>
@@ -768,6 +833,8 @@ export default function AdminPage() {
                                           multiline
                                           rows={4}
                                           placeholder="Enter each requirement on a new line"
+                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                          helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
                                       </Grid>
@@ -779,6 +846,8 @@ export default function AdminPage() {
                                           value={entry.application_url}
                                           onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
                                           placeholder="https://example.com/apply"
+                                          inputProps={{ maxLength: INPUT_LIMITS.URL }}
+                                          helperText={`${entry.application_url.length}/${INPUT_LIMITS.URL}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
                                       </Grid>
@@ -1064,6 +1133,7 @@ export default function AdminPage() {
                         Posted
                       </TableSortLabel>
                     </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>UUID</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -1096,6 +1166,9 @@ export default function AdminPage() {
                         </TableCell>
                         <TableCell>
                           {new Date(job.postedDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
+                          {job.id}
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -1195,6 +1268,14 @@ export default function AdminPage() {
                             </Typography>
                             <Typography variant="body2">
                               {new Date(job.postedDate).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                              UUID:
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                              {job.id}
                             </Typography>
                           </Box>
                         </Stack>

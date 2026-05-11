@@ -212,6 +212,11 @@ export default function JobTable({
                   Status
                 </TableSortLabel>
               </TableCell>
+              {!compact && (
+                <TableCell>
+                  UUID
+                </TableCell>
+              )}
               <TableCell align="right">
                 <TableSortLabel
                   active={sortField === 'postedDate'}
@@ -252,6 +257,11 @@ export default function JobTable({
                       sx={{ fontWeight: 600, fontSize: '0.75rem', textTransform: 'capitalize' }}
                     />
                   </TableCell>
+                  {!compact && (
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
+                      {job.id}
+                    </TableCell>
+                  )}
                   <TableCell align="right" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
                     {new Date(job.postedDate).toLocaleDateString()}
                   </TableCell>

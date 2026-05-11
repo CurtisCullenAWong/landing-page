@@ -242,6 +242,11 @@ export default function ApplicantTable({
                   Status
                 </TableSortLabel>
               </TableCell>
+              {!compact && (
+                <TableCell>
+                  UUID
+                </TableCell>
+              )}
               <TableCell align="right">
                 <TableSortLabel
                   active={sortField === 'applied_at'}
@@ -274,6 +279,11 @@ export default function ApplicantTable({
                       sx={{ fontWeight: 600, fontSize: '0.75rem' }}
                     />
                   </TableCell>
+                  {!compact && (
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
+                      {applicant.id}
+                    </TableCell>
+                  )}
                   <TableCell align="right" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
                     {applicant.applied_at ? new Date(applicant.applied_at).toLocaleDateString() : 'N/A'}
                   </TableCell>

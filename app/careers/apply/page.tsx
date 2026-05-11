@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useCallback, useEffect } from 'react';
 import { ArrowLeft, Upload, FileText, Link as LinkIcon, X, ChevronRight, ShieldCheck, Info } from 'lucide-react';
+
 import { useDropzone } from 'react-dropzone';
 import {
   Box,
@@ -25,8 +26,21 @@ import {
   Stack,
   alpha,
   Breadcrumbs,
+  Grid,
 } from '@mui/material';
+
 import { usePageTitle } from '@/lib/usePageTitle';
+import {
+  sanitizeString,
+  formatName,
+  normalizeEmail,
+  formatPhone,
+  isValidUrl,
+  isValidEmail,
+  INPUT_LIMITS
+} from '@/lib/input-utils';
+
+
 
 interface ApplicationFormData {
   first_name: string;
@@ -192,12 +206,29 @@ export default function GeneralApplicationPage() {
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    if (!isValidEmail(formData.email)) {
       setSubmitError('Please enter a valid email address.');
       setIsSubmitting(false);
       return;
     }
+
+    // Validate URLs if provided
+    if (formData.linkedin_url && !isValidUrl(formData.linkedin_url)) {
+      setSubmitError('Please enter a valid LinkedIn URL.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (formData.portfolio_url && !isValidUrl(formData.portfolio_url)) {
+      setSubmitError('Please enter a valid Portfolio URL.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (formData.resume_url && !isValidUrl(formData.resume_url)) {
+      setSubmitError('Please enter a valid Resume URL.');
+      setIsSubmitting(false);
+      return;
+    }
+
 
     try {
       // Generate UUID for the application
@@ -215,11 +246,11 @@ export default function GeneralApplicationPage() {
         .insert({
           id: applicationId, // Use the generated UUID
           job_id: null, // General application - no specific job
-          first_name: formData.first_name.trim(),
-          last_name: formData.last_name.trim(),
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone.trim() || null,
-          cover_letter: formData.cover_letter.trim() || null,
+          first_name: formatName(formData.first_name),
+          last_name: formatName(formData.last_name),
+          email: normalizeEmail(formData.email),
+          phone: formatPhone(formData.phone) || null,
+          cover_letter: sanitizeString(formData.cover_letter) || null,
           resume_url: resumeUrl,
           linkedin_url: formData.linkedin_url.trim() || null,
           portfolio_url: formData.portfolio_url.trim() || null,
@@ -228,6 +259,7 @@ export default function GeneralApplicationPage() {
         })
         .select()
         .single();
+
 
       if (error) {
         console.error('Error submitting application:', error);
@@ -267,20 +299,20 @@ export default function GeneralApplicationPage() {
             <CornerBrackets color={tertiaryMain} radius={16} />
             <CardContent sx={{ p: 6, textAlign: 'center' }}>
               <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ 
-                  p: 2, 
-                  bgcolor: alpha(theme.palette.success?.main || '#2e7d32', 0.1), 
-                  color: theme.palette.success?.main || '#2e7d32', 
-                  borderRadius: '50%' 
+                <Box sx={{
+                  p: 2,
+                  bgcolor: alpha(theme.palette.success?.main || '#2e7d32', 0.1),
+                  color: theme.palette.success?.main || '#2e7d32',
+                  borderRadius: '50%'
                 }}>
                   <ShieldCheck size={64} />
                 </Box>
               </Box>
-              <Typography variant="h3" sx={{ 
-                mb: 2, 
-                fontWeight: 900, 
-                color: theme.palette.success?.main || '#2e7d32', 
-                letterSpacing: -1 
+              <Typography variant="h3" sx={{
+                mb: 2,
+                fontWeight: 900,
+                color: theme.palette.success?.main || '#2e7d32',
+                letterSpacing: -1
               }}>
                 Submission Successful
               </Typography>
@@ -410,29 +442,37 @@ export default function GeneralApplicationPage() {
 
             <form onSubmit={handleSubmit}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {/* Name Fields */}
-                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
-                  <TextField
-                    fullWidth
-                    label="First Name"
-                    variant="outlined"
-                    value={formData.first_name}
-                    onChange={(e) => handleInputChange('first_name', e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
-                  <TextField
-                    fullWidth
-                    label="Last Name"
-                    variant="outlined"
-                    value={formData.last_name}
-                    onChange={(e) => handleInputChange('last_name', e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
-                </Box>
+                <Grid container spacing={3}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="First Name"
+                      variant="outlined"
+                      value={formData.first_name}
+                      onChange={(e) => handleInputChange('first_name', e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      inputProps={{ maxLength: INPUT_LIMITS.NAME }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      fullWidth
+                      label="Last Name"
+                      variant="outlined"
+                      value={formData.last_name}
+                      onChange={(e) => handleInputChange('last_name', e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      inputProps={{ maxLength: INPUT_LIMITS.NAME }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                </Grid>
+
+
+
 
                 {/* Contact Fields */}
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
@@ -445,19 +485,22 @@ export default function GeneralApplicationPage() {
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     required
                     disabled={isSubmitting}
+                    inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <TextField
                     fullWidth
                     label="Phone Number"
-                    type="tel"
                     variant="outlined"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     disabled={isSubmitting}
+                    placeholder="+63 XXX XXX XXXX"
+                    inputProps={{ maxLength: INPUT_LIMITS.PHONE }}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </Box>
+
 
                 {/* Resume Section Container */}
                 <Box>
@@ -574,6 +617,7 @@ export default function GeneralApplicationPage() {
                       value={formData.resume_url}
                       onChange={(e) => handleInputChange('resume_url', e.target.value)}
                       disabled={isSubmitting || isUploading || !!resumeFile}
+                      inputProps={{ maxLength: INPUT_LIMITS.URL }}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -582,8 +626,9 @@ export default function GeneralApplicationPage() {
                         ),
                         sx: { borderRadius: 2 }
                       }}
-                      helperText={!!resumeFile ? "Remove the attached file to utilize a URL." : "Ensure the document has appropriate viewing permissions."}
+                      helperText={!!resumeFile ? "Remove the attached file to utilize a URL." : `Ensure the document has appropriate viewing permissions. (${formData.resume_url.length}/${INPUT_LIMITS.URL})`}
                     />
+
                   </Stack>
                 </Box>
 
@@ -602,9 +647,12 @@ export default function GeneralApplicationPage() {
                     rows={8}
                     disabled={isSubmitting}
                     placeholder="Provide a brief overview of your professional background and motivation for joining Boss Cargo Express..."
+                    inputProps={{ maxLength: INPUT_LIMITS.COVER_LETTER }}
+                    helperText={`${formData.cover_letter.length}/${INPUT_LIMITS.COVER_LETTER}`}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </Box>
+
 
                 {/* URLs Section */}
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
@@ -616,6 +664,7 @@ export default function GeneralApplicationPage() {
                     onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
                     disabled={isSubmitting}
                     placeholder="https://linkedin.com/in/profile"
+                    inputProps={{ maxLength: INPUT_LIMITS.URL }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -624,7 +673,9 @@ export default function GeneralApplicationPage() {
                       ),
                       sx: { borderRadius: 2 }
                     }}
+                    helperText={`${formData.linkedin_url.length}/${INPUT_LIMITS.URL}`}
                   />
+
                   <TextField
                     fullWidth
                     label="Professional Portfolio"
@@ -633,6 +684,7 @@ export default function GeneralApplicationPage() {
                     onChange={(e) => handleInputChange('portfolio_url', e.target.value)}
                     disabled={isSubmitting}
                     placeholder="https://yourportfolio.com"
+                    inputProps={{ maxLength: INPUT_LIMITS.URL }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -641,7 +693,9 @@ export default function GeneralApplicationPage() {
                       ),
                       sx: { borderRadius: 2 }
                     }}
+                    helperText={`${formData.portfolio_url.length}/${INPUT_LIMITS.URL}`}
                   />
+
                 </Box>
 
                 {/* Submit Button */}
