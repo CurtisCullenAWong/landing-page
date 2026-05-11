@@ -62,10 +62,6 @@ export default function JobDetailsClient() {
   const [isLoading, setIsLoading] = useState(true);
   const theme = useTheme();
 
-  // Ensure page starts at the top on navigation
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   const primaryMain = theme.palette.primary?.main || '#00A39D';
   const tertiaryMain = (theme.palette as any).tertiary?.main || '#FCE200';

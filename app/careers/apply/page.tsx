@@ -85,10 +85,6 @@ export default function GeneralApplicationPage() {
   const tertiaryMain = (theme.palette as any).tertiary?.main || '#FCE200';
   const bgColor = theme.palette.background?.default || '#ffffff';
 
-  // Ensure page starts at the top on navigation
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   const [formData, setFormData] = useState<ApplicationFormData>({
     first_name: '',

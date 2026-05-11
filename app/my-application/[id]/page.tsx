@@ -61,10 +61,6 @@ export default function MyApplicationPage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // Ensure page starts at the top on navigation
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
 
   // Check if URL is a PDF

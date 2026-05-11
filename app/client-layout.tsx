@@ -63,7 +63,18 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove('scroll-lock-active');
     }
-  }, [isSequencePage]);
+
+    // Reset scroll position on route change
+    // We use a small timeout to ensure the layout has updated and scroll-lock is removed
+    const timer = setTimeout(() => {
+      // Don't auto-scroll to top if we have a hash on the home page (let HomePage handle it)
+      if (!window.location.hash || pathname !== '/') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
+    }, 10);
+
+    return () => clearTimeout(timer);
+  }, [isSequencePage, pathname]);
 
   return (
     <NextThemeProvider

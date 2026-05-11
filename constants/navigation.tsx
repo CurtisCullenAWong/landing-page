@@ -33,8 +33,17 @@ export const scrollToHref = (href: string) => {
   let id = href.replace('/#', '').replace('/', '');
   if (!id) id = 'home';
   const element = document.getElementById(id);
+  
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Account for header height (80px)
+    const headerOffset = 80;
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
 
     // Update the URL hash without triggering a jump
     const newHash = id === 'home' ? '' : `#${id}`;
@@ -52,6 +61,7 @@ export const useActiveSection = () => {
   const [activeSection, setActiveSection] = useState('home');
   const pathname = usePathname();
   const currentSectionRef = useRef('home');
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     // If not on the main page, don't bother tracking sections
@@ -60,36 +70,61 @@ export const useActiveSection = () => {
       return;
     }
 
+    // Set a flag to ignore "at top" hash clearing during initial hydration/scroll-to-hash
+    isInitialLoadRef.current = true;
+    const loadTimer = setTimeout(() => {
+      isInitialLoadRef.current = false;
+    }, 1000);
+
     const sections = ['home', 'about-us', 'why-us', 'history', 'partnerships', 'careers'];
 
     const handleScroll = () => {
+      // Defensive check: only run this on the home page
+      if (window.location.pathname !== '/') return;
+
+      // If we're at the very top, default to home
+      if (window.scrollY < 10) {
+        // Guard: If we have an initial hash and we're still at the top during the first second,
+        // assume we're waiting for the browser or HomePage script to perform the initial scroll.
+        if (isInitialLoadRef.current && window.location.hash && window.location.hash !== '#home') {
+          return;
+        }
+        
+        if (currentSectionRef.current !== 'home') {
+          currentSectionRef.current = 'home';
+          setActiveSection('home');
+          window.history.replaceState(null, '', window.location.pathname);
+          document.title = `Home | Boss Cargo Express`;
+        }
+        return;
+      }
+
       let current = 'home';
 
       // 1. Check if we're near the bottom of the page
       const scrollPosition = window.scrollY + window.innerHeight;
       const totalHeight = document.documentElement.scrollHeight;
-      const isAtBottom = scrollPosition >= totalHeight - 100;
+      // We only consider "at bottom" if we've actually scrolled down a bit
+      // and we are within 50px of the total height.
+      const isAtBottom = scrollPosition >= totalHeight - 50 && window.scrollY > 100;
 
       if (isAtBottom) {
         current = sections[sections.length - 1];
       } else {
         // 2. Find the section that is currently most visible in the viewport
-        // We use a more precise check: the section whose top is closest to the top of the viewport
-        // but still within a reasonable range (top 1/3)
-        let closestSection = 'home';
-        let minDistance = Infinity;
-
         for (const id of sections) {
           const element = document.getElementById(id);
           if (element) {
             const rect = element.getBoundingClientRect();
-            // If the section is in view or coming into view
-            if (rect.top <= window.innerHeight / 3) {
-              closestSection = id;
+            // Threshold is top 1/3 of the screen
+            const threshold = window.innerHeight / 3;
+            
+            // If the section's top has passed the threshold, it's a candidate
+            if (rect.top <= threshold) {
+              current = id;
             }
           }
         }
-        current = closestSection;
       }
 
       if (current !== currentSectionRef.current) {
@@ -126,6 +161,7 @@ export const useActiveSection = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
+      clearTimeout(loadTimer);
     };
   }, [pathname]);
 

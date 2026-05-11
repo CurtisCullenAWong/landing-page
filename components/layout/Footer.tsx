@@ -8,8 +8,10 @@ import {
   Stack,
   Divider,
   useTheme,
-  alpha // Helper function to handle opacities
+  alpha, // Helper function to handle opacities
+  Button
 } from '@mui/material';
+import { Calculate as CalculateIcon } from '@mui/icons-material';
 import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -117,6 +119,38 @@ export function Footer() {
                 Delivering excellence across the Philippines with world-class logistics
                 solutions since 2014.
               </Typography>
+              <Box>
+                <Button
+                  component="a"
+                  href="https://ratrix.cerrov5.wyred.tech/ratrix/shipping-calculator"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  startIcon={<CalculateIcon />}
+                  variant="contained"
+                  sx={{
+                    mt: 1,
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    borderRadius: '10px',
+                    px: 3,
+                    py: 1,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    boxShadow: `0 4px 14px 0 ${alpha(theme.palette.primary.main, 0.4)}`,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      bgcolor: theme.palette.primary.dark,
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    }
+                  }}
+                >
+                  Get a Quote
+                </Button>
+              </Box>
             </Stack>
           </Grid>
 

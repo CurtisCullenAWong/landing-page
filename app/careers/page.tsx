@@ -93,10 +93,6 @@ export default function JobPostingsPage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // Ensure page starts at the top on navigation
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
 
   // Defensive Theme Extraction

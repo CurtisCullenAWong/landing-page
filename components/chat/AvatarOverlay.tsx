@@ -21,6 +21,9 @@ const SQUIGGLY_PATHS = [
 // Preload the 3D model in the background
 useGLTF.preload('/models/avatar.glb');
 
+// Audio to play for dance animations — place your file at `public/audio/dance.mp3`
+const DANCE_AUDIO_SRC = '/audio/dance.mp3';
+
 const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-align"]';
 const SECTION_CHANGE_DEBOUNCE = 100; // ms
 
@@ -28,6 +31,12 @@ const SECTION_CHANGE_DEBOUNCE = 100; // ms
 const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: number, gender: 'male' | 'female', manualIndex: number }) => {
   const group = useRef<THREE.Group>(null);
   const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioAvailable, setAudioAvailable] = useState<boolean | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const oscIntervalRef = useRef<number | null>(null);
+  const oscNodeRef = useRef<OscillatorNode | null>(null);
 
   // Clone scene to prevent cumulative transform drift across navigation
   const scene = useMemo(() => SkeletonUtils.clone(originalScene), [originalScene]);
@@ -45,59 +54,136 @@ const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: numb
     return () => {
       mixer.stopAllAction();
       mixer.uncacheRoot(scene);
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        } catch (e) {
+          // ignore
+        }
+        audioRef.current = null;
+      }
+      if (oscIntervalRef.current) {
+        window.clearInterval(oscIntervalRef.current);
+        oscIntervalRef.current = null;
+      }
+      if (oscNodeRef.current) {
+        try { oscNodeRef.current.stop(); } catch (e) { }
+        try { oscNodeRef.current.disconnect(); } catch (e) { }
+        oscNodeRef.current = null;
+      }
+      if (audioContextRef.current) {
+        try { audioContextRef.current.close(); } catch (e) { }
+        audioContextRef.current = null;
+      }
     };
   }, [mixer, scene]);
 
-  const [currentClipIndex, setCurrentClipIndex] = useState(0);
+  // Detect whether the dance audio file exists on the server
+  useEffect(() => {
+    let mounted = true;
+    fetch(DANCE_AUDIO_SRC, { method: 'HEAD' })
+      .then((res) => {
+        if (!mounted) return;
+        setAudioAvailable(res.ok);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setAudioAvailable(false);
+      });
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
-    if (!animations || animations.length === 0) return;
+    if (!animations?.length) return;
 
-    const keywords = ['dance', 'walk', 'idle', 'wave', 'nod', 'clap', 'sit', 'stand', 'run'];
-    const pool = animations.filter((clip) =>
-      keywords.some(k => clip.name.toLowerCase().includes(k))
-    ).slice(0, Math.ceil(animations.length / 2)) || animations;
+    const keywords = ['dance', 'walk', 'idle', 'wave', 'run'];
+    const pool = animations.filter(a =>
+      keywords.some(k => a.name.toLowerCase().includes(k))
+    );
 
-    // Use modulo to stay within pool bounds
-    const targetIdx = (sectionIndex + manualIndex) % pool.length;
-    setCurrentClipIndex(targetIdx);
-  }, [sectionIndex, manualIndex, animations]);
-
-  useEffect(() => {
-    if (!animations || animations.length === 0) return;
-
-    const keywords = ['dance', 'walk', 'idle', 'wave', 'nod', 'clap', 'sit', 'stand', 'run'];
-    const pool = animations.filter((clip) =>
-      keywords.some(k => clip.name.toLowerCase().includes(k))
-    ).slice(0, Math.ceil(animations.length / 2)) || animations;
-
-    const clip = pool[currentClipIndex];
-    if (!clip) return;
-
-    const nextAction = mixer.clipAction(clip);
-    if (currentActionRef.current === nextAction) return;
-
-    console.log(`[AvatarModel] Playing: ${clip.name}`);
-
-    const prevAction = currentActionRef.current;
-
-    // Smooth transition
-    nextAction.reset();
-    nextAction.setEffectiveTimeScale(0.5); // Reduced speed to half
-    nextAction.setEffectiveWeight(1);
-    nextAction.fadeIn(0.5);
-    nextAction.play();
-
-    if (prevAction) {
-      prevAction.fadeOut(0.5);
+    // 1. Determine target clip index based on manualIndex
+    let idx = manualIndex % (pool.length || 1);
+    if (manualIndex === 0) {
+      const danceIdx = pool.findIndex(a => a.name.toLowerCase().includes('dance'));
+      if (danceIdx !== -1) idx = danceIdx;
     }
 
-    currentActionRef.current = nextAction;
+    const clip = pool[idx];
+    if (!clip) return;
+
+    // 2. Handle animation transition
+    const action = mixer.clipAction(clip);
+    if (currentActionRef.current === action) return;
+
+    action.reset();
+    action.setEffectiveTimeScale(0.5);
+    action.fadeIn(0.5);
+    action.play();
+
+    if (currentActionRef.current) {
+      currentActionRef.current.fadeOut(0.5);
+    }
+    currentActionRef.current = action;
+
+    // 3. Audio handling triggered after the animation transition to avoid clipping
+    const audioTimeout = setTimeout(() => {
+      const isDance = clip.name.toLowerCase().includes('dance');
+      if (isDance) {
+        if (audioAvailable === null || audioAvailable === true) {
+          if (!audioRef.current) {
+            audioRef.current = new Audio(DANCE_AUDIO_SRC);
+            audioRef.current.loop = true;
+            audioRef.current.volume = 0.65;
+          }
+          audioRef.current.play().catch(() => { /* autoplay blocked */ });
+        } else {
+          try {
+            if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const ctx = audioContextRef.current;
+            if (!ctx) return;
+
+            const gain = ctx.createGain();
+            gain.gain.value = 0;
+            gain.connect(ctx.destination);
+
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = 220;
+            osc.connect(gain);
+            osc.start();
+
+            oscNodeRef.current = osc;
+
+            oscIntervalRef.current = window.setInterval(() => {
+              gain.gain.cancelScheduledValues(ctx.currentTime);
+              gain.gain.setValueAtTime(0.0, ctx.currentTime);
+              gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+              gain.gain.linearRampToValueAtTime(0.0, ctx.currentTime + 0.28);
+            }, 400);
+          } catch (e) { /* WebAudio fallback failed */ }
+        }
+      } else {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        if (oscIntervalRef.current) {
+          window.clearInterval(oscIntervalRef.current);
+          oscIntervalRef.current = null;
+        }
+        if (oscNodeRef.current) {
+          try { oscNodeRef.current.stop(); } catch (e) { }
+          try { oscNodeRef.current.disconnect(); } catch (e) { }
+          oscNodeRef.current = null;
+        }
+      }
+    }, 500);
 
     return () => {
-      // Optional: keep it playing but handle transition logic carefully
+      clearTimeout(audioTimeout);
     };
-  }, [currentClipIndex, animations, mixer]);
+  }, [manualIndex, animations, mixer, audioAvailable]);
 
 
   return (
@@ -119,17 +205,14 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
   const theme = useTheme();
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
-  const [manualIndex, setManualIndex] = useState(0);
   const [currentPos, setCurrentPos] = useState<{ x: string; y: string }>({
     x: '30px',
     y: 'calc(50vh - 160px)',
   });
 
-  const sectionsRef = useRef<Element[]>([]);
-  const lastSectionRef = useRef<Element | null>(null);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const constraintsRef = useRef<HTMLDivElement>(null);
 
-  // Reposition on section change — strictly left side to avoid chat overlap
+  // Initial position only — ensuring it stays within viewport
   useEffect(() => {
     // Randomize vertical position (25vh to 65vh) to stay safely in viewport
     const randomY = Math.floor(Math.random() * 40) + 25;
@@ -138,7 +221,7 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
 
     const newPos = { x: `${randomX}px`, y: `calc(${randomY}vh - 160px)` };
     setCurrentPos(newPos);
-  }, [activeSectionIndex]);
+  }, []);
 
 
   // Stable color array derived from theme
@@ -153,82 +236,53 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
     [theme]
   );
 
-  // Section tracking via IntersectionObserver
-  useEffect(() => {
-    sectionsRef.current = Array.from(document.querySelectorAll(SECTION_SELECTOR));
-
-    const scheduleUpdate = (index: number) => {
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = setTimeout(() => {
-        setActiveSectionIndex(index);
-      }, SECTION_CHANGE_DEBOUNCE);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const intersecting = entries.filter((e) => e.isIntersecting);
-        if (intersecting.length > 0) {
-          const best = intersecting.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-          if (best && best.target !== lastSectionRef.current) {
-            lastSectionRef.current = best.target;
-            const idx = sectionsRef.current.indexOf(best.target);
-            if (idx !== -1) scheduleUpdate(idx);
-          }
-        }
-      },
-      { threshold: [0.1, 0.5, 0.9], rootMargin: '-10% 0px -10% 0px' }
-    );
-
-    sectionsRef.current.forEach((el) => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    };
-  }, []);
+  // Section tracking removed as per request to stop scroll-triggered logic
 
   const currentPath = SQUIGGLY_PATHS[activeSectionIndex % SQUIGGLY_PATHS.length];
   const currentColor = colors[activeSectionIndex % colors.length];
   const nextColor = colors[(activeSectionIndex + 1) % colors.length];
 
   return (
-    <motion.div
-      animate={{
-        x: currentPos.x,
-        y: currentPos.y,
-        opacity: isVisible ? 1 : 0,
-        scale: isVisible ? 1 : 0.8,
-      }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 1.2, ease: "easeOut" }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 12000,
-        width: 320,
-        height: 320,
-        pointerEvents: isVisible ? 'auto' : 'none',
-        willChange: 'transform, opacity',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <>
+      {/* Invisible constraint boundary for dragging */}
+      <Box
+        ref={constraintsRef}
+        sx={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 11999,
+          visibility: 'hidden'
+        }}
+      />
+
       <motion.div
         drag
+        dragConstraints={constraintsRef}
         dragMomentum={false}
         dragElastic={0}
         whileDrag={{ scale: 1.08 }}
-        onTap={() => setManualIndex(prev => prev + 1)}
+        onDragEnd={() => setActiveSectionIndex(prev => prev + 1)}
+        onTap={() => setActiveSectionIndex(prev => prev + 1)}
+        animate={{
+          opacity: isVisible ? 1 : 0,
+          scale: isVisible ? 1 : 0.8,
+        }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
         style={{
-          width: '100%',
-          height: '100%',
+          position: 'fixed',
+          top: currentPos.y,
+          left: currentPos.x,
+          zIndex: 12000,
+          width: 320,
+          height: 320,
+          pointerEvents: isVisible ? 'auto' : 'none',
+          willChange: 'transform, opacity',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: isVisible ? 'grab' : 'default',
-          overflow: 'visible',
         }}
       >
         <Box
@@ -355,12 +409,11 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
                   adjustCamera={false}
                   shadows="contact"
                 >
-                  <Center position={[0.4, -0.3, 0]}>
+                  <Center position={[0.4, -0.3, 1]}>
                     <AvatarModel
                       sectionIndex={activeSectionIndex}
                       gender={gender}
-                      manualIndex={manualIndex}
-                    />
+                      manualIndex={activeSectionIndex} />
                   </Center>
                 </Stage>
               </React.Suspense>
@@ -368,6 +421,6 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
           </Box>
         </Box>
       </motion.div>
-    </motion.div>
+    </>
   );
 };
