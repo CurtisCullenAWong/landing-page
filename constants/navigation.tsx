@@ -15,6 +15,7 @@ export const NAV_LINKS = [
 
 export const ADMIN_NAV_LINKS = [
   { name: 'Dashboard', href: '/admin' },
+  { name: 'Posts', href: '/admin/posts' },
   { name: 'Careers', href: '/admin/careers' },
   { name: 'Job Applications', href: '/admin/job-applications' },
 ];

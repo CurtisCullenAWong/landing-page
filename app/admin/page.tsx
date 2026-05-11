@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
-import { Plus, Download, Filter } from 'lucide-react';
+import { Plus, Download, Filter, Newspaper } from 'lucide-react';
 import StatCards from '@/components/admin/StatCards';
 import ApplicantTable from '@/components/admin/ApplicantTable';
 import JobTable from '@/components/admin/JobTable';
@@ -87,10 +87,12 @@ export default function AdminDashboardPage() {
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
-            startIcon={<Download size={18} />}
+            startIcon={<Newspaper size={18} />}
+            component={Link}
+            href="/admin/posts"
             sx={{ borderRadius: 2 }}
           >
-            Export Report
+            Manage Content
           </Button>
           <Button
             variant="contained"

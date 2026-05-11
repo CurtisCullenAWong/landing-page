@@ -15,11 +15,31 @@ import {
   Stack,
   Divider,
   alpha,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogContent,
+  Slide,
 } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { postService, Post } from '../../lib/services/post-service';
+import { createClient } from '../../lib/supabase/client';
+import { Calendar, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+
+const PostTransition = React.forwardRef(function Transition(
+  props: TransitionProps & { children: React.ReactElement<any, any> },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export default function AboutPage() {
   usePageTitle('About Us');
@@ -49,15 +69,58 @@ export default function AboutPage() {
     }
   ];
 
-  const officials = SITE_CONTENT.leadership.map(leader => ({
-    name: leader.name,
-    title: leader.role,
-    image: '', // To be updated when assets are available
-    phones: [leader.phone],
-    emails: [leader.email],
-    website: 'www.bosscargo.express',
-    address: SITE_CONTENT.contact.headquarters.address,
-  }));
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const data = await postService.getPublished();
+        setPosts(data);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    };
+
+    loadPosts();
+
+    // Implement Realtime updates for Posts
+    const supabase = createClient();
+    const channel = supabase
+      .channel('posts-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'posts' },
+        () => {
+          loadPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleNext = () => {
+    if (posts.length === 0) return;
+    setActiveIndex((prev) => (prev + 1) % posts.length);
+  };
+
+  const handlePrev = () => {
+    if (posts.length === 0) return;
+    setActiveIndex((prev) => (prev - 1 + posts.length) % posts.length);
+  };
+
+  const handleDragEnd = (_: any, info: any) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold) handleNext();
+    else if (info.offset.x > threshold) handlePrev();
+  };
 
   // Shared "Corner Accents" component
   const CornerAccents = () => (
@@ -126,7 +189,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 8, md: 10 },
+          py: { xs: 5, md: 7 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -188,8 +251,8 @@ export default function AboutPage() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
                 sx={{
-                  p: 3,
-                  mb: 2.5,
+                  p: 2.5,
+                  mb: 1.5,
                   borderRadius: 1.5,
                   bgcolor: alpha(isDark ? primaryDark : primaryMain, 0.08),
                   backdropFilter: 'blur(10px)',
@@ -306,7 +369,7 @@ export default function AboutPage() {
         />
       </Box>
 
-      {/* Slide 2: Company Officials */}
+      {/* Slide 2: News & Events */}
       <Box
         sx={{
           minHeight: 'calc(100vh - 80px)',
@@ -317,7 +380,7 @@ export default function AboutPage() {
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: paperColor,
-          py: { xs: 8, md: 10 },
+          py: { xs: 5, md: 7 },
           position: 'relative',
           overflow: 'visible'
         }}
@@ -354,123 +417,233 @@ export default function AboutPage() {
           }} />
         </Box>
 
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
+        <PageContainer maxWidth={false} disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1, px: { xs: 1, md: 2 } }}>
           <PageHeader
-            title="Company Officials"
+            title="News & Events"
+            subtitle="Stay updated with our latest milestones and corporate insights."
             titleVariant="h3"
-            sx={{ '& .MuiTypography-h3': { fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.5rem' } } }}
-            bottomSpacing={SECTION_SPACING.medium}
+            sx={{
+              '& .MuiTypography-h3': { fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.25rem' } },
+              '& .MuiTypography-h6': { maxWidth: '800px', mx: 'auto', mb: 1 }
+            }}
+            bottomSpacing={SECTION_SPACING.small}
             align="center"
           />
 
-          <Grid
-            container
-            spacing={3}
-            justifyContent="center"
-            alignItems="stretch"
-          >
-            {officials.map((official, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%',
-                    maxWidth: 340,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: isDark ? 12 : 6,
-                      borderColor: primaryMain
-                    },
-                    bgcolor: 'background.default',
-                    boxShadow: isDark ? 4 : 2,
-                    borderRadius: 1.5,
-                    position: 'relative',
-                    overflow: 'visible',
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
-                  }}
-                >
-                  <CornerAccents />
+          {isLoadingPosts ? (
+            <Box sx={{ height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Typography variant="h6" color="text.secondary" sx={{ animation: 'pulse 1.5s infinite' }}>Loading our journal...</Typography>
+            </Box>
+          ) : posts.length > 0 ? (
+            <Box sx={{
+              position: 'relative',
+              height: { xs: 450, md: 580 }, // Compressed vertical height
+              width: '100%',
+              overflow: 'visible', // Allow cards to span past viewport if needed
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              perspective: '1500px'
+            }}>
+              {/* Arc Carousel Container with Drag */}
+              <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleDragEnd}
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  touchAction: 'none'
+                }}
+              >
+                <AnimatePresence initial={false}>
+                  {posts.map((item, index) => {
+                    // Calculate relative position in the looping array
+                    let relIndex = (index - activeIndex);
+                    const half = Math.floor(posts.length / 2);
+                    if (relIndex > half) relIndex -= posts.length;
+                    if (relIndex < -half) relIndex += posts.length;
 
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: { xs: 180, sm: 220, md: 260 },
-                      bgcolor: isDark ? 'action.hover' : 'grey.50',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderTopLeftRadius: 'inherit',
-                      borderTopRightRadius: 'inherit',
-                    }}
-                  >
+                    // Geometry calculations for the "Bridge/Arc"
+                    const absRel = Math.abs(relIndex);
+                    const isActive = relIndex === 0;
 
-                    {official.image ? (
-                      <ImageWithFallback
-                        src={official.image}
-                        alt={official.name}
-                        layout="fill"
-                        rounded={6}
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <Stack alignItems="center" spacing={1.5}>
-                        <Box sx={{ p: 2, borderRadius: '50%', bgcolor: alpha(primaryMain, 0.1), color: primaryMain }}>
-                          <User size={48} />
-                        </Box>
-                        <Typography variant="overline" color="text.disabled" sx={{ fontWeight: 700 }}>
-                          No Image Available
-                        </Typography>
-                      </Stack>
-                    )}
-                  </Box>
+                    // Visibility check: exactly 7 cards for a more populated look
+                    if (absRel > 3) return null;
 
-                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                    <Box sx={{ textAlign: 'center', mb: 2 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, letterSpacing: -0.5 }}>
-                        {official.name}
-                      </Typography>
-                      <Typography variant="caption" sx={{
-                        color: tertiaryMain,
-                        bgcolor: alpha(tertiaryMain, 0.1),
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 1,
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: 1.5
-                      }}>
-                        {official.title}
-                      </Typography>
-                    </Box>
-                    <Divider sx={{ mb: 2, opacity: 0.4 }} />
-                    <Stack spacing={2}>
-                      {official.phones && (
-                        <Box>
-                          <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, letterSpacing: 0.5 }}>
-                            <Phone size={14} /> Contact
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>{official.phones[0]}</Typography>
-                        </Box>
-                      )}
-                      {official.emails && (
-                        <Box>
-                          <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, letterSpacing: 0.5 }}>
-                            <Mail size={14} /> Email
-                          </Typography>
-                          <Typography variant="body2" sx={{ wordBreak: 'break-all', fontSize: '0.875rem', color: primaryMain, fontWeight: 500 }}>{official.emails[0]}</Typography>
-                        </Box>
-                      )}
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                    // Transformation values - Compact and non-linear spread for 7 cards
+                    // Pulling the 3rd level cards slightly closer horizontally
+                    const baseSpacing = (typeof window !== 'undefined' && window.innerWidth < 1000 ? 150 : 260);
+                    const xOffset = relIndex * baseSpacing * (absRel === 3 ? 0.85 : 1);
+                    const yOffset = absRel * absRel * 22;
+                    const rotateZ = relIndex * 9;
+                    const scale = isActive ? 1.05 : (1 - absRel * 0.14);
+                    const opacity = 1 - absRel * 0.2;
+                    const zIndex = 10 - absRel;
+
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={false}
+                        animate={{
+                          x: xOffset,
+                          y: yOffset,
+                          rotateZ: rotateZ,
+                          scale: scale,
+                          opacity: opacity,
+                          zIndex: zIndex
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 130,
+                          damping: 18,
+                          mass: 1
+                        }}
+                        style={{
+                          position: 'absolute',
+                          width: '90%',
+                          maxWidth: 400,
+                          cursor: isActive ? 'pointer' : 'grab'
+                        }}
+                        whileTap={{ cursor: isActive ? 'pointer' : 'grabbing' }}
+                        onClick={() => {
+                          if (isActive) {
+                            setSelectedPost(item);
+                          } else {
+                            setActiveIndex(index);
+                          }
+                        }}
+                      >
+                        <Card
+                          sx={{
+                            height: { xs: 350, md: 420 },
+                            display: 'flex',
+                            flexDirection: 'column',
+                            bgcolor: 'background.default',
+                            boxShadow: isActive ? (isDark ? 30 : 15) : 5,
+                            borderRadius: 4,
+                            overflow: 'hidden',
+                            border: `1px solid ${isActive ? alpha(primaryMain, 0.4) : alpha(theme.palette.divider, 0.1)}`,
+                            position: 'relative',
+                            // Deeper fade for the 7th cards (extremes)
+                            ...(absRel === 3 && {
+                              maskImage: 'linear-gradient(to top, transparent, black 50%)',
+                              WebkitMaskImage: 'linear-gradient(to top, transparent, black 50%)'
+                            }),
+                            // Subtle fade for the 2nd level
+                            ...(absRel === 2 && {
+                              maskImage: 'linear-gradient(to top, transparent, black 20%)',
+                              WebkitMaskImage: 'linear-gradient(to top, transparent, black 20%)'
+                            })
+                          }}
+                        >
+                          {/* Category Badge */}
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 14,
+                            left: 14,
+                            zIndex: 10,
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: '4px',
+                            bgcolor: item.post_type === 'event' ? tertiaryMain : primaryMain,
+                            color: item.post_type === 'event' ? secondaryDark : 'white',
+                            fontWeight: 900,
+                            fontSize: '0.6rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: 2,
+                            boxShadow: 2
+                          }}>
+                            {item.category || item.post_type}
+                          </Box>
+
+                          <Box sx={{ width: '100%', height: '35%', position: 'relative', overflow: 'hidden' }}>
+                            {item.image_url ? (
+                              <Box
+                                component="img"
+                                src={item.image_url}
+                                alt={item.title}
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <Box sx={{ width: '100%', height: '100%', bgcolor: alpha(primaryMain, 0.05), display: 'flex', alignItems: 'center', justifyContent: 'center', color: alpha(primaryMain, 0.2) }}>
+                                <Globe size={60} />
+                              </Box>
+                            )}
+                          </Box>
+
+                          <CardContent sx={{ flexGrow: 1, p: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column' }}>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1, color: 'text.disabled' }}>
+                              <Calendar size={14} />
+                              <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                {new Date(item.event_date || item.published_at || item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </Typography>
+                            </Stack>
+
+                            <Typography variant="h6" sx={{
+                              fontWeight: 900,
+                              mb: 1,
+                              lineHeight: 1.1,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              fontSize: { xs: '1rem', md: '1.25rem' },
+                              color: 'text.primary'
+                            }}>
+                              {item.title}
+                            </Typography>
+
+                            <Typography variant="body2" color="text.secondary" sx={{
+                              lineHeight: 1.5,
+                              mb: 1.5,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              fontSize: '0.875rem'
+                            }}>
+                              {item.excerpt || item.content}
+                            </Typography>
+
+                            {item.tags && item.tags.length > 0 && (
+                              <Stack direction="row" spacing={1} sx={{ mt: 'auto', pt: 1, flexWrap: 'wrap', gap: 1 }}>
+                                {item.tags.slice(0, 2).map(tag => (
+                                  <Chip
+                                    key={tag}
+                                    label={`#${tag}`}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.6rem',
+                                      fontWeight: 800,
+                                      bgcolor: alpha(primaryMain, 0.03),
+                                      color: primaryMain,
+                                      border: `1px solid ${alpha(primaryMain, 0.1)}`
+                                    }}
+                                  />
+                                ))}
+                              </Stack>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </motion.div>
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Typography variant="h6" color="text.secondary" sx={{ opacity: 0.6 }}>
+                The archives are empty for now.
+              </Typography>
+            </Box>
+          )}
         </PageContainer>
 
         {/* Smooth transition to Slide 3 */}
@@ -496,7 +669,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 8, md: 10 },
+          py: { xs: 5, md: 7 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -536,8 +709,8 @@ export default function AboutPage() {
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <Box sx={{
-            p: { xs: 3, sm: 4, md: 6 },
-            mb: { xs: 4, md: 6 },
+            p: { xs: 2.5, sm: 3, md: 4 },
+            mb: { xs: 3, md: 4 },
             borderRadius: 2,
             background: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
             color: 'white',
@@ -756,6 +929,227 @@ export default function AboutPage() {
             zIndex: 3,
           }}
         />
+        {/* Post Details Modal - Restored at root for interaction safety */}
+        <Dialog
+          open={!!selectedPost}
+          onClose={() => setSelectedPost(null)}
+          maxWidth="lg"
+          fullWidth
+          TransitionComponent={PostTransition}
+          PaperProps={{
+            sx: {
+              borderRadius: 4,
+              bgcolor: 'background.paper',
+              backgroundImage: 'none',
+              overflow: 'hidden',
+              maxHeight: '92vh',
+              boxShadow: 24,
+            }
+          }}
+        >
+          {selectedPost && (
+            <Box sx={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <IconButton
+                onClick={() => setSelectedPost(null)}
+                sx={{
+                  position: 'absolute',
+                  right: 20,
+                  top: 20,
+                  zIndex: 10,
+                  bgcolor: alpha(theme.palette.background.paper, 0.8),
+                  backdropFilter: 'blur(8px)',
+                  color: 'text.primary',
+                  boxShadow: 2,
+                  '&:hover': { bgcolor: primaryMain, color: 'white' }
+                }}
+              >
+                <X size={24} />
+              </IconButton>
+
+              <Grid container sx={{ height: '100%', minHeight: { md: '600px' } }}>
+                {/* Image Side */}
+                {selectedPost.image_url && (
+                  <Grid size={{ xs: 12, md: 5 }} sx={{ position: 'relative', minHeight: { xs: '300px', md: '100%' } }}>
+                    <Box
+                      component="img"
+                      src={selectedPost.image_url}
+                      alt={selectedPost.title}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        position: { md: 'absolute' },
+                        inset: 0
+                      }}
+                    />
+                    <Box sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to right, rgba(0,0,0,0.3), transparent)',
+                      display: { xs: 'none', md: 'block' }
+                    }} />
+                  </Grid>
+                )}
+
+                {/* Content Side */}
+                <Grid size={{ xs: 12, md: selectedPost.image_url ? 7 : 12 }} sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflowY: 'auto',
+                  maxHeight: { md: '92vh' }
+                }}>
+                  <DialogContent sx={{ p: { xs: 4, md: 6 }, display: 'flex', flexDirection: 'column' }}>
+                    <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
+                      <Chip
+                        label={selectedPost.post_type}
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(primaryMain, 0.1),
+                          color: primaryMain,
+                          fontWeight: 800,
+                          px: 1,
+                          textTransform: 'uppercase'
+                        }}
+                      />
+                      {selectedPost.category && (
+                        <Chip
+                          label={selectedPost.category}
+                          size="small"
+                          sx={{
+                            bgcolor: alpha(tertiaryMain, 0.1),
+                            color: tertiaryMain,
+                            fontWeight: 800,
+                            px: 1,
+                            textTransform: 'uppercase'
+                          }}
+                        />
+                      )}
+                    </Stack>
+
+                    <Typography variant="h3" sx={{
+                      fontWeight: 900,
+                      mb: 2,
+                      lineHeight: 1.1,
+                      fontSize: { xs: '1.75rem', md: '2.25rem' },
+                      color: 'text.primary'
+                    }}>
+                      {selectedPost.title}
+                    </Typography>
+
+                    <Stack direction="row" spacing={3} sx={{ mb: 2, color: 'text.secondary' }}>
+                      <Stack direction="row" spacing={1.5} alignItems="center">
+                        <Calendar size={20} color={primaryMain} />
+                        <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                          {new Date(selectedPost.event_date || selectedPost.published_at || selectedPost.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </Typography>
+                      </Stack>
+                      {selectedPost.author_name && (
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <User size={20} color={tertiaryMain} />
+                          <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedPost.author_name}</Typography>
+                        </Stack>
+                      )}
+                    </Stack>
+
+                    <Divider sx={{ mb: 2, opacity: 0.6 }} />
+
+                    <Box
+                      sx={{
+                        lineHeight: 1.8,
+                        fontSize: '1.125rem',
+                        color: 'text.primary',
+                        flexGrow: 1,
+                        '& h1, & h2, & h3, & h4': { 
+                          mt: 2, 
+                          mb: 1.5, 
+                          fontWeight: 900, 
+                          color: 'text.primary',
+                          lineHeight: 1.2
+                        },
+                        '& h1': { fontSize: { xs: '1.75rem', md: '2.25rem' }, borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`, pb: 1 },
+                        '& h2': { fontSize: { xs: '1.5rem', md: '1.875rem' } },
+                        '& h3': { fontSize: { xs: '1.25rem', md: '1.5rem' } },
+                        '& h4': { fontSize: { xs: '1.125rem', md: '1.25rem' } },
+                        '& p': { mb: 2 },
+                        '& strong, & b': { fontWeight: 900, color: theme.palette.text.primary },
+                        '& em, & i': { fontStyle: 'italic' },
+                        '& ul, & ol': { 
+                          mb: 2, 
+                          pl: 3,
+                          listStyleType: 'disc'
+                        },
+                        '& ol': {
+                          listStyleType: 'decimal'
+                        },
+                        '& li': { 
+                          mb: 1,
+                          display: 'list-item'
+                        },
+                        '& blockquote': { 
+                          borderLeft: `4px solid ${primaryMain}`, 
+                          pl: 3, 
+                          py: 1.5, 
+                          m: 0, 
+                          mb: 3, 
+                          bgcolor: alpha(primaryMain, 0.05),
+                          borderRadius: '0 8px 8px 0',
+                          fontStyle: 'italic'
+                        },
+                        '& code': { 
+                          bgcolor: alpha(theme.palette.divider, 0.4), 
+                          px: 1, 
+                          py: 0.5, 
+                          borderRadius: 1, 
+                          fontFamily: 'monospace',
+                          fontSize: '0.9em'
+                        },
+                        '& pre': {
+                          bgcolor: isDark ? alpha('#000', 0.3) : alpha(theme.palette.divider, 0.2),
+                          p: 3,
+                          borderRadius: 2,
+                          overflowX: 'auto',
+                          mb: 4,
+                          '& code': { bgcolor: 'transparent', p: 0 }
+                        },
+                        '& img': { 
+                          maxWidth: '100%', 
+                          borderRadius: 2,
+                          boxShadow: 4,
+                          my: 4
+                        }
+                      }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                        {selectedPost.content}
+                      </ReactMarkdown>
+                    </Box>
+
+                    {selectedPost.tags && selectedPost.tags.length > 0 && (
+                      <Box sx={{ mt: 4, pt: 3, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="overline" sx={{ fontWeight: 900, color: 'text.disabled', mb: 1.5, display: 'block', letterSpacing: 2 }}>Exploration Tags</Typography>
+                        <Stack direction="row" spacing={1.5} flexWrap="wrap" gap={1.5}>
+                          {selectedPost.tags.map(tag => (
+                            <Chip
+                              key={tag}
+                              label={`#${tag}`}
+                              variant="outlined"
+                              sx={{
+                                fontWeight: 700,
+                                borderRadius: 1.5,
+                                borderColor: alpha(primaryMain, 0.2),
+                                '&:hover': { bgcolor: alpha(primaryMain, 0.05), borderColor: primaryMain }
+                              }}
+                            />
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                  </DialogContent>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+        </Dialog>
       </Box>
     </Box>
   );

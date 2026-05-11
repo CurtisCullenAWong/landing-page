@@ -20,6 +20,21 @@ import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { 
+  Facebook, 
+  Linkedin, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Briefcase, 
+  Users, 
+  Info, 
+  History, 
+  Handshake,
+  LayoutDashboard,
+  ClipboardList,
+  Newspaper
+} from 'lucide-react';
 import { NAV_LINKS, CONTACT_INFO, scrollToHref } from '@/constants/navigation';
 import { IMAGE_URLS } from '@/constants/images';
 
@@ -39,6 +54,21 @@ export function Footer() {
       if (scrollToHref(href)) {
         e.preventDefault();
       }
+    }
+  };
+
+  // Helper to get icon for nav name
+  const getNavIcon = (name: string) => {
+    switch(name) {
+      case 'Home': return <LayoutDashboard size={16} />;
+      case 'About Us': return <Info size={16} />;
+      case 'Why Us': return <Users size={16} />;
+      case 'History': return <History size={16} />;
+      case 'Partnerships': return <Handshake size={16} />;
+      case 'Careers': return <Briefcase size={16} />;
+      case 'My Application': return <ClipboardList size={16} />;
+      case 'News & Events': return <Newspaper size={16} />;
+      default: return null;
     }
   };
 
@@ -200,10 +230,19 @@ export function Footer() {
                     color: footerStyles.secondaryText,
                     textDecoration: 'none',
                     fontSize: '0.875rem',
-                    transition: 'color 0.2s',
-                    '&:hover': { color: theme.palette.common.white }
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    '&:hover': { 
+                      color: theme.palette.common.white,
+                      transform: 'translateX(4px)'
+                    }
                   }}
                 >
+                  <Box sx={{ color: theme.palette.primary.main, display: 'flex' }}>
+                    {getNavIcon(link.name)}
+                  </Box>
                   {link.name}
                 </MuiLink>
               ))}
@@ -214,9 +253,19 @@ export function Footer() {
                   color: footerStyles.secondaryText,
                   textDecoration: 'none',
                   fontSize: '0.875rem',
-                  '&:hover': { color: theme.palette.common.white }
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    color: theme.palette.common.white,
+                    transform: 'translateX(4px)'
+                  }
                 }}
               >
+                <Box sx={{ color: theme.palette.primary.main, display: 'flex' }}>
+                  {getNavIcon('My Application')}
+                </Box>
                 My Application
               </MuiLink>
             </Stack>
@@ -236,10 +285,20 @@ export function Footer() {
                   color: footerStyles.secondaryText,
                   textDecoration: 'none',
                   fontSize: '0.875rem',
-                  '&:hover': { color: theme.palette.common.white }
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    color: theme.palette.common.white,
+                    transform: 'translateX(4px)'
+                  }
                 }}
               >
-                Careers
+                <Box sx={{ color: theme.palette.tertiary.main, display: 'flex' }}>
+                  <Briefcase size={16} />
+                </Box>
+                Job Openings
               </MuiLink>
               <MuiLink
                 href="https://www.linkedin.com/company/boss-cargo-express/?originalSubdomain=ph"
@@ -249,23 +308,20 @@ export function Footer() {
                   color: footerStyles.secondaryText,
                   textDecoration: 'none',
                   fontSize: '0.875rem',
-                  '&:hover': { color: theme.palette.common.white }
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    color: theme.palette.common.white,
+                    transform: 'translateX(4px)'
+                  }
                 }}
               >
+                <Box sx={{ color: theme.palette.tertiary.main, display: 'flex' }}>
+                  <Linkedin size={16} />
+                </Box>
                 LinkedIn
-              </MuiLink>
-              <MuiLink
-                href="https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  color: footerStyles.secondaryText,
-                  textDecoration: 'none',
-                  fontSize: '0.875rem',
-                  '&:hover': { color: theme.palette.common.white }
-                }}
-              >
-                Indeed
               </MuiLink>
               <MuiLink
                 href="https://www.facebook.com/ikawangbossko20"
@@ -275,9 +331,19 @@ export function Footer() {
                   color: footerStyles.secondaryText,
                   textDecoration: 'none',
                   fontSize: '0.875rem',
-                  '&:hover': { color: theme.palette.common.white }
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    color: theme.palette.common.white,
+                    transform: 'translateX(4px)'
+                  }
                 }}
               >
+                <Box sx={{ color: theme.palette.tertiary.main, display: 'flex' }}>
+                  <Facebook size={16} />
+                </Box>
                 Facebook
               </MuiLink>
             </Stack>
@@ -288,7 +354,7 @@ export function Footer() {
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, textTransform: 'uppercase', color: footerStyles.text }}>
               Contact Us
             </Typography>
-            <Stack spacing={1.5}>
+            <Stack spacing={2}>
               {Object.entries(CONTACT_INFO).map(([key, info]) => (
                 <MuiLink
                   key={key}
@@ -297,13 +363,30 @@ export function Footer() {
                     color: footerStyles.secondaryText,
                     textDecoration: 'none',
                     fontSize: '0.875rem',
-                    display: 'block',
-                    '&:hover': { color: theme.palette.common.white }
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    transition: 'all 0.2s',
+                    '&:hover': { 
+                      color: theme.palette.common.white,
+                      transform: 'translateX(4px)'
+                    }
                   }}
                 >
+                  <Box sx={{ color: theme.palette.primary.main, display: 'flex' }}>
+                    {key === 'phone' ? <Phone size={16} /> : <Mail size={16} />}
+                  </Box>
                   {info.label}
                 </MuiLink>
               ))}
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, color: footerStyles.secondaryText }}>
+                <Box sx={{ color: theme.palette.primary.main, mt: 0.5 }}>
+                  <MapPin size={16} />
+                </Box>
+                <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                  Main Office: Brgy. San Dionisio, Parañaque City, Philippines
+                </Typography>
+              </Box>
             </Stack>
           </Grid>
         </Grid>
