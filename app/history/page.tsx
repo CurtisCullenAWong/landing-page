@@ -125,13 +125,12 @@ export default function HistoryPage() {
       {/* Slide 1: Introduction & Story */}
       <Box
         sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
+          minHeight: 'calc(100vh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 6, md: 10 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -144,10 +143,10 @@ export default function HistoryPage() {
           <PageHeader
             title="Our Journey"
             subtitle="Embark on a sustainable and transformative journey with us."
-            bottomSpacing={SECTION_SPACING.small}
+            bottomSpacing={SECTION_SPACING.medium}
           />
 
-          <Grid container spacing={{ xs: 4, lg: 6 }} alignItems="center">
+          <Grid container spacing={{ xs: 6, lg: 8 }} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }}>
               <Box sx={{ position: 'relative' }}>
                 <Box
@@ -163,14 +162,14 @@ export default function HistoryPage() {
                     zIndex: -1
                   }}
                 />
-                <Typography variant="h3" sx={{ mb: 2, fontWeight: 800, color: 'primary.main', letterSpacing: -1, fontSize: { xs: '1.75rem', md: '2.25rem' } }}>
+                <Typography variant="h3" sx={{ mb: 3, fontWeight: 800, color: 'primary.main', letterSpacing: -1, fontSize: { xs: '2rem', md: '2.5rem', lg: '3rem' } }}>
                   The Boss Cargo Express Story
                 </Typography>
-                <Stack spacing={2}>
-                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.7, fontSize: { xs: '1rem', md: '1.05rem' }, borderLeft: `4px solid ${tertiaryMain}`, pl: { xs: 2, md: 3 } }}>
+                <Stack spacing={3}>
+                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: { xs: '1rem', md: '1.1rem' }, borderLeft: `5px solid ${tertiaryMain}`, pl: { xs: 3, md: 4 } }}>
                     {SITE_CONTENT.company.story}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, pl: { xs: 2, md: 4 } }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, fontSize: { xs: '0.95rem', md: '1rem' }, pl: { xs: 3, md: 5 } }}>
                     {SITE_CONTENT.company.strategy.overview}
                   </Typography>
                 </Stack>
@@ -212,16 +211,15 @@ export default function HistoryPage() {
         <Box
           key={slideIndex}
           sx={{
-            height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-            minHeight: { xs: '100vh', md: 'auto' },
+            minHeight: 'calc(100vh - 80px)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: { xs: 'flex-start', md: 'center' },
+            justifyContent: 'center',
             alignItems: 'center',
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: slideIndex % 2 === 0 ? 'background.paper' : 'background.default',
-            py: { xs: 4, md: 8 },
+            py: { xs: 10, md: 15 },
             position: 'relative',
             overflow: 'visible'
           }}
@@ -244,7 +242,7 @@ export default function HistoryPage() {
             sx={{
               position: 'absolute',
               left: '50%',
-              top: 0,
+              top: slideIndex === 0 ? { xs: '30%', md: '28%' } : 0,
               bottom: slideIndex === milestoneChunks.length - 1 ? '50%' : 0,
               width: '3px',
               background: slideIndex % 2 === 0
@@ -259,49 +257,50 @@ export default function HistoryPage() {
 
           <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 5 }}>
             {slideIndex === 0 && (
-              <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <Box sx={{ textAlign: 'center', mb: 6 }}>
                 <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
                   CHRONICLES
                 </Typography>
-                <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' } }}>
+                <Typography variant="h2" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.5rem' } }}>
                   Early Milestones
                 </Typography>
               </Box>
             )}
 
-            <Stack spacing={3}>
+            <Stack spacing={6}>
               {chunk.map((milestone, index) => {
                 const globalIndex = slideIndex * 2 + index;
                 const isLeft = globalIndex % 2 === 0;
 
                 return (
-                  <Grid container spacing={4} alignItems="center" key={globalIndex}>
+                  <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center" key={globalIndex}>
                     {/* Left Position */}
                     <Grid size={{ xs: 12, md: 5 }} sx={{ order: isLeft ? 1 : 3 }}>
                       <Card
                         elevation={0}
                         sx={{
                           bgcolor: isDark ? alpha(milestone.color, 0.15) : alpha(milestone.color, 0.06),
-                          borderLeft: { xs: `5px solid ${milestone.color}`, md: isLeft ? `5px solid ${milestone.color}` : 'none' },
-                          borderRight: { xs: 'none', md: !isLeft ? `5px solid ${milestone.color}` : 'none' },
+                          borderLeft: { xs: `6px solid ${milestone.color}`, md: isLeft ? `6px solid ${milestone.color}` : 'none' },
+                          borderRight: { xs: 'none', md: !isLeft ? `6px solid ${milestone.color}` : 'none' },
                           borderRadius: {
-                            xs: '0 20px 20px 0',
-                            md: isLeft ? '0 20px 20px 0' : '20px 0 0 20px'
+                            xs: '0 24px 24px 0',
+                            md: isLeft ? '0 24px 24px 0' : '24px 0 0 24px'
                           },
-                          transition: 'all 0.3s ease',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           '&:hover': {
                             transform: {
-                              xs: 'translateX(5px)',
-                              md: isLeft ? 'translateX(10px)' : 'translateX(-10px)'
+                              xs: 'translateX(8px)',
+                              md: isLeft ? 'translateX(15px)' : 'translateX(-15px)'
                             },
-                            bgcolor: alpha(milestone.color, 0.2)
+                            bgcolor: alpha(milestone.color, 0.2),
+                            boxShadow: `0 10px 30px ${alpha(milestone.color, 0.15)}`
                           }
                         }}
                       >
-                        <CardContent sx={{ p: { xs: 2.5, sm: 3, md: 4 }, textAlign: { xs: 'left', md: isLeft ? 'left' : 'right' } }}>
-                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 900, mb: 1, opacity: 1, fontSize: { xs: '2rem', md: '3rem' } }}>{milestone.year}</Typography>
-                          <Typography variant="h5" sx={{ mb: 1, fontWeight: 700, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>{milestone.title}</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, fontSize: { xs: '0.9rem', md: '0.875rem' } }}>{milestone.description}</Typography>
+                        <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 }, textAlign: { xs: 'left', md: isLeft ? 'left' : 'right' } }}>
+                          <Typography variant="h3" sx={{ color: milestone.color, fontWeight: 950, mb: 1.5, opacity: 1, fontSize: { xs: '2.5rem', md: '4rem' }, letterSpacing: -2 }}>{milestone.year}</Typography>
+                          <Typography variant="h5" sx={{ mb: 2, fontWeight: 800, fontSize: { xs: '1.25rem', md: '1.75rem' }, lineHeight: 1.3 }}>{milestone.title}</Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, fontSize: { xs: '0.95rem', md: '1rem' }, fontWeight: 500 }}>{milestone.description}</Typography>
                         </CardContent>
                       </Card>
                     </Grid>
@@ -310,14 +309,16 @@ export default function HistoryPage() {
                     <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', order: 2 }}>
                       <Box
                         sx={{
-                          width: 28,
-                          height: 28,
+                          width: 32,
+                          height: 32,
                           borderRadius: '50%',
                           bgcolor: milestone.color,
-                          border: `6px solid ${theme.palette.background.paper}`,
-                          boxShadow: `0 0 25px ${alpha(milestone.color, 0.6)}`,
+                          border: `8px solid ${theme.palette.background.paper}`,
+                          boxShadow: `0 0 30px ${alpha(milestone.color, 0.7)}`,
                           zIndex: 6,
-                          position: 'relative'
+                          position: 'relative',
+                          transition: 'transform 0.3s ease',
+                          '&:hover': { transform: 'scale(1.2)' }
                         }}
                       />
                     </Grid>
@@ -330,12 +331,12 @@ export default function HistoryPage() {
 
               {/* Vision Section (Appended to last milestone slide) */}
               {slideIndex === milestoneChunks.length - 1 && (
-                <Box sx={{ mt: 4, position: 'relative' }}>
+                <Box sx={{ mt: 10, position: 'relative' }}>
                   <Paper
                     elevation={0}
                     sx={{
-                      p: { xs: 3, md: 5 },
-                      borderRadius: 6,
+                      p: { xs: 4, md: 8 },
+                      borderRadius: 8,
                       textAlign: 'center',
                       position: 'relative',
                       overflow: 'hidden',
@@ -344,7 +345,7 @@ export default function HistoryPage() {
                         : `linear-gradient(135deg, ${alpha(primaryMain, 0.08)} 0%, ${alpha(secondaryMain, 0.08)} 100%)`,
                       border: '1px solid',
                       borderColor: isDark ? alpha(primaryMain, 0.3) : alpha(primaryMain, 0.15),
-                      boxShadow: `0 20px 50px -20px ${alpha(secondaryMain, 0.4)}`
+                      boxShadow: `0 30px 70px -20px ${alpha(secondaryMain, 0.5)}`
                     }}
                   >
                     <Box
@@ -353,17 +354,17 @@ export default function HistoryPage() {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: '6px',
+                        height: '8px',
                         background: `linear-gradient(to right, ${primaryMain}, ${tertiaryMain}, ${secondaryMain})`
                       }}
                     />
-                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2 }}>
+                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 900, letterSpacing: 3, mb: 1, display: 'block' }}>
                       OUR VISION
                     </Typography>
-                    <Typography variant="h3" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}>
+                    <Typography variant="h3" sx={{ mb: 2, fontWeight: 900, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }, letterSpacing: -1 }}>
                       Looking Ahead
                     </Typography>
-                    <Typography variant="body1" sx={{ maxWidth: '750px', mx: 'auto', lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.1rem' }, color: 'text.primary', fontWeight: 500 }}>
+                    <Typography variant="body1" sx={{ maxWidth: '850px', mx: 'auto', lineHeight: 1.8, fontSize: { xs: '1rem', md: '1.2rem' }, color: 'text.primary', fontWeight: 500, fontStyle: 'italic' }}>
                       "As we move forward, Boss Cargo Express remains committed to innovation, sustainability, and
                       creating opportunities for our team members to grow and succeed. We continue to embrace the frame
                       of CANI as we write the next chapter of our story."

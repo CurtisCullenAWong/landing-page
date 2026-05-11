@@ -68,7 +68,7 @@ const CornerBrackets = ({
         borderTop: `3px solid ${color}`,
         borderLeft: `3px solid ${color}`,
         borderTopLeftRadius: radius,
-        zIndex: 2
+        zIndex: 1
       }} />
     )}
     {!hideBottomRight && (
@@ -81,7 +81,7 @@ const CornerBrackets = ({
         borderBottom: `3px solid ${color}`,
         borderRight: `3px solid ${color}`,
         borderBottomRightRadius: radius,
-        zIndex: 2
+        zIndex: 1
       }} />
     )}
   </>
@@ -244,7 +244,8 @@ export default function JobPostingsPage() {
       {/* Slide 1: Professional Development */}
       <Box
         sx={{
-          py: { xs: 4, md: 8 },
+          minHeight: 'calc(100vh - 80px)',
+          py: { xs: 10, md: 15 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: { xs: 'flex-start', md: 'center' },
@@ -397,7 +398,7 @@ export default function JobPostingsPage() {
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: paperColor,
-            py: { xs: 4, md: 8 },
+            py: { xs: 10, md: 15 },
             position: 'relative',
             overflow: 'hidden'
           }}
@@ -555,19 +556,46 @@ export default function JobPostingsPage() {
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 800, bgcolor: alpha(primaryMain, 0.05), py: 2 }}>
+                      <TableCell sx={{
+                        fontWeight: 800,
+                        bgcolor: alpha(theme.palette.background.paper, 0.9),
+                        backdropFilter: 'blur(8px)',
+                        py: 2,
+                        zIndex: 3
+                      }}>
                         <TableSortLabel active={sortField === 'title'} direction={sortField === 'title' ? sortDirection : 'asc'} onClick={() => handleSort('title')}>
                           Position Title
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 800, bgcolor: alpha(primaryMain, 0.05) }}>
+                      <TableCell sx={{
+                        fontWeight: 800,
+                        bgcolor: alpha(theme.palette.background.paper, 0.9),
+                        backdropFilter: 'blur(8px)',
+                        zIndex: 3
+                      }}>
                         <TableSortLabel active={sortField === 'department'} direction={sortField === 'department' ? sortDirection : 'asc'} onClick={() => handleSort('department')}>
                           Department
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 800, bgcolor: alpha(primaryMain, 0.05) }}>Work Location</TableCell>
-                      <TableCell sx={{ fontWeight: 800, bgcolor: alpha(primaryMain, 0.05) }}>Contract</TableCell>
-                      <TableCell sx={{ fontWeight: 800, bgcolor: alpha(primaryMain, 0.05), textAlign: 'right' }}>Action</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 800,
+                        bgcolor: alpha(theme.palette.background.paper, 0.9),
+                        backdropFilter: 'blur(8px)',
+                        zIndex: 3
+                      }}>Work Location</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 800,
+                        bgcolor: alpha(theme.palette.background.paper, 0.9),
+                        backdropFilter: 'blur(8px)',
+                        zIndex: 3
+                      }}>Contract</TableCell>
+                      <TableCell sx={{
+                        fontWeight: 800,
+                        bgcolor: alpha(theme.palette.background.paper, 0.9),
+                        backdropFilter: 'blur(8px)',
+                        textAlign: 'right',
+                        zIndex: 3
+                      }}>Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -621,20 +649,26 @@ export default function JobPostingsPage() {
                     )}
                   </TableBody>
                 </Table>
-                <TablePagination
-                  component="div"
-                  count={filteredAndSortedJobs.length}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  rowsPerPage={rowsPerPage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  rowsPerPageOptions={[5, 10, 25]}
-                  sx={{ borderTop: `1px solid ${theme.palette.divider}` }}
-                />
               </TableContainer>
+              <TablePagination
+                component="div"
+                count={filteredAndSortedJobs.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25]}
+                sx={{
+                  borderTop: `1px solid ${theme.palette.divider}`,
+                  bgcolor: alpha(theme.palette.background.paper, 0.8),
+                  backdropFilter: 'blur(10px)',
+                  position: 'relative',
+                  zIndex: 2
+                }}
+              />
 
               {/* Mobile Card View */}
-              <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2, bgcolor: alpha(paperColor, 0.5) }}>
+              <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2, bgcolor: alpha(paperColor, 0.9), backdropFilter: 'blur(10px)' }}>
                 {paginatedJobs.map((job) => (
                   <Card key={job.id} sx={{ mb: 2, border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, position: 'relative', borderRadius: 2 }}>
                     <CornerBrackets color={tertiaryMain} radius={16} size={16} hideTopLeft={true} />
@@ -683,7 +717,8 @@ export default function JobPostingsPage() {
       {/* Slide 3: Final Overview & CTA */}
       <Box
         sx={{
-          py: { xs: 4, md: 8 },
+          minHeight: 'calc(100vh - 80px)',
+          py: { xs: 10, md: 15 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: { xs: 'flex-start', md: 'center' },
@@ -731,12 +766,12 @@ export default function JobPostingsPage() {
               variant="outlined"
               sx={{
                 px: { xs: 2, md: 4 },
-                py: { xs: 3, md: 2 },
+                py: { xs: 2, md: 2 },
                 borderRadius: { xs: 4, md: 10 },
                 display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },
                 alignItems: 'center',
-                gap: { xs: 2, md: 5 },
+                gap: { xs: 1.5, md: 5 },
                 bgcolor: alpha(primaryMain, 0.05),
                 borderColor: alpha(primaryMain, 0.2),
                 backdropFilter: 'blur(12px)',
@@ -746,7 +781,7 @@ export default function JobPostingsPage() {
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Users size={20} color={primaryMain} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.7rem', sm: '0.875rem' } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                   Workforce: <span style={{ color: primaryMain }}>ACTIVE</span>
                 </Typography>
               </Box>
@@ -754,13 +789,13 @@ export default function JobPostingsPage() {
               <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Target size={20} color={tertiaryMain} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.7rem', sm: '0.875rem' } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                   Open Positions: <span style={{ color: primaryMain }}>{activeJobs.length}</span>
                 </Typography>
               </Box>
               <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', display: { xs: 'none', md: 'block' } }} />
               <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
-              <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+              <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5, fontSize: { xs: '0.8rem', sm: '1rem' } }}>
                 {SITE_CONTENT.careers.application.email}
               </Typography>
             </Paper>
@@ -832,10 +867,10 @@ export default function JobPostingsPage() {
                     </Box>
                   </Grid>
                   <Grid size={{ xs: 12, md: 5 }} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-                    <Typography variant="h1" sx={{ mb: { xs: 2, md: 3 }, fontWeight: 900, letterSpacing: { xs: -1, md: -3 }, lineHeight: 1, textTransform: 'uppercase', fontSize: { xs: '2.5rem', sm: '3.5rem', md: '5rem', lg: '6rem' } }}>
+                    <Typography variant="h1" sx={{ mb: { xs: 2, md: 3 }, fontWeight: 900, letterSpacing: { xs: -1, md: -3 }, lineHeight: 1, textTransform: 'uppercase', fontSize: { xs: '2.25rem', sm: '3.5rem', md: '5rem', lg: '6rem' } }}>
                       Join Our <span style={{ color: tertiaryMain }}>Elite Team</span>
                     </Typography>
-                    <Typography variant="h5" sx={{ mb: { xs: 4, md: 6 }, opacity: 0.9, lineHeight: 1.8, fontWeight: 400, fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
+                    <Typography variant="h5" sx={{ mb: { xs: 4, md: 6 }, opacity: 0.9, lineHeight: 1.8, fontWeight: 400, fontSize: { xs: '1rem', md: '1.5rem' } }}>
                       We are constantly expanding our global team. Submit your professional credentials for future consideration.
                     </Typography>
                     <Button

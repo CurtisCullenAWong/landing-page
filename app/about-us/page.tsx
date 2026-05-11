@@ -127,7 +127,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 },
+          py: { xs: 8, md: 10 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -177,7 +177,11 @@ export default function AboutPage() {
           <PageHeader
             title="About Boss Cargo Express"
             subtitle="Embark on a sustainable and transformative journey with us."
-            bottomSpacing={SECTION_SPACING.small}
+            bottomSpacing={SECTION_SPACING.medium}
+            sx={{ 
+              '& .MuiTypography-h2': { fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' } },
+              '& .MuiTypography-h6': { fontSize: { xs: '1rem', md: '1.125rem' }, opacity: 0.8, maxWidth: '700px' }
+            }}
           />
 
           <Grid container spacing={4} alignItems="center">
@@ -296,7 +300,7 @@ export default function AboutPage() {
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: paperColor,
-          py: { xs: 4, md: 8 },
+          py: { xs: 8, md: 10 },
           position: 'relative',
           overflow: 'visible'
         }}
@@ -337,7 +341,7 @@ export default function AboutPage() {
           <PageHeader
             title="Company Officials"
             titleVariant="h3"
-            sx={{ '& .MuiTypography-h3': { fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } } }}
+            sx={{ '& .MuiTypography-h3': { fontSize: { xs: '2.25rem', sm: '2.75rem', md: '3.5rem' } } }}
             bottomSpacing={SECTION_SPACING.medium}
             align="center"
           />
@@ -475,7 +479,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 },
+          py: { xs: 8, md: 10 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -515,8 +519,8 @@ export default function AboutPage() {
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <Box sx={{
-            p: 4,
-            mb: 4,
+            p: { xs: 3, sm: 4, md: 6 },
+            mb: { xs: 4, md: 6 },
             borderRadius: 2,
             background: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
             color: 'white',
@@ -549,10 +553,21 @@ export default function AboutPage() {
             }} />
             
             <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, textTransform: 'uppercase', letterSpacing: -1 }}>
+              <Typography variant="h3" sx={{ 
+                fontWeight: 900, 
+                mb: 1, 
+                textTransform: 'uppercase', 
+                letterSpacing: -1,
+                fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }
+              }}>
                 Get In Touch
               </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400, maxWidth: 600 }}>
+              <Typography variant="h6" sx={{ 
+                opacity: 0.9, 
+                fontWeight: 400, 
+                maxWidth: 600,
+                fontSize: { xs: '0.9375rem', sm: '1.125rem', md: '1.25rem' }
+              }}>
                 We're ready to handle your logistics needs with precision and care.
               </Typography>
             </Box>
@@ -566,7 +581,14 @@ export default function AboutPage() {
                 <Grid size={{ xs: 12, md: 5 }}>
                   <Stack spacing={3} sx={{ height: '100%' }}>
                     <Box>
-                      <Typography variant="h4" sx={{ color: primaryMain, fontWeight: 800, mb: 1, textTransform: 'uppercase', letterSpacing: -1 }}>
+                      <Typography variant="h4" sx={{ 
+                        color: primaryMain, 
+                        fontWeight: 800, 
+                        mb: 1, 
+                        textTransform: 'uppercase', 
+                        letterSpacing: -1,
+                        fontSize: { xs: '1.75rem', sm: '2rem', md: '2.25rem' }
+                      }}>
                         {office.name}
                       </Typography>
                       <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>

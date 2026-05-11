@@ -20,6 +20,7 @@ import {
 import { PageContainer, PageHeader } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { SECTION_SPACING } from '@/constants/layout';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -101,7 +102,7 @@ export default function PartnershipsPage() {
   usePageTitle('Partnerships');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  
+
   const primaryMain = theme.palette.primary.main;
   const secondaryMain = theme.palette.secondary.main;
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
@@ -124,7 +125,7 @@ export default function PartnershipsPage() {
       whiteBackground = true;
     }
     if (m.name.includes('JCtrans')) image = IMAGE_URLS.MEMBERSHIP_JCTRANS;
-    
+
     return {
       name: m.name,
       fullName: m.name,
@@ -139,13 +140,12 @@ export default function PartnershipsPage() {
       {/* Slide 1: Introduction & Industries */}
       <Box
         sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
+          minHeight: 'calc(100vh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 6, md: 10 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -157,21 +157,25 @@ export default function PartnershipsPage() {
           <PageHeader
             title="Strategic Alliances"
             subtitle={SITE_CONTENT.partnerships.description}
-            bottomSpacing={5}
+            bottomSpacing={SECTION_SPACING.medium}
+            sx={{
+              '& .MuiTypography-h2': { fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' } },
+              '& .MuiTypography-h6': { fontSize: { xs: '1rem', md: '1.125rem' }, opacity: 0.8, maxWidth: '700px' }
+            }}
           />
 
           <Box sx={{ mt: 2 }}>
-            <Typography variant="overline" sx={{ display: 'block', textAlign: 'center', mb: 4, fontWeight: 800, color: 'primary.main', letterSpacing: 4, opacity: 0.8 }}>
+            <Typography variant="overline" sx={{ display: 'block', textAlign: 'center', mb: 4, fontWeight: 800, color: 'primary.main', letterSpacing: { xs: 2, md: 4 }, opacity: 0.8, fontSize: { xs: '0.7rem', md: '0.875rem' } }}>
               INDUSTRIES WE SERVE
             </Typography>
-            
+
             {/* Infinite Scrolling Carousel Container */}
-            <Box sx={{ 
-              position: 'relative', 
-              width: '100vw', 
-              left: '50%', 
-              right: '50%', 
-              marginLeft: '-50vw', 
+            <Box sx={{
+              position: 'relative',
+              width: '100vw',
+              left: '50%',
+              right: '50%',
+              marginLeft: '-50vw',
               marginRight: '-50vw',
               overflow: 'hidden',
               py: 2
@@ -222,21 +226,21 @@ export default function PartnershipsPage() {
                   const IconComponent = industry.icon;
                   return (
                     <Box key={index} sx={{ width: 180, flexShrink: 0 }}>
-                      <Card 
+                      <Card
                         elevation={0}
-                        sx={{ 
-                          height: '100%', 
+                        sx={{
+                          height: '100%',
                           bgcolor: isDark ? alpha(primaryMain, 0.08) : alpha(primaryMain, 0.03),
                           border: '1px solid',
                           borderColor: isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.1),
-                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', 
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           borderRadius: 4,
-                          '&:hover': { 
-                            transform: 'translateY(-10px) scale(1.02)', 
-                            bgcolor: alpha(primaryMain, 0.12), 
+                          '&:hover': {
+                            transform: 'translateY(-10px) scale(1.02)',
+                            bgcolor: alpha(primaryMain, 0.12),
                             borderColor: primaryMain,
                             boxShadow: `0 20px 40px ${alpha(primaryMain, 0.15)}`
-                          } 
+                          }
                         }}
                       >
                         <CardContent sx={{ p: 3, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5 }}>
@@ -288,14 +292,13 @@ export default function PartnershipsPage() {
       {/* Slide 2: Partnership Philosophy (Alternating Orientation) */}
       <Box
         sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
+          minHeight: 'calc(100vh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: 'background.paper',
-          py: { xs: 6, md: 10 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -323,11 +326,11 @@ export default function PartnershipsPage() {
                 <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 800, letterSpacing: 2 }}>
                   OUR PHILOSOPHY
                 </Typography>
-                <Typography variant="h2" sx={{ mb: 3, fontWeight: 800, color: 'text.primary', fontSize: { xs: '2.25rem', md: '3rem' } }}>
+                <Typography variant="h2" sx={{ mb: 3, fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }, lineHeight: 1.2 }}>
                   Dependable & <br />
                   <span style={{ color: primaryMain }}>Cost-Effective</span>
                 </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'text.secondary', mb: 4 }}>
+                <Typography variant="body1" sx={{ fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.8, color: 'text.secondary', mb: 4 }}>
                   {SITE_CONTENT.partnerships.description}
                 </Typography>
                 <Paper
@@ -379,15 +382,14 @@ export default function PartnershipsPage() {
       {/* Slide 3: Memberships & CTA */}
       <Box
         sx={{
-          height: { xs: 'auto', md: 'calc(100vh - 80px)' },
-          minHeight: { xs: '100vh', md: 'auto' },
+          minHeight: 'calc(100vh - 80px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: { xs: 'flex-start', md: 'center' },
+          justifyContent: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 4, md: 8 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'visible'
         }}
@@ -400,7 +402,7 @@ export default function PartnershipsPage() {
             <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
               ACCREDITATIONS
             </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' } }}>
+            <Typography variant="h3" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '2rem', sm: '2.75rem', md: '3.5rem' } }}>
               Global Networks
             </Typography>
           </Box>
@@ -408,11 +410,11 @@ export default function PartnershipsPage() {
           <Grid container spacing={4} sx={{ mb: 8 }}>
             {memberships.map((membership, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
-                <Card 
+                <Card
                   elevation={0}
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
                     flexDirection: 'column',
                     bgcolor: 'background.paper',
                     border: '1px solid',
@@ -422,8 +424,8 @@ export default function PartnershipsPage() {
                     '&:hover': { boxShadow: theme.shadows[10], borderColor: primaryMain }
                   }}
                 >
-                  <Box 
-                    sx={{ 
+                  <Box
+                    sx={{
                       p: 4,
                       display: 'flex',
                       justifyContent: 'center',
@@ -475,19 +477,19 @@ export default function PartnershipsPage() {
             <Grid container spacing={4} alignItems="center">
               <Grid size={{ xs: 12, md: 8 }}>
                 <Box sx={{ textAlign: 'left' }}>
-                  <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}>
                     Ready to Expand Your Reach?
                   </Typography>
-                  <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: '1.1rem', maxWidth: '600px' }}>
+                  <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: { xs: '0.95rem', md: '1.1rem' }, maxWidth: '600px' }}>
                     Join our network of strategic partners and investors to revolutionize the logistics industry in the Philippines and beyond.
                   </Typography>
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Link href="/about-us" style={{ textDecoration: 'none' }}>
-                  <Button 
-                    variant="contained" 
-                    size="large" 
+                  <Button
+                    variant="contained"
+                    size="large"
                     fullWidth
                     sx={{
                       py: 2,
@@ -504,17 +506,17 @@ export default function PartnershipsPage() {
                 </Link>
               </Grid>
             </Grid>
-            
+
             {/* Decorative background element */}
-            <Handshake 
-              size={120} 
-              style={{ 
-                position: 'absolute', 
-                right: -20, 
-                bottom: -20, 
-                opacity: 0.05, 
-                transform: 'rotate(-15deg)' 
-              }} 
+            <Handshake
+              size={120}
+              style={{
+                position: 'absolute',
+                right: -20,
+                bottom: -20,
+                opacity: 0.05,
+                transform: 'rotate(-15deg)'
+              }}
             />
           </Paper>
         </PageContainer>
