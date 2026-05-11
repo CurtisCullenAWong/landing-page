@@ -86,6 +86,11 @@ const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: numb
       .then((res) => {
         if (!mounted) return;
         setAudioAvailable(res.ok);
+        if (res.ok && !audioRef.current) {
+          audioRef.current = new Audio(DANCE_AUDIO_SRC);
+          audioRef.current.loop = true;
+          audioRef.current.volume = 0.65;
+        }
       })
       .catch(() => {
         if (!mounted) return;
@@ -178,7 +183,7 @@ const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: numb
           oscNodeRef.current = null;
         }
       }
-    }, 500);
+    }, 50);
 
     return () => {
       clearTimeout(audioTimeout);

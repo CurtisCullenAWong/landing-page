@@ -381,10 +381,10 @@ export default function HomePage() {
               </Typography>
               <Grid container spacing={2}>
                 {[
-                  { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' },
-                  { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
                   { icon: Users, title: 'Domestic Services', desc: 'Air, land, and sea freight across the Philippine archipelago' },
-                  { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' }
+                  { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
+                  { icon: Award, title: 'Value-Added Services', desc: 'Packing, crating, warehousing, and specialized permits' },
+                  { icon: Truck, title: 'International Freight', desc: 'Air freight, sea freight (FCL & LCL), and brokerage services' }
                 ].map((service, index) => (
                   <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                     <Card

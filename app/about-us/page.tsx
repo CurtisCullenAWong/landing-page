@@ -1,13 +1,12 @@
 'use client';
 
-import { Mail, Phone, MapPin, User, Linkedin, ExternalLink, Facebook } from 'lucide-react';
+import { Mail, Phone, MapPin, User, Linkedin, ExternalLink, Facebook, Zap, Globe, Award, Clock, Target, Eye } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
-import { PageContainer, PageHeader, Section, ContentGrid } from '../../components/layout';
+import { PageContainer, PageHeader } from '../../components/layout';
 import {
   Box,
   Typography,
-  Button,
   Grid,
   Card,
   CardContent,
@@ -178,7 +177,7 @@ export default function AboutPage() {
             title="About Boss Cargo Express"
             subtitle="Embark on a sustainable and transformative journey with us."
             bottomSpacing={SECTION_SPACING.medium}
-            sx={{ 
+            sx={{
               '& .MuiTypography-h2': { fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' } },
               '& .MuiTypography-h6': { fontSize: { xs: '1rem', md: '1.125rem' }, opacity: 0.8, maxWidth: '700px' }
             }}
@@ -201,17 +200,25 @@ export default function AboutPage() {
               >
                 <CornerAccents />
 
-                <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700, color: primaryMain }}>
-                  Who We Are
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: primaryMain, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Zap size={20} /> At a Glance
                 </Typography>
-                <Stack spacing={1.5}>
-                  <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.9375rem', lineHeight: 1.7 }}>
-                    {SITE_CONTENT.company.story}
-                  </Typography>
-                  <Typography variant="body2" color="text.primary" sx={{ fontSize: '0.9375rem', lineHeight: 1.7 }}>
-                    {SITE_CONTENT.company.strategy.overview}
-                  </Typography>
-                </Stack>
+                <Grid container spacing={2}>
+                  {[
+                    { icon: <Clock size={20} />, label: 'Since 2014', sub: 'A decade of logistics excellence.' },
+                    { icon: <Globe size={20} />, label: 'Nationwide', sub: 'Network across the archipelago.' },
+                    { icon: <Award size={20} />, label: 'Expert Team', sub: 'Years of solid freight experience.' },
+                    { icon: <Zap size={20} />, label: 'CANI Driven', sub: 'Constant and never-ending improvement.' },
+                  ].map((stat, i) => (
+                    <Grid size={{ xs: 6 }} key={i}>
+                      <Box sx={{ p: 1.5, borderRadius: 1, bgcolor: alpha(primaryMain, 0.05), border: `1px solid ${alpha(primaryMain, 0.1)}` }}>
+                        <Box sx={{ color: primaryMain, mb: 0.5 }}>{stat.icon}</Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: '0.8125rem' }}>{stat.label}</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.2 }}>{stat.sub}</Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
               </Paper>
 
               <Grid container spacing={2}>
@@ -220,11 +227,16 @@ export default function AboutPage() {
                     <CornerAccents />
 
                     <CardContent sx={{ p: 2.5 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-                        Our Mission
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {SITE_CONTENT.missionVision.mission}
+                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                        <Box sx={{ p: 1, borderRadius: 1, bgcolor: alpha(primaryMain, 0.1), color: primaryMain }}>
+                          <Target size={18} />
+                        </Box>
+                        <Typography variant="subtitle2" sx={{ color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Mission
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        Empowering businesses through customized, tech-driven, and sustainable logistics solutions.
                       </Typography>
                     </CardContent>
                   </Card>
@@ -234,11 +246,16 @@ export default function AboutPage() {
                     <CornerAccents />
 
                     <CardContent sx={{ p: 2.5 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1, color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-                        Our Dreams
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {SITE_CONTENT.missionVision.vision}
+                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                        <Box sx={{ p: 1, borderRadius: 1, bgcolor: alpha(tertiaryMain, 0.1), color: tertiaryMain }}>
+                          <Eye size={18} />
+                        </Box>
+                        <Typography variant="subtitle2" sx={{ color: tertiaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
+                          Vision
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        To be the country's preeminent and technologically driven logistics leader.
                       </Typography>
                     </CardContent>
                   </Card>
@@ -551,20 +568,20 @@ export default function AboutPage() {
               borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
               zIndex: 0,
             }} />
-            
+
             <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography variant="h3" sx={{ 
-                fontWeight: 900, 
-                mb: 1, 
-                textTransform: 'uppercase', 
+              <Typography variant="h3" sx={{
+                fontWeight: 900,
+                mb: 1,
+                textTransform: 'uppercase',
                 letterSpacing: -1,
                 fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }
               }}>
                 Get In Touch
               </Typography>
-              <Typography variant="h6" sx={{ 
-                opacity: 0.9, 
-                fontWeight: 400, 
+              <Typography variant="h6" sx={{
+                opacity: 0.9,
+                fontWeight: 400,
                 maxWidth: 600,
                 fontSize: { xs: '0.9375rem', sm: '1.125rem', md: '1.25rem' }
               }}>
@@ -581,11 +598,11 @@ export default function AboutPage() {
                 <Grid size={{ xs: 12, md: 5 }}>
                   <Stack spacing={3} sx={{ height: '100%' }}>
                     <Box>
-                      <Typography variant="h4" sx={{ 
-                        color: primaryMain, 
-                        fontWeight: 800, 
-                        mb: 1, 
-                        textTransform: 'uppercase', 
+                      <Typography variant="h4" sx={{
+                        color: primaryMain,
+                        fontWeight: 800,
+                        mb: 1,
+                        textTransform: 'uppercase',
                         letterSpacing: -1,
                         fontSize: { xs: '1.75rem', sm: '2rem', md: '2.25rem' }
                       }}>
