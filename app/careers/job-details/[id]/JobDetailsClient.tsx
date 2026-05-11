@@ -243,7 +243,7 @@ export default function JobDetailsClient() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             The career opportunity you are seeking is either no longer available or has been relocated.
           </Typography>
-          <Button component={Link} href="/careers" variant="contained" size="large" sx={{ px: 4, fontWeight: 700 }}>
+          <Button component={Link} href="/#careers" variant="contained" size="large" sx={{ px: 4, fontWeight: 700 }}>
             Return to Career Listings
           </Button>
         </Container>
@@ -262,7 +262,7 @@ export default function JobDetailsClient() {
           <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Home</Typography>
           </Link>
-          <Link href="/careers" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link href="/#careers" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Careers</Typography>
           </Link>
           <Typography variant="caption" sx={{ fontWeight: 700, color: primaryMain }}>Position Specification</Typography>
@@ -270,7 +270,7 @@ export default function JobDetailsClient() {
 
         <Button 
           component={Link} 
-          href="/careers" 
+          href="/#careers" 
           variant="text"
           startIcon={<ArrowLeft size={18} />} 
           sx={{ 
@@ -564,7 +564,7 @@ export default function JobDetailsClient() {
               </Button>
               <Button
                 component={Link}
-                href="/careers"
+                href="/#careers"
                 variant="outlined"
                 size="large"
                 sx={{ px: 4, py: 1.5, fontWeight: 700, borderRadius: 2 }}

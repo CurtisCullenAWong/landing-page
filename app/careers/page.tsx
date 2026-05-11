@@ -37,6 +37,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { JobListingsSkeleton } from '@/components/loading';
+import { Footer } from '@/components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 
@@ -234,25 +235,42 @@ export default function JobPostingsPage() {
     setPage(0);
   };
 
+  useEffect(() => {
+    // Hide global footer to use local one in snap sequence
+    const globalFooter = document.querySelector('footer');
+    if (globalFooter) globalFooter.style.display = 'none';
+    return () => {
+      if (globalFooter) globalFooter.style.display = 'block';
+    };
+  }, []);
+
   if (isLoading) {
     return <JobListingsSkeleton />;
   }
 
   return (
-    <Box sx={{ bgcolor: bgColor, overflowX: 'hidden' }}>
+    <Box sx={{
+      bgcolor: bgColor,
+      height: 'calc(100vh - 80px)',
+      overflowY: 'auto',
+      scrollSnapType: 'y mandatory',
+      scrollBehavior: 'smooth',
+      '&::-webkit-scrollbar': { width: '6px' },
+      '&::-webkit-scrollbar-thumb': { bgcolor: alpha(primaryMain, 0.2), borderRadius: '3px' },
+      overflowX: 'hidden'
+    }}>
       {/* Slide 1: Professional Development */}
       <Box
         sx={{
           minHeight: 'calc(100vh - 80px)',
-          py: { xs: 10, md: 15 },
+          py: { xs: 8, md: 10 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: { xs: 'flex-start', md: 'center' },
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          position: 'relative',
-          overflow: 'hidden'
+          position: 'relative'
         }}
       >
         {/* Background Architectural Elements */}
@@ -264,48 +282,63 @@ export default function JobPostingsPage() {
           maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
           WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
         }}>
-          {/* Massive Squiggly Shape (Teal) */}
+          {/* Massive Squiggly Shape (Teal Gradient) */}
           <Box sx={{
             position: 'absolute',
-            top: '-10%',
-            right: '-5%',
-            width: '1200px',
-            height: '800px',
-            bgcolor: alpha(primaryMain, 0.1),
+            top: '-15%',
+            right: '-10%',
+            width: { xs: '150%', md: '1400px' },
+            height: { xs: '80%', md: '1000px' },
+            background: `linear-gradient(135deg, ${alpha(primaryMain, 0.15)}, ${alpha(tertiaryMain, 0.05)})`,
             borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
-            transform: 'rotate(-10deg)',
+            transform: 'rotate(-12deg)',
+            filter: 'blur(60px)',
           }} />
-          {/* Technical Grid */}
+          {/* Technical Grid Overlay */}
           <Box sx={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `radial-gradient(${alpha(isDark ? '#fff' : '#000', 0.08)} 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
+            backgroundImage: `radial-gradient(${alpha(primaryMain, 0.12)} 1.5px, transparent 1.5px)`,
+            backgroundSize: '30px 30px',
+            opacity: 0.8,
+          }} />
+          {/* Floating Architectural Square */}
+          <Box sx={{
+            position: 'absolute',
+            top: '20%',
+            left: '5%',
+            width: { xs: '200px', md: '300px' },
+            height: { xs: '200px', md: '300px' },
+            border: `1px solid ${alpha(tertiaryMain, 0.2)}`,
+            borderRadius: '20px',
+            transform: 'rotate(45deg)',
+            opacity: 0.5,
           }} />
         </Box>
 
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Grid container spacing={6} alignItems="center">
+          <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
             <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ position: 'relative' }}>
                 {/* Decorative Offset Frame - Sharp & Bold */}
                 <Box sx={{
                   position: 'absolute',
                   inset: { xs: '-10px 10px 10px -10px', md: '-20px 20px 20px -20px' },
-                  border: { xs: '2px solid', md: '3px solid' },
+                  border: { xs: '4px solid', md: '6px solid' },
                   borderColor: tertiaryMain,
-                  borderRadius: '4px',
+                  borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
                   zIndex: 0,
-                  opacity: 0.8,
-                  boxShadow: { xs: `5px 5px 0px ${alpha(primaryMain, 0.1)}`, md: `10px 10px 0px ${alpha(primaryMain, 0.1)}` }
+                  opacity: 0.9,
+                  boxShadow: `0 0 30px ${alpha(tertiaryMain, 0.3)}, ${alpha(tertiaryMain, 0.2)} 10px 10px 0px`,
                 }} />
-                {/* Secondary Support Frame */}
+                {/* Secondary Tertiary Support Frame */}
                 <Box sx={{
                   position: 'absolute',
                   inset: { xs: '5px -5px -5px 5px', md: '10px -10px -10px 10px' },
-                  bgcolor: alpha(primaryMain, 0.05),
-                  border: `1px solid ${alpha(primaryMain, 0.2)}`,
-                  borderRadius: '4px',
+                  bgcolor: alpha(tertiaryMain, 0.1),
+                  backdropFilter: 'blur(4px)',
+                  border: `1px solid ${alpha(tertiaryMain, 0.3)}`,
+                  borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
                   zIndex: 0,
                 }} />
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
@@ -323,7 +356,7 @@ export default function JobPostingsPage() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Paper
                 sx={{
-                  p: { xs: 4, md: 6 },
+                  p: { xs: 2.5, md: 3 },
                   bgcolor: alpha(isDark ? primaryDark : primaryMain, 0.05),
                   backdropFilter: 'blur(12px)',
                   border: `1px solid ${alpha(primaryMain, 0.2)}`,
@@ -344,7 +377,7 @@ export default function JobPostingsPage() {
                     </Typography>
                   </Box>
 
-                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: '1.125rem', fontWeight: 500 }}>
+                  <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: { xs: '1rem', md: '1.125rem' }, fontWeight: 500 }}>
                     {SITE_CONTENT.careers.university.description}
                   </Typography>
 
@@ -354,14 +387,14 @@ export default function JobPostingsPage() {
                     {SITE_CONTENT.careers.university.details}
                   </Typography>
 
-                  <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                    <Box sx={{ textAlign: 'center', flex: 1, p: 2, bgcolor: alpha(tertiaryMain, 0.1), borderRadius: 2 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 800, color: primaryMain }}>100%</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Internal Training</Typography>
+                  <Box sx={{ display: 'flex', gap: { xs: 1.5, md: 2 }, mt: 1 }}>
+                    <Box sx={{ textAlign: 'center', flex: 1, p: { xs: 1.5, md: 2 }, bgcolor: alpha(tertiaryMain, 0.1), borderRadius: 2 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 800, color: primaryMain, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>100%</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary', fontSize: '0.65rem' }}>Internal Training</Typography>
                     </Box>
-                    <Box sx={{ textAlign: 'center', flex: 1, p: 2, bgcolor: alpha(primaryMain, 0.1), borderRadius: 2 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 800, color: primaryMain }}>Elite</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>Mastery Program</Typography>
+                    <Box sx={{ textAlign: 'center', flex: 1, p: { xs: 1.5, md: 2 }, bgcolor: alpha(primaryMain, 0.1), borderRadius: 2 }}>
+                      <Typography variant="h5" sx={{ fontWeight: 800, color: primaryMain, fontSize: { xs: '1.25rem', md: '1.5rem' } }}>Elite</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary', fontSize: '0.65rem' }}>Mastery Program</Typography>
                     </Box>
                   </Box>
                 </Stack>
@@ -384,7 +417,208 @@ export default function JobPostingsPage() {
           }}
         />
       </Box>
+      {/* Slide 3: Final Overview & CTA */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          py: { xs: 8, md: 10 },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: { xs: 'flex-start', md: 'center' },
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          position: 'relative'
+        }}
+      >
+        {/* Background Architectural Elements */}
+        <Box sx={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}>
+          {/* Massive Organic Shape (Yellow Gradient) */}
+          <Box sx={{
+            position: 'absolute',
+            top: '-25%',
+            left: '-15%',
+            width: { xs: '150%', md: '1200px' },
+            height: { xs: '100%', md: '1200px' },
+            background: `linear-gradient(135deg, ${alpha(tertiaryMain, 0.18)}, ${alpha(primaryMain, 0.05)})`,
+            borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
+            transform: 'rotate(20deg)',
+            filter: 'blur(80px)',
+          }} />
+          {/* Architectural Lines Overlay */}
+          <Box sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `radial-gradient(${alpha(tertiaryMain, 0.15)} 2px, transparent 2px)`,
+            backgroundSize: '60px 60px',
+            opacity: 0.6,
+          }} />
+          {/* Technical Circle Outline (Vibrant) */}
+          <Box sx={{
+            position: 'absolute',
+            bottom: '-20%',
+            right: '-15%',
+            width: { xs: '300px', md: '800px' },
+            height: { xs: '300px', md: '800px' },
+            border: `3px dashed ${alpha(primaryMain, 0.25)}`,
+            borderRadius: '50%',
+            opacity: 0.4,
+          }} />
+        </Box>
 
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: { xs: 'flex-start', md: 'center' }, py: { xs: 2, md: 0 } }}>
+          {/* Workforce Status Summary Bar - Optimized for large view */}
+          <Box sx={{ mb: { xs: 1.5, md: 2 }, display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                px: { xs: 2, md: 4 },
+                py: { xs: 2, md: 2 },
+                borderRadius: { xs: 4, md: 10 },
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                gap: { xs: 1.5, md: 5 },
+                bgcolor: alpha(primaryMain, 0.05),
+                borderColor: alpha(primaryMain, 0.2),
+                backdropFilter: 'blur(12px)',
+                width: { xs: '100%', md: 'auto' },
+                textAlign: 'center'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Users size={20} color={primaryMain} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                  Workforce: <span style={{ color: primaryMain }}>ACTIVE</span>
+                </Typography>
+              </Box>
+              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', display: { xs: 'none', md: 'block' } }} />
+              <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Target size={20} color={tertiaryMain} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                  Open Positions: <span style={{ color: primaryMain }}>{activeJobs.length}</span>
+                </Typography>
+              </Box>
+              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', display: { xs: 'none', md: 'block' } }} />
+              <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
+              <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5, fontSize: { xs: '0.7rem', sm: '0.875rem', md: '1rem' }, wordBreak: { xs: 'break-all', sm: 'normal' } }}>
+                {SITE_CONTENT.careers.application.email}
+              </Typography>
+            </Paper>
+          </Box>
+
+          <Grid container spacing={0}>
+            {/* Massive Hero CTA Card - Maximized View */}
+            <Grid size={{ xs: 12 }}>
+              <Paper
+                sx={{
+                  p: { xs: 2.5, md: 3 },
+                  background: isDark
+                    ? `linear-gradient(135deg, ${secondaryDark} 0%, ${primaryDark} 100%)`
+                    : `linear-gradient(135deg, ${primaryDark} 0%, ${primaryMain} 100%)`,
+                  color: 'white',
+                  borderRadius: 2,
+                  boxShadow: 24,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <CornerBrackets color={tertiaryMain} radius={16} size={48} hideTopLeft={true} />
+                {/* Decorative Pattern overlay */}
+                <Box sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  opacity: 0.1,
+                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+                  backgroundSize: '32px 32px',
+                  pointerEvents: 'none'
+                }} />
+
+                <Grid container spacing={{ xs: 3, md: 6 }} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
+                  <Grid size={{ xs: 12, md: 7 }}>
+                    <Box sx={{
+                      position: 'relative',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': { transform: { xs: 'none', md: 'scale(1.04) rotate(-0.5deg)' } },
+                      mx: { xs: 2, md: 0 }
+                    }}>
+                      {/* Bold Architectural Frame - Expanded */}
+                      <Box sx={{
+                        position: 'absolute',
+                        inset: { xs: '-12px', md: '-20px' },
+                        border: { xs: '4px solid', md: '6px solid' },
+                        borderColor: tertiaryMain,
+                        borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+                        zIndex: 0,
+                        boxShadow: `0 0 40px ${alpha(tertiaryMain, 0.4)}, 15px 15px 0px ${alpha(secondaryDark, 0.6)}`
+                      }} />
+                      {/* Secondary Tertiary Glass Backing */}
+                      <Box sx={{
+                        position: 'absolute',
+                        inset: { xs: '10px -10px -10px 10px', md: '20px -20px -20px 20px' },
+                        bgcolor: alpha(tertiaryMain, 0.15),
+                        backdropFilter: 'blur(12px)',
+                        borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
+                        zIndex: 0,
+                      }} />
+                      <Box sx={{ position: 'relative', zIndex: 1 }}>
+                        <ImageWithFallback
+                          src={IMAGE_URLS.JOBS_CAREER_GROWTH.src}
+                          alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
+                          layout="responsive"
+                          aspectRatio="21:9"
+                          rounded={2}
+                          shadow={24}
+                        />
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 5 }} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                    <Typography variant="h1" sx={{ mb: { xs: 1, md: 1.5 }, fontWeight: 900, letterSpacing: { xs: -1, md: -3 }, lineHeight: 1, textTransform: 'uppercase', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem', lg: '5rem' } }}>
+                      Join Our <span style={{ color: tertiaryMain }}>Elite Team</span>
+                    </Typography>
+                    <Typography variant="h5" sx={{ mb: { xs: 2, md: 3 }, opacity: 0.9, lineHeight: 1.5, fontWeight: 400, fontSize: { xs: '0.9rem', md: '1.15rem' } }}>
+                      We are constantly expanding our global team. Submit your professional credentials for future consideration.
+                    </Typography>
+                    <Button
+                      component={Link}
+                      href="/careers/apply"
+                      variant="contained"
+                      size="large"
+                      sx={{
+                        bgcolor: tertiaryMain,
+                        color: secondaryDark,
+                        fontWeight: 900,
+                        px: { xs: 4, md: 6 },
+                        py: 2,
+                        fontSize: { xs: '0.9rem', md: '1.1rem' },
+                        borderRadius: 2,
+                        boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.4)}`,
+                        '&:hover': {
+                          bgcolor: alpha(tertiaryMain, 1),
+                          transform: 'translateY(-4px) scale(1.0)',
+                          boxShadow: `0 16px 48px ${alpha(tertiaryMain, 0.6)}`,
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        width: { xs: '100%', sm: 'auto' }
+                      }}
+                    >
+                      Submit General Application
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+
+      </Box>
       {/* Slide 2: Career Opportunities */}
       {activeJobs.length > 0 && (
         <Box
@@ -397,9 +631,8 @@ export default function JobPostingsPage() {
             scrollSnapAlign: 'start',
             scrollSnapStop: 'always',
             bgcolor: paperColor,
-            py: { xs: 10, md: 15 },
-            position: 'relative',
-            overflow: 'hidden'
+            py: { xs: 8, md: 10 },
+            position: 'relative'
           }}
         >
           {/* Background Elements */}
@@ -409,25 +642,39 @@ export default function JobPostingsPage() {
             zIndex: 0,
             pointerEvents: 'none',
           }}>
+            {/* Gradient Glow */}
             <Box sx={{
               position: 'absolute',
-              bottom: '-10%',
-              left: '-10%',
-              width: '800px',
-              height: '800px',
-              bgcolor: alpha(tertiaryMain, 0.08),
+              bottom: '-20%',
+              left: '-15%',
+              width: { xs: '120%', md: '1000px' },
+              height: { xs: '80%', md: '1000px' },
+              background: `radial-gradient(circle, ${alpha(tertiaryMain, 0.15)} 0%, transparent 70%)`,
               borderRadius: '50%',
-              filter: 'blur(80px)'
+              filter: 'blur(100px)'
             }} />
+            {/* Technical Detail: Rotating Frame */}
             <Box sx={{
               position: 'absolute',
-              top: '10%',
-              right: '5%',
-              width: '400px',
-              height: '400px',
-              border: `1px solid ${alpha(primaryMain, 0.1)}`,
-              borderRadius: '40px',
-              transform: 'rotate(45deg)'
+              top: '5%',
+              right: '2%',
+              width: { xs: '300px', md: '500px' },
+              height: { xs: '300px', md: '500px' },
+              border: `2px dashed ${alpha(primaryMain, 0.15)}`,
+              borderRadius: '60px',
+              transform: 'rotate(25deg)',
+              animation: 'spin 120s linear infinite',
+              '@keyframes spin': {
+                from: { transform: 'rotate(25deg)' },
+                to: { transform: 'rotate(385deg)' }
+              }
+            }} />
+            {/* Secondary Grid */}
+            <Box sx={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `linear-gradient(${alpha(theme.palette.divider, 0.05)} 1px, transparent 1px), linear-gradient(90deg, ${alpha(theme.palette.divider, 0.05)} 1px, transparent 1px)`,
+              backgroundSize: '100px 100px',
             }} />
           </Box>
 
@@ -713,210 +960,9 @@ export default function JobPostingsPage() {
         </Box>
       )}
 
-      {/* Slide 3: Final Overview & CTA */}
-      <Box
-        sx={{
-          minHeight: 'calc(100vh - 80px)',
-          py: { xs: 10, md: 15 },
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: { xs: 'flex-start', md: 'center' },
-          alignItems: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Background Architectural Elements */}
-        <Box sx={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: 'none',
-        }}>
-          {/* Massive Organic Shape (Yellow) */}
-          <Box sx={{
-            position: 'absolute',
-            top: '-20%',
-            left: '-10%',
-            width: '1000px',
-            height: '1000px',
-            bgcolor: alpha(tertiaryMain, 0.12),
-            borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
-            transform: 'rotate(15deg)',
-          }} />
-          {/* Technical Circle Outline */}
-          <Box sx={{
-            position: 'absolute',
-            bottom: '-15%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            border: `2px dashed ${alpha(primaryMain, 0.15)}`,
-            borderRadius: '50%',
-          }} />
-        </Box>
 
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, minHeight: '100%', display: 'flex', flexDirection: 'column', justifyContent: { xs: 'flex-start', md: 'center' }, py: { xs: 2, md: 0 } }}>
-          {/* Workforce Status Summary Bar - Optimized for large view */}
-          <Box sx={{ mb: { xs: 4, md: 6 }, display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <Paper
-              variant="outlined"
-              sx={{
-                px: { xs: 2, md: 4 },
-                py: { xs: 2, md: 2 },
-                borderRadius: { xs: 4, md: 10 },
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                alignItems: 'center',
-                gap: { xs: 1.5, md: 5 },
-                bgcolor: alpha(primaryMain, 0.05),
-                borderColor: alpha(primaryMain, 0.2),
-                backdropFilter: 'blur(12px)',
-                width: { xs: '100%', md: 'auto' },
-                textAlign: 'center'
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Users size={20} color={primaryMain} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                  Workforce: <span style={{ color: primaryMain }}>ACTIVE</span>
-                </Typography>
-              </Box>
-              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', display: { xs: 'none', md: 'block' } }} />
-              <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Target size={20} color={tertiaryMain} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                  Open Positions: <span style={{ color: primaryMain }}>{activeJobs.length}</span>
-                </Typography>
-              </Box>
-              <Divider orientation="vertical" flexItem sx={{ height: 24, my: 'auto', display: { xs: 'none', md: 'block' } }} />
-              <Divider sx={{ width: '80%', display: { xs: 'block', md: 'none' }, opacity: 0.1 }} />
-              <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.5, fontSize: { xs: '0.8rem', sm: '1rem' } }}>
-                {SITE_CONTENT.careers.application.email}
-              </Typography>
-            </Paper>
-          </Box>
-
-          <Grid container spacing={0}>
-            {/* Massive Hero CTA Card - Maximized View */}
-            <Grid size={{ xs: 12 }}>
-              <Paper
-                sx={{
-                  p: { xs: 3, md: 6 },
-                  background: isDark
-                    ? `linear-gradient(135deg, ${secondaryDark} 0%, ${primaryDark} 100%)`
-                    : `linear-gradient(135deg, ${primaryDark} 0%, ${primaryMain} 100%)`,
-                  color: 'white',
-                  borderRadius: 2,
-                  boxShadow: 24,
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <CornerBrackets color={tertiaryMain} radius={16} size={48} hideTopLeft={true} />
-                {/* Decorative Pattern overlay */}
-                <Box sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  opacity: 0.1,
-                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-                  backgroundSize: '32px 32px',
-                  pointerEvents: 'none'
-                }} />
-
-                <Grid container spacing={{ xs: 6, md: 10 }} alignItems="center" sx={{ position: 'relative', zIndex: 1 }}>
-                  <Grid size={{ xs: 12, md: 7 }}>
-                    <Box sx={{
-                      position: 'relative',
-                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': { transform: { xs: 'none', md: 'scale(1.04) rotate(-0.5deg)' } },
-                      mx: { xs: 2, md: 0 }
-                    }}>
-                      {/* Bold Architectural Frame - Expanded */}
-                      <Box sx={{
-                        position: 'absolute',
-                        inset: { xs: '-12px 12px 12px -12px', md: '-24px 24px 24px -24px' },
-                        border: { xs: '3px solid', md: '6px solid' },
-                        borderColor: tertiaryMain,
-                        borderRadius: '2px',
-                        zIndex: 0,
-                        boxShadow: { xs: `8px 8px 0px ${alpha(secondaryDark, 0.5)}`, md: `15px 15px 0px ${alpha(secondaryDark, 0.5)}` }
-                      }} />
-                      {/* Secondary Glass Backing */}
-                      <Box sx={{
-                        position: 'absolute',
-                        inset: { xs: '10px -10px -10px 10px', md: '20px -20px -20px 20px' },
-                        bgcolor: alpha('#fff', 0.2),
-                        backdropFilter: 'blur(12px)',
-                        borderRadius: '2px',
-                        zIndex: 0,
-                      }} />
-                      <Box sx={{ position: 'relative', zIndex: 1 }}>
-                        <ImageWithFallback
-                          src={IMAGE_URLS.JOBS_CAREER_GROWTH.src}
-                          alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
-                          layout="responsive"
-                          rounded={2}
-                          shadow={24}
-                        />
-                      </Box>
-                    </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 5 }} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
-                    <Typography variant="h1" sx={{ mb: { xs: 2, md: 3 }, fontWeight: 900, letterSpacing: { xs: -1, md: -3 }, lineHeight: 1, textTransform: 'uppercase', fontSize: { xs: '2.25rem', sm: '3.5rem', md: '5rem', lg: '6rem' } }}>
-                      Join Our <span style={{ color: tertiaryMain }}>Elite Team</span>
-                    </Typography>
-                    <Typography variant="h5" sx={{ mb: { xs: 4, md: 6 }, opacity: 0.9, lineHeight: 1.8, fontWeight: 400, fontSize: { xs: '1rem', md: '1.5rem' } }}>
-                      We are constantly expanding our global team. Submit your professional credentials for future consideration.
-                    </Typography>
-                    <Button
-                      component={Link}
-                      href="/careers/apply"
-                      variant="contained"
-                      size="large"
-                      sx={{
-                        bgcolor: tertiaryMain,
-                        color: secondaryDark,
-                        fontWeight: 900,
-                        px: { xs: 4, md: 6 },
-                        py: 2,
-                        fontSize: { xs: '0.9rem', md: '1.1rem' },
-                        borderRadius: 2,
-                        boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.4)}`,
-                        '&:hover': {
-                          bgcolor: alpha(tertiaryMain, 1),
-                          transform: 'translateY(-4px) scale(1.0)',
-                          boxShadow: `0 16px 48px ${alpha(tertiaryMain, 0.6)}`,
-                        },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        width: { xs: '100%', sm: 'auto' }
-                      }}
-                    >
-                      Submit General Application
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-
-        {/* Smooth transition to next page section or footer */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '15vh',
-            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
-            pointerEvents: 'none',
-            zIndex: 3,
-          }}
-        />
+      <Box sx={{ scrollSnapAlign: 'start' }}>
+        <Footer />
       </Box>
     </Box>
   );

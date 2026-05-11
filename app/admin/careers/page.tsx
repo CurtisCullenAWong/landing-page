@@ -49,6 +49,26 @@ import { usePageTitle } from '../../../lib/usePageTitle';
 import { formatStatus } from '@/lib/utils';
 import { sanitizeString, cleanList, formatName, isValidUrl, INPUT_LIMITS } from '@/lib/input-utils';
 
+const formatSalaryRange = (min: string, max: string, freq: string) => {
+  if (!min && !max) return 'Negotiable';
+  const format = (val: string) => {
+    const num = Number(val);
+    if (isNaN(num) || !val) return '';
+    if (num >= 1000000) return `₱${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `₱${(num / 1000).toFixed(0)}k`;
+    return `₱${num}`;
+  };
+
+  const minFmt = format(min);
+  const maxFmt = format(max);
+  const freqFmt = freq ? ` / ${freq.toLowerCase()}` : '';
+
+  if (minFmt && maxFmt) return `${minFmt} - ${maxFmt}${freqFmt}`;
+  if (minFmt) return `${minFmt}+${freqFmt}`;
+  if (maxFmt) return `Up to ${maxFmt}${freqFmt}`;
+  return 'Negotiable';
+};
+
 
 
 
@@ -57,7 +77,7 @@ type SortDirection = 'asc' | 'desc';
 
 const MAX_JOB_ENTRIES = 10;
 
-type JobFormData = {
+type JobFormState = {
   id: string;
   title: string;
   department: string;
@@ -68,6 +88,9 @@ type JobFormData = {
   requirements: string;
   benefits: string;
   salary: string;
+  salary_min: string;
+  salary_max: string;
+  salary_frequency: string;
   status: 'active' | 'closed';
   application_url: string;
   employment_type: string;
@@ -77,6 +100,8 @@ type JobFormData = {
   application_email: string;
   external_application_url: string;
   featured: boolean;
+  published_at: string;
+  expires_at: string;
   expanded: boolean;
 };
 
@@ -89,7 +114,7 @@ export default function AdminPage() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
-  const [jobEntries, setJobEntries] = useState<JobFormData[]>([
+  const [jobEntries, setJobEntries] = useState<JobFormState[]>([
     {
       id: `job-${Date.now()}`,
       title: '',
@@ -101,6 +126,9 @@ export default function AdminPage() {
       requirements: '',
       benefits: '',
       salary: '',
+      salary_min: '',
+      salary_max: '',
+      salary_frequency: 'Monthly',
       status: 'active',
       application_url: '',
       employment_type: '',
@@ -110,6 +138,8 @@ export default function AdminPage() {
       application_email: '',
       external_application_url: '',
       featured: false,
+      published_at: new Date().toISOString().split('T')[0],
+      expires_at: '',
       expanded: true,
     }
   ]);
@@ -252,7 +282,7 @@ export default function AdminPage() {
     return <AdminTableSkeleton />;
   }
 
-  const handleInputChange = (id: string, field: keyof JobFormData, value: string | boolean) => {
+  const handleInputChange = (id: string, field: keyof JobFormState, value: string | boolean) => {
     setJobEntries(entries =>
       entries.map(entry =>
         entry.id === id ? { ...entry, [field]: value } : entry
@@ -260,7 +290,7 @@ export default function AdminPage() {
     );
   };
 
-  const handleSelectChange = (id: string, field: keyof JobFormData, value: string) => {
+  const handleSelectChange = (id: string, field: keyof JobFormState, value: string) => {
     setJobEntries(entries =>
       entries.map(entry =>
         entry.id === id ? { ...entry, [field]: value } : entry
@@ -283,16 +313,21 @@ export default function AdminPage() {
       requirements: '',
       benefits: '',
       salary: '',
+      salary_min: '',
+      salary_max: '',
+      salary_frequency: 'Monthly',
       status: 'active',
       application_url: '',
       employment_type: '',
       work_setup: 'In person',
       job_level: '',
       schedule: '',
-      expanded: true,
       application_email: '',
       external_application_url: '',
-      featured: false
+      featured: false,
+      published_at: new Date().toISOString().split('T')[0],
+      expires_at: '',
+      expanded: true,
     }]);
   };
 
@@ -326,14 +361,17 @@ export default function AdminPage() {
 
       const jobData = {
         title: sanitizeString(entry.title),
-        department: formatName(entry.department),
+        department: entry.department,
         location: formatName(entry.location),
         type: entry.type,
         description: sanitizeString(entry.description),
         responsibilities: cleanList(entry.responsibilities),
         requirements: cleanList(entry.requirements),
         benefits: cleanList(entry.benefits),
-        salary: sanitizeString(entry.salary),
+        salary: formatSalaryRange(entry.salary_min, entry.salary_max, entry.salary_frequency),
+        salary_min: entry.salary_min ? Number(entry.salary_min) : undefined,
+        salary_max: entry.salary_max ? Number(entry.salary_max) : undefined,
+        salary_frequency: entry.salary_frequency,
         status: entry.status,
         application_url: entry.application_url.trim() || undefined,
         employment_type: sanitizeString(entry.employment_type) || undefined,
@@ -343,6 +381,8 @@ export default function AdminPage() {
         application_email: sanitizeString(entry.application_email) || undefined,
         external_application_url: entry.external_application_url.trim() || undefined,
         featured: entry.featured,
+        published_at: entry.published_at ? new Date(entry.published_at).toISOString() : undefined,
+        expires_at: entry.expires_at ? new Date(entry.expires_at).toISOString() : undefined,
       };
       updateJob(editingJob.id, jobData);
       setEditingJob(null);
@@ -359,14 +399,17 @@ export default function AdminPage() {
 
           return {
             title: sanitizeString(entry.title),
-            department: formatName(entry.department),
+            department: entry.department,
             location: formatName(entry.location),
             type: entry.type,
             description: sanitizeString(entry.description),
             responsibilities: cleanList(entry.responsibilities),
             requirements: cleanList(entry.requirements),
             benefits: cleanList(entry.benefits),
-            salary: sanitizeString(entry.salary),
+            salary: formatSalaryRange(entry.salary_min, entry.salary_max, entry.salary_frequency),
+            salary_min: entry.salary_min ? Number(entry.salary_min) : undefined,
+            salary_max: entry.salary_max ? Number(entry.salary_max) : undefined,
+            salary_frequency: entry.salary_frequency,
             status: entry.status,
             application_url: entry.application_url.trim() || undefined,
             employment_type: sanitizeString(entry.employment_type) || undefined,
@@ -376,6 +419,8 @@ export default function AdminPage() {
             application_email: sanitizeString(entry.application_email) || undefined,
             external_application_url: entry.external_application_url.trim() || undefined,
             featured: entry.featured,
+            published_at: entry.published_at ? new Date(entry.published_at).toISOString() : undefined,
+            expires_at: entry.expires_at ? new Date(entry.expires_at).toISOString() : undefined,
           };
         });
 
@@ -401,6 +446,9 @@ export default function AdminPage() {
       requirements: job.requirements.join('\n'),
       benefits: job.benefits.join('\n'),
       salary: job.salary,
+      salary_min: job.salary_min?.toString() || '',
+      salary_max: job.salary_max?.toString() || '',
+      salary_frequency: job.salary_frequency || 'Monthly',
       status: job.status,
       application_url: job.application_url || '',
       employment_type: job.employment_type || '',
@@ -410,6 +458,8 @@ export default function AdminPage() {
       application_email: job.application_email || '',
       external_application_url: job.external_application_url || '',
       featured: job.featured || false,
+      published_at: job.published_at ? new Date(job.published_at).toISOString().split('T')[0] : '',
+      expires_at: job.expires_at ? new Date(job.expires_at).toISOString().split('T')[0] : '',
       expanded: true,
     }]);
     setIsFormOpen(true);
@@ -440,6 +490,9 @@ export default function AdminPage() {
       requirements: '',
       benefits: '',
       salary: '',
+      salary_min: '',
+      salary_max: '',
+      salary_frequency: 'Monthly',
       status: 'active',
       application_url: '',
       employment_type: '',
@@ -449,6 +502,8 @@ export default function AdminPage() {
       application_email: '',
       external_application_url: '',
       featured: false,
+      published_at: new Date().toISOString().split('T')[0],
+      expires_at: '',
       expanded: true,
     }]);
     setIsFormOpen(false);
@@ -510,7 +565,7 @@ export default function AdminPage() {
                 mb: 2
               }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-                  {editingJob ? 'Edit Job Posting' : `Create Careers (${jobEntries.length})`}
+                  {editingJob ? 'Edit Job Posting' : `Create Job Postings (${jobEntries.length})`}
                 </Typography>
                 <Box sx={{
                   display: 'flex',
@@ -557,546 +612,302 @@ export default function AdminPage() {
               )}
 
               <form onSubmit={handleSubmit}>
-
-                {isMobile ? (
-                  /* Mobile Card View */
-                  <Stack spacing={2} sx={{ mb: 2 }}>
-                    {jobEntries.map((entry, index) => (
-                      <Card key={entry.id} variant="outlined" sx={{ borderRadius: 2 }}>
-                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              Job {index + 1} {jobEntries.length > 1 && !editingJob && `(${jobEntries.length} total)`}
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                              {jobEntries.length > 1 && !editingJob && (
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleRemoveEntry(entry.id)}
-                                  color="error"
-                                  sx={{ p: 0.5 }}
-                                >
-                                  <Trash2 size={18} />
-                                </IconButton>
-                              )}
-                              <IconButton
-                                size="small"
-                                onClick={() => handleToggleExpand(entry.id)}
-                                sx={{ p: 0.5 }}
-                              >
-                                {entry.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                              </IconButton>
-                            </Box>
+                <Stack spacing={3} sx={{ mb: 3 }}>
+                  {jobEntries.map((entry, index) => (
+                    <Card key={entry.id} variant="outlined" sx={{ borderRadius: 2, border: 1, borderColor: 'divider', overflow: 'hidden' }}>
+                      <Box sx={{ 
+                        p: 2, 
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                      }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ 
+                            width: 24, 
+                            height: 24, 
+                            borderRadius: '50%', 
+                            bgcolor: 'primary.main', 
+                            color: 'white', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            fontSize: '0.75rem'
+                          }}>
+                            {index + 1}
                           </Box>
-                          <Stack spacing={2}>
-                            <TextField
-                              fullWidth
+                          {entry.title || 'Untitled Job Posting'}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {jobEntries.length > 1 && !editingJob && (
+                            <IconButton
                               size="small"
-                              label="Job Title"
-                              placeholder="Job Title"
-                              value={entry.title}
-                              onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
-                              required
-                              inputProps={{ maxLength: INPUT_LIMITS.TITLE }}
-                            />
-
-                            <FormControl fullWidth size="small" required>
-                              <InputLabel>Department</InputLabel>
-                              <Select
-                                value={entry.department}
-                                label="Department"
-                                onChange={(e) => handleSelectChange(entry.id, 'department', e.target.value)}
-                              >
-                                {departments.map((dept) => (
-                                  <MenuItem key={dept.id} value={dept.name}>
-                                    {dept.name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Location"
-                              placeholder="Location"
-                              value={entry.location}
-                              onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
-                              required
-                              inputProps={{ maxLength: INPUT_LIMITS.LOCATION }}
-                            />
-
-                            <FormControl fullWidth size="small" required>
-                              <InputLabel>Type</InputLabel>
-                              <Select
-                                value={entry.type}
-                                label="Type"
-                                onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
-                              >
-                                <MenuItem value="Full-time">Full-time</MenuItem>
-                                <MenuItem value="Part-time">Part-time</MenuItem>
-                                <MenuItem value="Contract">Contract</MenuItem>
-                                <MenuItem value="Temporary">Temporary</MenuItem>
-                              </Select>
-                            </FormControl>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Salary"
-                              placeholder="₱50k - ₱70k"
-                              value={entry.salary}
-                              onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
-                              required
-                              inputProps={{ maxLength: INPUT_LIMITS.SALARY }}
-                            />
-
-                            <FormControl fullWidth size="small" required>
-                              <InputLabel>Status</InputLabel>
-                              <Select
-                                value={entry.status}
-                                label="Status"
-                                onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
-                              >
-                                <MenuItem value="active">Active</MenuItem>
-                                <MenuItem value="closed">Closed</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Stack>
-                          <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
-                            <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                              <Stack spacing={2}>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  label="Job Description"
-                                  value={entry.description}
-                                  onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
-                                  required
-                                  multiline
-                                  rows={3}
-                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                  helperText={`${entry.description.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                />
-
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  label="Responsibilities (one per line)"
-                                  value={entry.responsibilities}
-                                  onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
-                                  required
-                                  multiline
-                                  rows={4}
-                                  placeholder="Enter each responsibility on a new line"
-                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                  helperText={`${entry.responsibilities.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                />
-
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  label="Requirements (one per line)"
-                                  value={entry.requirements}
-                                  onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
-                                  required
-                                  multiline
-                                  rows={4}
-                                  placeholder="Enter each requirement on a new line"
-                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                  helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                />
-
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  label="Benefits (one per line)"
-                                  value={entry.benefits}
-                                  onChange={(e) => handleInputChange(entry.id, 'benefits', e.target.value)}
-                                  multiline
-                                  rows={4}
-                                  placeholder="Enter each benefit on a new line"
-                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                  helperText={`${entry.benefits.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                />
-
-                                <Stack direction="row" spacing={2}>
+                              onClick={() => handleRemoveEntry(entry.id)}
+                              color="error"
+                              title="Remove this job"
+                            >
+                              <Trash2 size={18} />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleExpand(entry.id)}
+                            title={entry.expanded ? "Collapse" : "Expand"}
+                          >
+                            {entry.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      
+                      <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
+                        <CardContent sx={{ p: 3 }}>
+                          <Grid container spacing={3}>
+                            {/* Basic Information Section */}
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                                Basic Information
+                              </Typography>
+                              <Divider sx={{ mb: 2, mt: 0.5 }} />
+                              <Grid container spacing={2}>
+                                <Grid size={{ xs: 12, md: 6 }}>
                                   <TextField
                                     fullWidth
                                     size="small"
-                                    label="Schedule"
-                                    placeholder="Mon-Fri, 8AM-5PM"
-                                    value={entry.schedule}
-                                    onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)}
-                                    inputProps={{ maxLength: 100 }}
+                                    label="Job Title"
+                                    placeholder="e.g. Software Engineer"
+                                    value={entry.title}
+                                    onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
+                                    required
+                                    inputProps={{ maxLength: INPUT_LIMITS.TITLE }}
                                   />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <FormControl fullWidth size="small" required>
+                                    <InputLabel>Department</InputLabel>
+                                    <Select
+                                      value={entry.department}
+                                      label="Department"
+                                      onChange={(e) => handleSelectChange(entry.id, 'department', e.target.value)}
+                                    >
+                                      {departments.map((dept) => (
+                                        <MenuItem key={dept.id} value={dept.name}>{dept.name}</MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
                                   <TextField
                                     fullWidth
                                     size="small"
-                                    label="Work Setup"
-                                    placeholder="In person / Hybrid / Remote"
-                                    value={entry.work_setup}
-                                    onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)}
-                                    inputProps={{ maxLength: 50 }}
+                                    label="Location"
+                                    placeholder="e.g. Remote / Manila, Philippines"
+                                    value={entry.location}
+                                    onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
+                                    required
+                                    inputProps={{ maxLength: INPUT_LIMITS.LOCATION }}
                                   />
-                                </Stack>
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <FormControl fullWidth size="small" required>
+                                    <InputLabel>Type</InputLabel>
+                                    <Select
+                                      value={entry.type}
+                                      label="Type"
+                                      onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
+                                    >
+                                      <MenuItem value="Full-time">Full-time</MenuItem>
+                                      <MenuItem value="Part-time">Part-time</MenuItem>
+                                      <MenuItem value="Contract">Contract</MenuItem>
+                                      <MenuItem value="Temporary">Temporary</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                              </Grid>
+                            </Grid>
 
-                                <Stack direction="row" spacing={2}>
+                            {/* Compensation Section */}
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 2, display: 'block' }}>
+                                Compensation & Benefits
+                              </Typography>
+                              <Divider sx={{ mb: 2, mt: 0.5 }} />
+                              <Grid container spacing={2}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                   <TextField
                                     fullWidth
                                     size="small"
-                                    label="Employment Type"
-                                    placeholder="Permanent / Full-time"
-                                    value={entry.employment_type}
-                                    onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)}
-                                    inputProps={{ maxLength: 50 }}
+                                    label="Min Salary"
+                                    type="number"
+                                    value={entry.salary_min}
+                                    onChange={(e) => handleInputChange(entry.id, 'salary_min', e.target.value)}
+                                    placeholder="e.g. 50000"
                                   />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                   <TextField
                                     fullWidth
                                     size="small"
-                                    label="Job Level"
-                                    placeholder="Junior / Senior"
-                                    value={entry.job_level}
-                                    onChange={(e) => handleInputChange(entry.id, 'job_level', e.target.value)}
-                                    inputProps={{ maxLength: 50 }}
+                                    label="Max Salary"
+                                    type="number"
+                                    value={entry.salary_max}
+                                    onChange={(e) => handleInputChange(entry.id, 'salary_max', e.target.value)}
+                                    placeholder="e.g. 80000"
                                   />
-                                </Stack>
-
-                                <Box sx={{ mt: 2, p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05), borderRadius: 2 }}>
-                                  <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
-                                    Admin / Routing Settings
-                                  </Typography>
-                                  <Stack spacing={2}>
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      label="Application Email (Internal Admin Only)"
-                                      value={entry.application_email}
-                                      onChange={(e) => handleInputChange(entry.id, 'application_email', e.target.value)}
-                                      placeholder="hr@example.com"
-                                      inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
-                                    />
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      label="External Application URL (Client-Facing Redirect)"
-                                      value={entry.external_application_url || entry.application_url}
-                                      onChange={(e) => handleInputChange(entry.id, 'external_application_url', e.target.value)}
-                                      placeholder="https://example.com/apply"
-                                      inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                                    />
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={entry.featured}
-                                          onChange={(e: { target: { checked: string | boolean; }; }) => handleInputChange(entry.id, 'featured', e.target.checked)}
-                                          color="primary"
-                                        />
-                                      }
-                                      label="Mark as Featured Job (Client-Facing)"
-                                    />
-                                  </Stack>
-                                </Box>
-
-                              </Stack>
-                            </Box>
-                          </Collapse>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Stack>
-                ) : (
-                  /* Desktop Table View */
-                  <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ bgcolor: 'action.hover' }}>
-                          <TableCell sx={{ width: 40, p: 1 }}></TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Title</TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Department</TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Location</TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Type</TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Salary</TableCell>
-                          <TableCell sx={{ fontWeight: 600, p: 1 }}>Status</TableCell>
-                          <TableCell sx={{ width: 50, p: 1 }}></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {jobEntries.map((entry, index) => (
-                          <React.Fragment key={entry.id}>
-                            <TableRow>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleToggleExpand(entry.id)}
-                                  sx={{ p: 0.5 }}
-                                >
-                                  {entry.expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                </IconButton>
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  placeholder="Job Title"
-                                  value={entry.title}
-                                  onChange={(e) => handleInputChange(entry.id, 'title', e.target.value)}
-                                  required
-                                  inputProps={{ maxLength: INPUT_LIMITS.TITLE }}
-                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                />
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <FormControl fullWidth size="small" required>
-                                  <Select
-                                    value={entry.department}
-                                    onChange={(e) => handleSelectChange(entry.id, 'department', e.target.value)}
-                                    displayEmpty
-                                    sx={{ fontSize: '0.875rem' }}
-                                  >
-                                    <MenuItem value="" disabled>Select Department</MenuItem>
-                                    {departments.map((dept) => (
-                                      <MenuItem key={dept.id} value={dept.name} sx={{ fontSize: '0.875rem' }}>
-                                        {dept.name}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  placeholder="Location"
-                                  value={entry.location}
-                                  onChange={(e) => handleInputChange(entry.id, 'location', e.target.value)}
-                                  required
-                                  inputProps={{ maxLength: INPUT_LIMITS.LOCATION }}
-                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                />
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <FormControl fullWidth size="small" required>
-                                  <Select
-                                    value={entry.type}
-                                    onChange={(e) => handleSelectChange(entry.id, 'type', e.target.value)}
-                                    sx={{ fontSize: '0.875rem' }}
-                                  >
-                                    <MenuItem value="Full-time">Full-time</MenuItem>
-                                    <MenuItem value="Part-time">Part-time</MenuItem>
-                                    <MenuItem value="Contract">Contract</MenuItem>
-                                    <MenuItem value="Temporary">Temporary</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  placeholder="₱50k - ₱70k"
-                                  value={entry.salary}
-                                  onChange={(e) => handleInputChange(entry.id, 'salary', e.target.value)}
-                                  required
-                                  inputProps={{ maxLength: INPUT_LIMITS.SALARY }}
-                                  sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                />
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                <FormControl fullWidth size="small" required>
-                                  <Select
-                                    value={entry.status}
-                                    onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
-                                    sx={{ fontSize: '0.875rem' }}
-                                  >
-                                    <MenuItem value="active">Active</MenuItem>
-                                    <MenuItem value="closed">Closed</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </TableCell>
-                              <TableCell sx={{ p: 0.5 }}>
-                                {jobEntries.length > 1 && !editingJob && (
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleRemoveEntry(entry.id)}
-                                    color="error"
-                                    sx={{ p: 0.5 }}
-                                  >
-                                    <Trash2 size={16} />
-                                  </IconButton>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell colSpan={8} sx={{ py: 0, px: 1, border: 0 }}>
-                                <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
-                                  <Box sx={{ py: 2, px: 1 }}>
-                                    <Grid container spacing={2}>
-                                      <Grid size={{ xs: 12 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Job Description"
-                                          value={entry.description}
-                                          onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
-                                          required
-                                          multiline
-                                          rows={3}
-                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                          helperText={`${entry.description.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Responsibilities (one per line)"
-                                          value={entry.responsibilities}
-                                          onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
-                                          required
-                                          multiline
-                                          rows={4}
-                                          placeholder="Enter each responsibility on a new line"
-                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                          helperText={`${entry.responsibilities.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Requirements (one per line)"
-                                          value={entry.requirements}
-                                          onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
-                                          required
-                                          multiline
-                                          rows={6}
-                                          placeholder="Enter each requirement on a new line"
-                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                          helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Benefits (one per line)"
-                                          value={entry.benefits}
-                                          onChange={(e) => handleInputChange(entry.id, 'benefits', e.target.value)}
-                                          multiline
-                                          rows={6}
-                                          placeholder="Enter each benefit on a new line"
-                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
-                                          helperText={`${entry.benefits.length}/${INPUT_LIMITS.DESCRIPTION}`}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Schedule"
-                                          placeholder="Mon-Fri, 8AM-5PM"
-                                          value={entry.schedule}
-                                          onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)}
-                                          inputProps={{ maxLength: 100 }}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Work Setup"
-                                          placeholder="In person / Hybrid / Remote"
-                                          value={entry.work_setup}
-                                          onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)}
-                                          inputProps={{ maxLength: 50 }}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Employment Type"
-                                          placeholder="Permanent / Full-time"
-                                          value={entry.employment_type}
-                                          onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)}
-                                          inputProps={{ maxLength: 50 }}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                        <TextField
-                                          fullWidth
-                                          size="small"
-                                          label="Job Level"
-                                          placeholder="Junior / Senior"
-                                          value={entry.job_level}
-                                          onChange={(e) => handleInputChange(entry.id, 'job_level', e.target.value)}
-                                          inputProps={{ maxLength: 50 }}
-                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 12 }}>
-                                        <Box sx={{ mt: 1, p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05), borderRadius: 2 }}>
-                                          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
-                                            Admin / Routing Settings
-                                          </Typography>
-                                          <Grid container spacing={2}>
-                                            <Grid size={{ xs: 12, md: 6 }}>
-                                              <TextField
-                                                fullWidth
-                                                size="small"
-                                                label="Application Email (Internal Admin Only)"
-                                                value={entry.application_email}
-                                                onChange={(e) => handleInputChange(entry.id, 'application_email', e.target.value)}
-                                                placeholder="hr@example.com"
-                                                inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
-                                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                              />
-                                            </Grid>
-                                            <Grid size={{ xs: 12, md: 6 }}>
-                                              <TextField
-                                                fullWidth
-                                                size="small"
-                                                label="External Application URL (Client-Facing Redirect)"
-                                                value={entry.external_application_url || entry.application_url}
-                                                onChange={(e) => handleInputChange(entry.id, 'external_application_url', e.target.value)}
-                                                placeholder="https://example.com/apply"
-                                                inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
-                                              />
-                                            </Grid>
-                                            <Grid size={{ xs: 12 }}>
-                                              <FormControlLabel
-                                                control={
-                                                  <Checkbox
-                                                    checked={entry.featured}
-                                                    onChange={(e: { target: { checked: string | boolean; }; }) => handleInputChange(entry.id, 'featured', e.target.checked)}
-                                                    color="primary"
-                                                    size="small"
-                                                  />
-                                                }
-                                                label={<Typography variant="body2">Mark as Featured Job (Client-Facing)</Typography>}
-                                              />
-                                            </Grid>
-                                          </Grid>
-                                        </Box>
-                                      </Grid>
-                                    </Grid>
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <FormControl fullWidth size="small">
+                                    <InputLabel>Frequency</InputLabel>
+                                    <Select
+                                      value={entry.salary_frequency}
+                                      label="Frequency"
+                                      onChange={(e) => handleSelectChange(entry.id, 'salary_frequency', e.target.value)}
+                                    >
+                                      <MenuItem value="Monthly">Monthly</MenuItem>
+                                      <MenuItem value="Weekly">Weekly</MenuItem>
+                                      <MenuItem value="Hourly">Hourly</MenuItem>
+                                      <MenuItem value="Yearly">Yearly</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                                <Grid size={{ xs: 12 }}>
+                                  <Box sx={{ p: 1, bgcolor: 'action.hover', borderRadius: 1, border: '1px dashed', borderColor: 'divider' }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                                      Preview Display: {formatSalaryRange(entry.salary_min, entry.salary_max, entry.salary_frequency)}
+                                    </Typography>
                                   </Box>
-                                </Collapse>
-                              </TableCell>
-                            </TableRow>
-                          </React.Fragment>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
+                                </Grid>
+                              </Grid>
+                            </Grid>
+
+                            {/* Details Section */}
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 2, display: 'block' }}>
+                                Job Details & Requirements
+                              </Typography>
+                              <Divider sx={{ mb: 2, mt: 0.5 }} />
+                              <Grid container spacing={2}>
+                                <Grid size={{ xs: 12 }}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Description"
+                                    placeholder="Provide a brief overview of the role..."
+                                    value={entry.description}
+                                    onChange={(e) => handleInputChange(entry.id, 'description', e.target.value)}
+                                    required
+                                    multiline
+                                    rows={3}
+                                    helperText={`${entry.description.length}/${INPUT_LIMITS.DESCRIPTION}`}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Responsibilities (one per line)"
+                                    placeholder="Enter each responsibility on a new line"
+                                    value={entry.responsibilities}
+                                    onChange={(e) => handleInputChange(entry.id, 'responsibilities', e.target.value)}
+                                    required
+                                    multiline
+                                    rows={4}
+                                    helperText={`${entry.responsibilities.length}/${INPUT_LIMITS.DESCRIPTION}`}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Requirements (one per line)"
+                                    placeholder="Enter each requirement on a new line"
+                                    value={entry.requirements}
+                                    onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
+                                    required
+                                    multiline
+                                    rows={4}
+                                    helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Benefits (one per line)"
+                                    placeholder="Enter each benefit on a new line"
+                                    value={entry.benefits}
+                                    onChange={(e) => handleInputChange(entry.id, 'benefits', e.target.value)}
+                                    multiline
+                                    rows={3}
+                                    helperText={`${entry.benefits.length}/${INPUT_LIMITS.DESCRIPTION}`}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <Grid container spacing={2}>
+                                    <Grid size={{ xs: 6 }}>
+                                      <TextField fullWidth size="small" label="Schedule" placeholder="Mon-Fri, 8AM-5PM" value={entry.schedule} onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)} />
+                                    </Grid>
+                                    <Grid size={{ xs: 6 }}>
+                                      <TextField fullWidth size="small" label="Work Setup" placeholder="In person / Hybrid / Remote" value={entry.work_setup} onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)} />
+                                    </Grid>
+                                    <Grid size={{ xs: 6 }}>
+                                      <TextField fullWidth size="small" label="Employment Type" placeholder="Permanent / Full-time" value={entry.employment_type} onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)} />
+                                    </Grid>
+                                    <Grid size={{ xs: 6 }}>
+                                      <TextField fullWidth size="small" label="Job Level" placeholder="Junior / Senior" value={entry.job_level} onChange={(e) => handleInputChange(entry.id, 'job_level', e.target.value)} />
+                                    </Grid>
+                                  </Grid>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+
+                            {/* Admin Section */}
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 2, display: 'block' }}>
+                                Admin & Routing Settings
+                              </Typography>
+                              <Divider sx={{ mb: 2, mt: 0.5 }} />
+                              <Grid container spacing={2}>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <TextField fullWidth size="small" label="Application Email" value={entry.application_email} onChange={(e) => handleInputChange(entry.id, 'application_email', e.target.value)} placeholder="hr@example.com" />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <TextField fullWidth size="small" label="External URL" value={entry.external_application_url || entry.application_url} onChange={(e) => handleInputChange(entry.id, 'external_application_url', e.target.value)} placeholder="https://careers.example.com/job-123" />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <FormControl fullWidth size="small">
+                                    <InputLabel>Status</InputLabel>
+                                    <Select
+                                      value={entry.status}
+                                      label="Status"
+                                      onChange={(e) => handleSelectChange(entry.id, 'status', e.target.value as 'active' | 'closed')}
+                                    >
+                                      <MenuItem value="active">Active</MenuItem>
+                                      <MenuItem value="closed">Closed</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField fullWidth size="small" label="Published Date" type="date" value={entry.published_at} onChange={(e) => handleInputChange(entry.id, 'published_at', e.target.value)} InputLabelProps={{ shrink: true }} />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 6 }}>
+                                  <TextField fullWidth size="small" label="Expiry Date" type="date" value={entry.expires_at} onChange={(e) => handleInputChange(entry.id, 'expires_at', e.target.value)} InputLabelProps={{ shrink: true }} />
+                                </Grid>
+                                <Grid size={{ xs: 12 }}>
+                                  <FormControlLabel
+                                    control={<Checkbox checked={entry.featured} onChange={(e) => handleInputChange(entry.id, 'featured', e.target.checked)} color="primary" />}
+                                    label="Featured Job (Highlight in Client View)"
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </CardContent>
+                      </Collapse>
+                    </Card>
+                  ))}
+                </Stack>
 
                 <Box sx={{
                   display: 'flex',
@@ -1359,15 +1170,8 @@ export default function AdminPage() {
                         Status
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      <TableSortLabel
-                        active={sortField === 'postedDate'}
-                        direction={sortField === 'postedDate' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('postedDate')}
-                      >
-                        Posted
-                      </TableSortLabel>
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Posted</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Analytics</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>UUID</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
@@ -1401,6 +1205,12 @@ export default function AdminPage() {
                         </TableCell>
                         <TableCell>
                           {new Date(job.postedDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction="row" spacing={1}>
+                            <Chip label={`👁 ${job.views_count || 0}`} size="small" variant="outlined" />
+                            <Chip label={`📝 ${job.applications_count || 0}`} size="small" variant="outlined" />
+                          </Stack>
                         </TableCell>
                         <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
                           {job.id}

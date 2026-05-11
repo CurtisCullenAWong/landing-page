@@ -140,10 +140,11 @@ export function JobProvider({ children }: { children: ReactNode }) {
     };
     initData();
 
-    // Set up realtime subscription for jobs table
+    // Set up realtime subscription for jobs and departments
     const supabase = createClient();
-    const channel = supabase
-      .channel('jobs-changes')
+    
+    const jobsChannel = supabase
+      .channel('jobs-realtime')
       .on(
         'postgres_changes',
         {
@@ -151,17 +152,14 @@ export function JobProvider({ children }: { children: ReactNode }) {
           schema: 'public',
           table: 'jobs',
         },
-        (payload: { eventType: string; new: DatabaseJob; old: { id: string; }; }) => {
-          console.log('Realtime event received:', payload.eventType, payload);
+        (payload: any) => {
+          console.log('Jobs Realtime event:', payload.eventType, payload);
           
           if (payload.eventType === 'INSERT') {
             const newJob = mapDatabaseJobToJob(payload.new as DatabaseJob);
             setJobs((prevJobs) => {
-              // Check if job already exists (avoid duplicates)
-              if (prevJobs.find(job => job.id === newJob.id)) {
-                return prevJobs;
-              }
-              return [...prevJobs, newJob].sort((a, b) => 
+              if (prevJobs.find(job => job.id === newJob.id)) return prevJobs;
+              return [newJob, ...prevJobs].sort((a, b) => 
                 new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime()
               );
             });
@@ -175,11 +173,36 @@ export function JobProvider({ children }: { children: ReactNode }) {
           }
         }
       )
-      .subscribe();
+      .subscribe((status: string) => {
+        console.log('Jobs Realtime Status:', status);
+      });
+
+    const departmentsChannel = supabase
+      .channel('departments-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'departments',
+        },
+        (payload: any) => {
+          console.log('Departments Realtime event:', payload.eventType, payload);
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            loadDepartments(); // Refresh departments list
+          } else if (payload.eventType === 'DELETE') {
+            setDepartments((prev) => prev.filter(d => d.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe((status: string) => {
+        console.log('Departments Realtime Status:', status);
+      });
 
     // Cleanup subscription on unmount
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(jobsChannel);
+      supabase.removeChannel(departmentsChannel);
     };
   }, []);
 

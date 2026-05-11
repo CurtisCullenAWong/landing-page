@@ -330,7 +330,7 @@ export default function GeneralApplicationPage() {
                 </Button>
                 <Button
                   component={Link}
-                  href="/careers"
+                  href="/#careers"
                   variant="outlined"
                   size="large"
                   sx={{ px: 4, fontWeight: 700 }}
@@ -356,7 +356,7 @@ export default function GeneralApplicationPage() {
           <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Home</Typography>
           </Link>
-          <Link href="/careers" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link href="/#careers" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography variant="caption" sx={{ fontWeight: 600, '&:hover': { color: primaryMain } }}>Careers</Typography>
           </Link>
           <Typography variant="caption" sx={{ fontWeight: 700, color: primaryMain }}>Employment Application</Typography>
@@ -365,7 +365,7 @@ export default function GeneralApplicationPage() {
         {/* Back Button */}
         <Button
           component={Link}
-          href="/careers"
+          href="/#careers"
           variant="text"
           startIcon={<ArrowLeft size={18} />}
           sx={{ mb: 4, fontWeight: 700, color: 'text.secondary', '&:hover': { color: primaryMain } }}
@@ -672,7 +672,7 @@ export default function GeneralApplicationPage() {
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 4, mt: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
                   <Button
                     component={Link}
-                    href="/careers"
+                    href="/#careers"
                     variant="text"
                     disabled={isSubmitting}
                     sx={{ fontWeight: 700, px: 3 }}

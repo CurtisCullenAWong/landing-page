@@ -427,7 +427,7 @@ export default function JobApplicationClient() {
           cover_letter: sanitizeString(formData.cover_letter) || null,
           resume_url: resumeUrl,
           portfolio_url: formData.portfolio_url.trim() || null,
-          status: 'Pending',
+          status: 'pending',
           applied_at: new Date().toISOString(),
         })
         .select()
@@ -493,7 +493,7 @@ export default function JobApplicationClient() {
 
           <Button
             component={Link}
-            href="/careers"
+            href="/#careers"
             variant="contained"
           >
             View All Positions
@@ -555,7 +555,7 @@ export default function JobApplicationClient() {
 
                 <Button
                   component={Link}
-                  href="/careers"
+                  href="/#careers"
                   variant="outlined"
                 >
                   Browse More Jobs
@@ -755,7 +755,7 @@ export default function JobApplicationClient() {
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, pt: 2 }}>
                   <Button
                     component={Link}
-                    href="/careers"
+                    href="/#careers"
                     variant="outlined"
                     disabled={isSubmitting}
                   >

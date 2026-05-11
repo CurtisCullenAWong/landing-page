@@ -102,6 +102,7 @@ export default function JobApplicationsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [applicantToDelete, setApplicantToDelete] = useState<JobApplicant | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -118,6 +119,16 @@ export default function JobApplicationsPage() {
   const handleMenuClose = () => {
     setMenuAnchor(null);
     setSelectedApplicant(null);
+  };
+
+  const toggleRow = (id: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedRows(newExpanded);
   };
 
   const handleViewPDF = (url: string) => {
@@ -695,6 +706,7 @@ export default function JobApplicationsPage() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'action.hover' }}>
+                    <TableCell sx={{ width: 40 }} />
                     <TableCell sx={{ fontWeight: 600 }}>
                       <TableSortLabel
                         active={sortField === 'name'}
@@ -772,45 +784,115 @@ export default function JobApplicationsPage() {
                     </TableRow>
                   ) : (
                     paginatedApplicants.map((applicant) => (
-                      <TableRow
-                        key={applicant.id}
-                        sx={{
-                          '&:hover': { bgcolor: 'action.hover' },
-                        }}
-                      >
-                        <TableCell>
-                          {applicant.first_name} {applicant.last_name}
-                        </TableCell>
-                        <TableCell>{applicant.email}</TableCell>
-                        <TableCell>{applicant.phone || 'N/A'}</TableCell>
-                        <TableCell>
-                          {applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || 'Unknown Job') : 'General Application'}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={formatStatus(applicant.status)}
-                            size="small"
-                            color={getStatusColor(applicant.status) as any}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {applicant.applied_at
-                            ? new Date(applicant.applied_at).toLocaleDateString()
-                            : 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          {applicant.updated_by || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            onClick={(e) => handleMenuOpen(e, applicant)}
-                            size="small"
-                            title="Actions"
-                          >
-                            <MoreVertical size={18} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
+                      <React.Fragment key={applicant.id}>
+                        <TableRow
+                          sx={{
+                            '&:hover': { bgcolor: 'action.hover' },
+                            borderBottom: expandedRows.has(applicant.id) ? 'none' : undefined,
+                          }}
+                        >
+                          <TableCell sx={{ width: 40 }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => toggleRow(applicant.id)}
+                            >
+                              {expandedRows.has(applicant.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            </IconButton>
+                          </TableCell>
+                          <TableCell>
+                            {applicant.first_name} {applicant.last_name}
+                          </TableCell>
+                          <TableCell>{applicant.email}</TableCell>
+                          <TableCell>{applicant.phone || 'N/A'}</TableCell>
+                          <TableCell>
+                            {applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || 'Unknown Job') : 'General Application'}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={formatStatus(applicant.status)}
+                              size="small"
+                              color={getStatusColor(applicant.status) as any}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {applicant.applied_at
+                              ? new Date(applicant.applied_at).toLocaleDateString()
+                              : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {applicant.updated_by || 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={(e) => handleMenuOpen(e, applicant)}
+                              size="small"
+                              title="Actions"
+                            >
+                              <MoreVertical size={18} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell colSpan={9} sx={{ py: 0, borderBottom: expandedRows.has(applicant.id) ? undefined : 'none' }}>
+                            <Collapse in={expandedRows.has(applicant.id)} timeout="auto" unmountOnExit>
+                              <Box sx={{ py: 3, px: 2, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+                                <Grid container spacing={4}>
+                                  <Grid size={{ xs: 12, md: 7 }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                      Cover Letter
+                                    </Typography>
+                                    <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.paper', whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>
+                                      <Typography variant="body2">
+                                        {applicant.cover_letter || 'No cover letter provided.'}
+                                      </Typography>
+                                    </Paper>
+                                  </Grid>
+                                  <Grid size={{ xs: 12, md: 5 }}>
+                                    <Stack spacing={3}>
+                                      <Box>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                          Portfolio / Links
+                                        </Typography>
+                                        {applicant.portfolio_url ? (
+                                          <Button
+                                            variant="outlined"
+                                            size="small"
+                                            href={applicant.portfolio_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            startIcon={<FileText size={16} />}
+                                            fullWidth
+                                          >
+                                            View Portfolio
+                                          </Button>
+                                        ) : (
+                                          <Typography variant="body2" color="text.secondary">No portfolio link provided.</Typography>
+                                        )}
+                                      </Box>
+                                      <Box>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                          Documents
+                                        </Typography>
+                                        {applicant.resume_url && (
+                                          <Button
+                                            variant="contained"
+                                            size="small"
+                                            onClick={() => handleViewPDF(applicant.resume_url)}
+                                            startIcon={<Eye size={16} />}
+                                            fullWidth
+                                          >
+                                            View Resume
+                                          </Button>
+                                        )}
+                                      </Box>
+                                    </Stack>
+                                  </Grid>
+                                </Grid>
+                              </Box>
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      </React.Fragment>
                     ))
                   )}
                 </TableBody>
@@ -903,6 +985,35 @@ export default function JobApplicationsPage() {
                                 Updated By:
                               </Typography>
                               <Typography variant="body2">{applicant.updated_by}</Typography>
+                            </Box>
+                          )}
+                          {applicant.portfolio_url && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
+                                Portfolio:
+                              </Typography>
+                              <Button
+                                size="small"
+                                variant="text"
+                                href={applicant.portfolio_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ p: 0, minWidth: 0, textTransform: 'none' }}
+                              >
+                                View Link
+                              </Button>
+                            </Box>
+                          )}
+                          {applicant.cover_letter && (
+                            <Box>
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
+                                Cover Letter:
+                              </Typography>
+                              <Paper variant="outlined" sx={{ p: 1, bgcolor: 'action.hover', maxHeight: 100, overflow: 'auto' }}>
+                                <Typography variant="caption" sx={{ whiteSpace: 'pre-wrap' }}>
+                                  {applicant.cover_letter}
+                                </Typography>
+                              </Paper>
                             </Box>
                           )}
                         </Stack>

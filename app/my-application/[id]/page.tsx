@@ -375,7 +375,7 @@ export default function MyApplicationPage() {
           <Alert severity="error" sx={{ mb: 4 }}>
             {error || 'Application not found'}
           </Alert>
-          <Button component={Link} href="/careers" variant="contained">
+          <Button component={Link} href="/#careers" variant="contained">
             Browse Jobs
           </Button>
         </Container>
@@ -389,7 +389,7 @@ export default function MyApplicationPage() {
         {/* Back Button */}
         <Button
           component={Link}
-          href="/careers"
+          href="/#careers"
           startIcon={<ArrowLeft size={20} />}
           sx={{ mb: 4 }}
         >
