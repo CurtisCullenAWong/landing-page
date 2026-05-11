@@ -3,6 +3,7 @@
 import { Truck, Globe, Users, Award } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Box,
   Container,
@@ -115,10 +116,34 @@ export default function HomePage() {
                 zIndex: 1,
               }}
             />
+            {/* Subtle Hero Abstract Shapes */}
+            <Box
+              component={motion.div}
+              animate={{
+                y: [0, -20, 0],
+                rotate: [0, 5, 0],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              sx={{
+                position: 'absolute',
+                top: '15%',
+                right: '5%',
+                width: '300px',
+                height: '300px',
+                borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
+                background: tertiaryMain,
+                opacity: 0.1,
+                filter: 'blur(60px)',
+                zIndex: 0,
+              }}
+            />
           </Box>
           <Container
             maxWidth="lg"
-            className="animate-fade-in-up"
             sx={{
               position: 'relative',
               zIndex: 1,
@@ -132,6 +157,10 @@ export default function HomePage() {
           >
             {/* Main Heading */}
             <Typography
+              component={motion.h1}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
               variant="h1"
               sx={{
                 mb: 3,
@@ -147,6 +176,10 @@ export default function HomePage() {
 
             {/* Subheading / Description */}
             <Typography
+              component={motion.h3}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               variant="h3"
               sx={{
                 mb: 5,
@@ -164,7 +197,13 @@ export default function HomePage() {
             </Typography>
 
             {/* Buttons */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}
+            >
               <Button
                 component={Link}
                 href="/#why-us"
@@ -246,6 +285,22 @@ export default function HomePage() {
         >
           {/* Massive Squiggly Tertiary Blob */}
           <Box
+            component={motion.div}
+            initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
+            whileInView={{ opacity: isDark ? 0.12 : 0.18, scale: 1, rotate: -5 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            animate={{
+              x: [0, 30, -20, 0],
+              y: [0, -40, 20, 0],
+            }}
+            // @ts-ignore
+            transition={{
+              x: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 18, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.5 },
+              scale: { duration: 1.5 },
+              rotate: { duration: 1.5 }
+            }}
             sx={{
               position: 'absolute',
               top: '-20%',
@@ -254,12 +309,27 @@ export default function HomePage() {
               height: '1000px',
               borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
               background: `linear-gradient(135deg, ${tertiaryMain} 0%, ${tertiaryLight} 100%)`,
-              opacity: isDark ? 0.12 : 0.18,
-              transform: 'rotate(-5deg)',
+              transformOrigin: 'center center',
             }}
           />
           {/* Massive Squiggly Primary Blob */}
           <Box
+            component={motion.div}
+            initial={{ opacity: 0, scale: 0.8, rotate: 15 }}
+            whileInView={{ opacity: isDark ? 0.1 : 0.15, scale: 1, rotate: 5 }}
+            transition={{ duration: 1.8, ease: "easeOut" }}
+            animate={{
+              x: [0, -40, 30, 0],
+              y: [0, 30, -40, 0],
+            }}
+            // @ts-ignore
+            transition={{
+              x: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 16, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.8 },
+              scale: { duration: 1.8 },
+              rotate: { duration: 1.8 }
+            }}
             sx={{
               position: 'absolute',
               bottom: '-25%',
@@ -268,12 +338,26 @@ export default function HomePage() {
               height: '1200px',
               borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
               background: `linear-gradient(315deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
-              opacity: isDark ? 0.1 : 0.15,
-              transform: 'rotate(5deg)',
+              transformOrigin: 'center center',
             }}
           />
           {/* Additional Primary Squiggle */}
           <Box
+            component={motion.div}
+            initial={{ opacity: 0, x: -100 }}
+            whileInView={{ opacity: 0.08, x: 0 }}
+            transition={{ duration: 1.2, delay: 0.2 }}
+            animate={{
+              rotate: [-10, -5, -12, -10],
+              scale: [1, 1.05, 0.98, 1],
+            }}
+            // @ts-ignore
+            transition={{
+              rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 },
+              x: { duration: 1.2 }
+            }}
             sx={{
               position: 'absolute',
               bottom: '10%',
@@ -282,12 +366,24 @@ export default function HomePage() {
               height: '600px',
               borderRadius: '30% 70% 40% 60% / 50% 30% 70% 50%',
               background: primaryMain,
-              opacity: 0.08,
               transform: 'rotate(-10deg)',
             }}
           />
           {/* Overlapping Squiggly Accent */}
           <Box
+            component={motion.div}
+            initial={{ opacity: 0, x: 100 }}
+            whileInView={{ opacity: isDark ? 0.08 : 0.12, x: 0 }}
+            transition={{ duration: 1.2, delay: 0.4 }}
+            animate={{
+              y: [0, 20, -20, 0],
+            }}
+            // @ts-ignore
+            transition={{
+              y: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 },
+              x: { duration: 1.2 }
+            }}
             sx={{
               position: 'absolute',
               top: '40%',
@@ -296,11 +392,24 @@ export default function HomePage() {
               height: '400px',
               borderRadius: '50% 50% 0 50% / 50% 50% 0 50%',
               background: tertiaryMain,
-              opacity: isDark ? 0.08 : 0.12,
             }}
           />
           {/* Decorative Floating Ring (Sharper) */}
           <Box
+            component={motion.div}
+            initial={{ opacity: 0, scale: 0.5 }}
+            whileInView={{ opacity: 0.2, scale: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            animate={{
+              rotate: 360,
+              scale: [1, 1.1, 1],
+            }}
+            // @ts-ignore
+            transition={{
+              rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+              scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1 },
+            }}
             sx={{
               position: 'absolute',
               top: '10%',
@@ -309,7 +418,6 @@ export default function HomePage() {
               height: '400px',
               borderRadius: '50%',
               border: `3px solid ${tertiaryMain}`,
-              opacity: 0.2,
             }}
           />
         </Box>
@@ -320,10 +428,23 @@ export default function HomePage() {
             <Grid size={12}>
               <Grid container spacing={4} alignItems="center">
                 <Grid size={{ xs: 12, md: 7 }}>
-                  <Typography variant="h2" sx={{ mb: 3, fontWeight: 600 }}>
+                  <Typography
+                    component={motion.h2}
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    variant="h2"
+                    sx={{ mb: 3, fontWeight: 600 }}
+                  >
                     A People-First Philosophy
                   </Typography>
                   <Paper
+                    component={motion.div}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
                     sx={{
                       p: 3,
                       bgcolor: isDark ? 'action.hover' : 'action.selected',
@@ -338,9 +459,26 @@ export default function HomePage() {
                   </Paper>
                 </Grid>
                 <Grid size={{ xs: 12, md: 5 }}>
-                  <Box sx={{ position: 'relative', p: 1 }}>
+                  <Box
+                    component={motion.div}
+                    initial={{ opacity: 0, scale: 0.9, x: 30 }}
+                    whileInView={{ opacity: 1, scale: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    sx={{ position: 'relative', p: 1 }}
+                  >
                     {/* Decorative Image Frame */}
                     <Box
+                      component={motion.div}
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.02, 0.98, 1],
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
                       sx={{
                         position: 'absolute',
                         top: '-5%',
@@ -380,6 +518,7 @@ export default function HomePage() {
                 Our Services
               </Typography>
               <Grid container spacing={2}>
+                {/* Service Cards with Staggered Entry */}
                 {[
                   { icon: Users, title: 'Domestic Services', desc: 'Air, land, and sea freight across the Philippine archipelago' },
                   { icon: Globe, title: 'Customs Clearance', desc: 'Import/export clearance, trade classification, and PEZA facilitation' },
@@ -388,6 +527,11 @@ export default function HomePage() {
                 ].map((service, index) => (
                   <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                     <Card
+                      component={motion.div}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
                       sx={{
                         height: '100%',
                         display: 'flex',
@@ -451,6 +595,11 @@ export default function HomePage() {
             {/* Bottom Row: Compact CTA */}
             <Grid size={12}>
               <Paper
+                component={motion.div}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
                 sx={{
                   p: 3,
                   textAlign: 'center',
