@@ -116,10 +116,15 @@ export default function JobDetailsClient() {
             description: data.description,
             responsibilities: data.responsibilities || [],
             requirements: data.requirements || [],
+            benefits: data.benefits || [],
             salary: data.salary,
             postedDate,
             status: data.status,
             application_url: data.application_url || undefined,
+            employment_type: data.employment_type || undefined,
+            work_setup: data.work_setup || undefined,
+            job_level: data.job_level || undefined,
+            schedule: data.schedule || undefined,
           };
 
           setJob(mappedJob);
@@ -147,7 +152,32 @@ export default function JobDetailsClient() {
           table: 'jobs',
           filter: `id=eq.${id}`,
         },
-        (payload: { eventType: string; new: { posted_date: string | number | Date; id: any; title: any; department: any; location: any; type: any; description: any; responsibilities: any; requirements: any; salary: any; status: any; application_url: any; }; }) => {
+        (payload: { eventType: string; new: { 
+          id: string;
+          title: string;
+          department: string;
+          location: string;
+          type: string;
+          description: string;
+          responsibilities: string[];
+          requirements: string[];
+          benefits: string[];
+          salary: string;
+          status: 'active' | 'closed';
+          posted_date: string | number | Date;
+          application_url: string | null;
+          employment_type: string | null;
+          work_setup: string | null;
+          job_level: string | null;
+          schedule: string | null;
+          application_email: string | null;
+          external_application_url: string | null;
+          views_count: number | null;
+          applications_count: number | null;
+          featured: boolean | null;
+          published_at: string | null;
+          expires_at: string | null;
+        }; }) => {
           if (payload.eventType === 'UPDATE' && payload.new) {
             let postedDate = new Date().toISOString().split('T')[0];
             if (payload.new.posted_date) {
@@ -167,10 +197,22 @@ export default function JobDetailsClient() {
               description: payload.new.description,
               responsibilities: payload.new.responsibilities || [],
               requirements: payload.new.requirements || [],
+              benefits: payload.new.benefits || [],
               salary: payload.new.salary,
               postedDate,
               status: payload.new.status,
               application_url: payload.new.application_url || undefined,
+              employment_type: payload.new.employment_type || undefined,
+              work_setup: payload.new.work_setup || undefined,
+              job_level: payload.new.job_level || undefined,
+              schedule: payload.new.schedule || undefined,
+              application_email: payload.new.application_email || undefined,
+              external_application_url: payload.new.external_application_url || undefined,
+              views_count: payload.new.views_count || undefined,
+              applications_count: payload.new.applications_count || undefined,
+              featured: payload.new.featured || undefined,
+              published_at: payload.new.published_at || undefined,
+              expires_at: payload.new.expires_at || undefined,
             };
             setJob(updatedJob);
           } else if (payload.eventType === 'DELETE') {
@@ -231,34 +273,123 @@ export default function JobDetailsClient() {
           href="/careers" 
           variant="text"
           startIcon={<ArrowLeft size={18} />} 
-          sx={{ mb: 4, fontWeight: 700, color: 'text.secondary', '&:hover': { color: primaryMain } }}
+          sx={{ 
+            mb: 4, 
+            fontWeight: 700, 
+            color: 'text.secondary', 
+            transition: 'all 0.3s ease',
+            '&:hover': { 
+              color: primaryMain,
+              transform: 'translateX(-4px)'
+            } 
+          }}
         >
           Back to Career Listings
         </Button>
 
         {/* formal header section */}
         <Box sx={{ mb: 6 }}>
-          <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, letterSpacing: -2, textTransform: 'uppercase', color: primaryMain }}>
+          <Typography 
+            variant="h2" 
+            sx={{ 
+              fontWeight: 900, 
+              mb: 3, 
+              letterSpacing: -2, 
+              textTransform: 'uppercase', 
+              background: `linear-gradient(135deg, ${primaryMain} 0%, ${alpha(primaryMain, 0.7)} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              lineHeight: 1.1,
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word'
+            }}
+          >
             {job.title}
           </Typography>
           
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ color: 'text.secondary' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Briefcase size={18} color={primaryMain} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.department}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <MapPin size={18} color={primaryMain} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.location}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Clock size={18} color={primaryMain} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{job.type}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Calendar size={18} color={primaryMain} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Posted: {job.postedDate}</Typography>
-            </Box>
+          <Stack 
+            direction="row" 
+            spacing={2} 
+            sx={{ 
+              color: 'text.secondary', 
+              flexWrap: 'wrap', 
+              rowGap: 1.5,
+              '& > *': {
+                flexShrink: 0
+              }
+            }}
+          >
+            <Paper 
+              elevation={0}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                px: 1.5, 
+                py: 0.75, 
+                borderRadius: 2,
+                bgcolor: alpha(primaryMain, 0.05),
+                border: `1px solid ${alpha(primaryMain, 0.1)}`
+              }}
+            >
+              <Briefcase size={16} color={primaryMain} />
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>{job.department}</Typography>
+            </Paper>
+
+            <Paper 
+              elevation={0}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                px: 1.5, 
+                py: 0.75, 
+                borderRadius: 2,
+                bgcolor: alpha(primaryMain, 0.05),
+                border: `1px solid ${alpha(primaryMain, 0.1)}`
+              }}
+            >
+              <MapPin size={16} color={primaryMain} />
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                {job.location} {job.work_setup && <Box component="span" sx={{ opacity: 0.7, fontWeight: 500 }}>• {job.work_setup}</Box>}
+              </Typography>
+            </Paper>
+
+            <Paper 
+              elevation={0}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                px: 1.5, 
+                py: 0.75, 
+                borderRadius: 2,
+                bgcolor: alpha(primaryMain, 0.05),
+                border: `1px solid ${alpha(primaryMain, 0.1)}`
+              }}
+            >
+              <Clock size={16} color={primaryMain} />
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                {job.type} {job.schedule && <Box component="span" sx={{ opacity: 0.7, fontWeight: 500 }}>• {job.schedule}</Box>}
+              </Typography>
+            </Paper>
+
+            <Paper 
+              elevation={0}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                px: 1.5, 
+                py: 0.75, 
+                borderRadius: 2,
+                bgcolor: alpha(theme.palette.text.secondary, 0.05),
+                border: `1px solid ${alpha(theme.palette.text.secondary, 0.1)}`
+              }}
+            >
+              <Calendar size={16} color={theme.palette.text.secondary} />
+              <Typography variant="caption" sx={{ fontWeight: 700 }}>Posted {job.postedDate}</Typography>
+            </Paper>
           </Stack>
         </Box>
 
@@ -268,10 +399,20 @@ export default function JobDetailsClient() {
             
             {/* Overview Section */}
             <Box sx={{ mb: 6 }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 4, height: 24, bgcolor: primaryMain, borderRadius: 1 }} />
                 Position Overview
               </Typography>
-              <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary', whiteSpace: 'pre-wrap' }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  lineHeight: 1.8, 
+                  color: 'text.secondary', 
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word'
+                }} 
+              >
                 {job.description}
               </Typography>
             </Box>
@@ -280,16 +421,26 @@ export default function JobDetailsClient() {
 
             {/* Responsibilities Section */}
             <Box sx={{ mb: 6 }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 4, height: 24, bgcolor: primaryMain, borderRadius: 1 }} />
                 Key Responsibilities
               </Typography>
               <List sx={{ p: 0 }}>
                 {job.responsibilities.map((responsibility, index) => (
-                  <ListItem key={index} sx={{ py: 1.5, px: 0, alignItems: 'flex-start' }}>
+                  <ListItem key={index} sx={{ py: 1.25, px: 0, alignItems: 'flex-start' }}>
                     <Box sx={{ mt: 1, mr: 2, width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, flexShrink: 0 }} />
                     <ListItemText 
                       primary={responsibility} 
-                      primaryTypographyProps={{ variant: 'body1', sx: { fontWeight: 500, color: 'text.primary' } }} 
+                      primaryTypographyProps={{ 
+                        variant: 'body1', 
+                        sx: { 
+                          fontWeight: 500, 
+                          color: 'text.primary',
+                          lineHeight: 1.6,
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
+                        } 
+                      }} 
                     />
                   </ListItem>
                 ))}
@@ -300,32 +451,98 @@ export default function JobDetailsClient() {
 
             {/* Requirements Section */}
             <Box sx={{ mb: 6 }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 4, height: 24, bgcolor: primaryMain, borderRadius: 1 }} />
                 Professional Requirements
               </Typography>
               <List sx={{ p: 0 }}>
                 {job.requirements.map((requirement, index) => (
-                  <ListItem key={index} sx={{ py: 1.5, px: 0, alignItems: 'flex-start' }}>
+                  <ListItem key={index} sx={{ py: 1.25, px: 0, alignItems: 'flex-start' }}>
                     <Box sx={{ mt: 1, mr: 2, width: 6, height: 6, borderRadius: '50%', bgcolor: primaryMain, flexShrink: 0 }} />
                     <ListItemText 
                       primary={requirement} 
-                      primaryTypographyProps={{ variant: 'body1', sx: { fontWeight: 500, color: 'text.primary' } }} 
+                      primaryTypographyProps={{ 
+                        variant: 'body1', 
+                        sx: { 
+                          fontWeight: 500, 
+                          color: 'text.primary',
+                          lineHeight: 1.6,
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
+                        } 
+                      }} 
                     />
                   </ListItem>
                 ))}
               </List>
             </Box>
 
+            {job.benefits && job.benefits.length > 0 && (
+              <>
+                <Divider sx={{ mb: 6, opacity: 0.5 }} />
+                <Box sx={{ mb: 6 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ width: 4, height: 24, bgcolor: tertiaryMain, borderRadius: 1 }} />
+                    Benefits & Perks
+                  </Typography>
+                  <List sx={{ p: 0 }}>
+                    {job.benefits.map((benefit, index) => (
+                      <ListItem key={index} sx={{ py: 1.25, px: 0, alignItems: 'flex-start' }}>
+                        <Box sx={{ mt: 1, mr: 2, width: 6, height: 6, borderRadius: '50%', bgcolor: tertiaryMain, flexShrink: 0 }} />
+                        <ListItemText 
+                          primary={benefit} 
+                          primaryTypographyProps={{ 
+                            variant: 'body1', 
+                            sx: { 
+                              fontWeight: 500, 
+                              color: 'text.primary',
+                              lineHeight: 1.6,
+                              wordWrap: 'break-word',
+                              overflowWrap: 'break-word'
+                            } 
+                          }} 
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              </>
+            )}
+
             {job.salary && (
               <>
                 <Divider sx={{ mb: 6, opacity: 0.5 }} />
                 <Box sx={{ mb: 6 }}>
-                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, letterSpacing: -0.5 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, letterSpacing: -0.5, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ width: 4, height: 24, bgcolor: primaryMain, borderRadius: 1 }} />
                     Compensation
                   </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, display: 'inline-flex', alignItems: 'center', gap: 1.5, bgcolor: alpha(primaryMain, 0.03), borderColor: alpha(primaryMain, 0.2) }}>
-                    <Banknote size={24} color={primaryMain} />
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{job.salary}</Typography>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 2.5, 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: 2, 
+                      bgcolor: alpha(primaryMain, 0.05), 
+                      border: `1px solid ${alpha(primaryMain, 0.1)}`,
+                      borderRadius: 3
+                    }}
+                  >
+                    <Box 
+                      sx={{ 
+                        p: 1, 
+                        borderRadius: 1.5, 
+                        bgcolor: primaryMain, 
+                        color: 'white',
+                        display: 'flex'
+                      }}
+                    >
+                      <Banknote size={24} />
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                      {job.salary}
+                    </Typography>
                   </Paper>
                 </Box>
               </>
@@ -334,14 +551,14 @@ export default function JobDetailsClient() {
             <Box sx={{ pt: 4, mt: 4, borderTop: `1px solid ${theme.palette.divider}`, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Button
                 component={Link}
-                href={job.application_url || `/careers/apply?jobId=${job.id}`}
+                href={job.external_application_url || job.application_url || `/careers/job-details/${job.id}/apply`}
                 variant="contained"
                 size="large"
                 fullWidth={false}
                 sx={{ px: 6, py: 1.5, fontWeight: 800, borderRadius: 2 }}
                 startIcon={<FileText size={20} />}
-                target={job.application_url ? "_blank" : undefined}
-                rel={job.application_url ? "noopener noreferrer" : undefined}
+                target={(job.external_application_url || job.application_url) ? "_blank" : undefined}
+                rel={(job.external_application_url || job.application_url) ? "noopener noreferrer" : undefined}
               >
                 Submit Application
               </Button>

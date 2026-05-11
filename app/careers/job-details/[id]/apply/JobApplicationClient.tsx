@@ -59,7 +59,6 @@ interface ApplicationFormData {
   phone: string;
   cover_letter: string;
   resume_url: string;
-  linkedin_url: string;
   portfolio_url: string;
 }
 
@@ -105,7 +104,6 @@ export default function JobApplicationClient() {
     phone: '',
     cover_letter: '',
     resume_url: '',
-    linkedin_url: '',
     portfolio_url: '',
   });
 
@@ -298,6 +296,7 @@ export default function JobApplicationClient() {
           postedDate,
           status: data.status,
           application_url: data.application_url || undefined,
+          benefits: []
         };
 
         setJob(mappedJob);
@@ -371,12 +370,6 @@ export default function JobApplicationClient() {
       return;
     }
 
-    // Validate URLs if provided
-    if (formData.linkedin_url && !isValidUrl(formData.linkedin_url)) {
-      setSubmitError('Please enter a valid LinkedIn URL.');
-      setIsSubmitting(false);
-      return;
-    }
     if (formData.portfolio_url && !isValidUrl(formData.portfolio_url)) {
       setSubmitError('Please enter a valid Portfolio URL.');
       setIsSubmitting(false);
@@ -433,9 +426,8 @@ export default function JobApplicationClient() {
           phone: formatPhone(formData.phone) || null,
           cover_letter: sanitizeString(formData.cover_letter) || null,
           resume_url: resumeUrl,
-          linkedin_url: formData.linkedin_url.trim() || null,
           portfolio_url: formData.portfolio_url.trim() || null,
-          status: 'pending',
+          status: 'Pending',
           applied_at: new Date().toISOString(),
         })
         .select()
@@ -457,7 +449,6 @@ export default function JobApplicationClient() {
         phone: '',
         cover_letter: '',
         resume_url: '',
-        linkedin_url: '',
         portfolio_url: '',
       });
 
@@ -746,18 +737,6 @@ export default function JobApplicationClient() {
                 </Box>
 
                 <Grid container spacing={3}>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="LinkedIn Profile URL"
-                      placeholder="https://linkedin.com/in/username"
-                      value={formData.linkedin_url}
-                      onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
-                      disabled={isSubmitting}
-                      inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                      helperText={`${formData.linkedin_url.length}/${INPUT_LIMITS.URL}`}
-                    />
-                  </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth

@@ -208,7 +208,6 @@ CREATE TABLE job_applicants (
   phone TEXT,
   cover_letter TEXT,
   resume_url TEXT NOT NULL,
-  linkedin_url TEXT,
   portfolio_url TEXT,
   status TEXT CHECK (status IN ('pending', 'reviewing', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn')) DEFAULT 'pending',
   applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

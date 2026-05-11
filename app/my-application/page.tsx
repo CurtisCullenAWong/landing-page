@@ -27,13 +27,14 @@ export default function MyApplicationSection() {
     e.preventDefault();
     const id = applicationId.trim();
     if (id) {
-      // Basic UUID validation
+      // Validation
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(id)) {
-        alert('Invalid Application ID format. Please enter a valid UUID.');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!uuidRegex.test(id) && !emailRegex.test(id)) {
+        alert('Invalid format. Please enter a valid Application ID (UUID) or Email Address.');
         return;
       }
-      router.push(`/my-application/${id}`);
+      router.push(`/my-application/${encodeURIComponent(id)}`);
     }
   };
 
@@ -101,7 +102,7 @@ export default function MyApplicationSection() {
             >
               <TextField
                 fullWidth
-                placeholder="Enter Application ID (e.g., app_123...)"
+                placeholder="Enter Application ID or Email Address"
                 value={applicationId}
                 onChange={(e) => setApplicationId(e.target.value)}
                 sx={{
@@ -137,7 +138,7 @@ export default function MyApplicationSection() {
             </Box>
 
             <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
-              Can't find your ID? Check the confirmation email we sent after you applied.
+              Can't find your ID? You can also track your applications using your email address.
             </Typography>
           </Box>
         </Paper>

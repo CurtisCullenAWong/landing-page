@@ -58,7 +58,6 @@ interface JobApplicant {
   phone: string | null;
   cover_letter: string | null;
   resume_url: string;
-  linkedin_url: string | null;
   portfolio_url: string | null;
   status: 'pending' | 'reviewing' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
   applied_at: string | null;
@@ -144,14 +143,14 @@ export default function JobApplicationsPage() {
     setIsDeleting(true);
     try {
       const supabase = createClient();
-      
+
       // Delete file from storage if it's a storage path
       if (applicantToDelete.resume_url?.startsWith('applicant-files:')) {
         const filePath = applicantToDelete.resume_url.replace('applicant-files:', '');
         const { error: storageError } = await supabase.storage
           .from('applicant-files')
           .remove([filePath]);
-        
+
         if (storageError) {
           console.error('Error deleting file from storage:', storageError);
           // Continue with database deletion even if file deletion fails
@@ -184,7 +183,7 @@ export default function JobApplicationsPage() {
     const loadData = async () => {
       try {
         const supabase = createClient();
-        
+
         // Load jobs for job title mapping
         const { data: jobsData, error: jobsError } = await supabase
           .from('jobs')
@@ -232,7 +231,7 @@ export default function JobApplicationsPage() {
 
     // Set up realtime subscriptions
     const supabase = createClient();
-    
+
     // Realtime subscription for job_applicants table
     const applicantsChannel = supabase
       .channel('job-applicants-realtime')
@@ -245,7 +244,7 @@ export default function JobApplicationsPage() {
         },
         (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           console.log('Realtime event received for job_applicants:', payload.eventType, payload);
-          
+
           if (payload.eventType === 'INSERT') {
             const newApplicant = payload.new as unknown as JobApplicant;
             setJobApplicants((prevApplicants) => {
@@ -268,7 +267,7 @@ export default function JobApplicationsPage() {
               )
             );
             // Update editing applicant if it's the one being edited
-            setEditingApplicant((prev) => 
+            setEditingApplicant((prev) =>
               prev && prev.id === updatedApplicant.id ? updatedApplicant : prev
             );
           } else if (payload.eventType === 'DELETE') {
@@ -277,7 +276,7 @@ export default function JobApplicationsPage() {
               prevApplicants.filter((applicant) => applicant.id !== deletedId)
             );
             // Clear editing applicant if it was deleted
-            setEditingApplicant((prev) => 
+            setEditingApplicant((prev) =>
               prev && prev.id === deletedId ? null : prev
             );
           }
@@ -297,7 +296,7 @@ export default function JobApplicationsPage() {
         },
         (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           console.log('Realtime event received for jobs:', payload.eventType, payload);
-          
+
           if (payload.eventType === 'INSERT') {
             const newJob = payload.new as { id: string; title: string };
             setJobs((prevJobs) => {
@@ -444,10 +443,10 @@ export default function JobApplicationsPage() {
 
     try {
       const supabase = createClient();
-      
+
       // Step 1: Get current user UUID
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !user) {
         console.error('Error getting current user:', userError);
         alert('Failed to get current user information. Please try again.');
@@ -456,11 +455,11 @@ export default function JobApplicationsPage() {
 
       // Step 2: Get the UUID of the current user
       const userId = user.id;
-      
+
       // Step 3: Fetch email from auth based on that user UUID
       // The getUser() already returns the email in the user object
       let updatedBy: string | null = null;
-      
+
       if (user.email) {
         updatedBy = user.email;
       } else {
@@ -499,7 +498,7 @@ export default function JobApplicationsPage() {
           hint: error.hint,
           code: error.code,
         });
-        
+
         // Check if it's an RLS policy error or column doesn't exist
         if (error.code === '42501' || error.message?.includes('row-level security')) {
           alert('Permission denied. Please check your database permissions.');

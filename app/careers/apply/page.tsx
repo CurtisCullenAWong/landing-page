@@ -49,7 +49,6 @@ interface ApplicationFormData {
   phone: string;
   cover_letter: string;
   resume_url: string;
-  linkedin_url: string;
   portfolio_url: string;
 }
 
@@ -107,7 +106,6 @@ export default function GeneralApplicationPage() {
     phone: '',
     cover_letter: '',
     resume_url: '',
-    linkedin_url: '',
     portfolio_url: '',
   });
 
@@ -212,12 +210,6 @@ export default function GeneralApplicationPage() {
       return;
     }
 
-    // Validate URLs if provided
-    if (formData.linkedin_url && !isValidUrl(formData.linkedin_url)) {
-      setSubmitError('Please enter a valid LinkedIn URL.');
-      setIsSubmitting(false);
-      return;
-    }
     if (formData.portfolio_url && !isValidUrl(formData.portfolio_url)) {
       setSubmitError('Please enter a valid Portfolio URL.');
       setIsSubmitting(false);
@@ -252,7 +244,6 @@ export default function GeneralApplicationPage() {
           phone: formatPhone(formData.phone) || null,
           cover_letter: sanitizeString(formData.cover_letter) || null,
           resume_url: resumeUrl,
-          linkedin_url: formData.linkedin_url.trim() || null,
           portfolio_url: formData.portfolio_url.trim() || null,
           status: 'pending',
           applied_at: new Date().toISOString(),
@@ -275,7 +266,6 @@ export default function GeneralApplicationPage() {
           phone: '',
           cover_letter: '',
           resume_url: '',
-          linkedin_url: '',
           portfolio_url: '',
         });
         setResumeFile(null);
@@ -656,26 +646,6 @@ export default function GeneralApplicationPage() {
 
                 {/* URLs Section */}
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
-                  <TextField
-                    fullWidth
-                    label="LinkedIn Profile"
-                    variant="outlined"
-                    value={formData.linkedin_url}
-                    onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
-                    disabled={isSubmitting}
-                    placeholder="https://linkedin.com/in/profile"
-                    inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LinkIcon size={18} color={primaryMain} />
-                        </InputAdornment>
-                      ),
-                      sx: { borderRadius: 2 }
-                    }}
-                    helperText={`${formData.linkedin_url.length}/${INPUT_LIMITS.URL}`}
-                  />
-
                   <TextField
                     fullWidth
                     label="Professional Portfolio"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import {
   Paper,
   Alert,
   CircularProgress,
+  alpha,
 } from '@mui/material';
 import { JobDetailsSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
@@ -34,7 +35,6 @@ interface JobApplicant {
   phone: string | null;
   cover_letter: string | null;
   resume_url: string;
-  linkedin_url: string | null;
   portfolio_url: string | null;
   status: 'pending' | 'reviewing' | 'interviewing' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
   applied_at: string | null;
@@ -53,11 +53,13 @@ export default function MyApplicationPage() {
   const params = useParams();
   const id = params?.id as string;
   const [application, setApplication] = useState<JobApplicant | null>(null);
+  const [applicationsList, setApplicationsList] = useState<JobApplicant[] | null>(null);
   const [job, setJob] = useState<JobWithTitle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [resumeSignedUrl, setResumeSignedUrl] = useState<string | null>(null);
+  const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -111,21 +113,77 @@ export default function MyApplicationPage() {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const loadApplication = async () => {
-      // Validate UUID format before querying Supabase
+      const decodedId = decodeURIComponent(id);
+      // Validate UUID or Email format before querying Supabase
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(id)) {
-        console.error('Invalid Application ID format:', id);
-        setError('Invalid Application ID format. Please check your ID and try again.');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      const isUuid = uuidRegex.test(decodedId);
+      const isEmail = emailRegex.test(decodedId);
+
+      if (!isUuid && !isEmail) {
+        console.error('Invalid ID format:', decodedId);
+        setError('Invalid format. Please enter a valid Application ID (UUID) or Email Address.');
         setIsLoading(false);
         return;
       }
 
       try {
-        // Load application
+        if (isEmail) {
+          const { data: applicationsData, error: applicationsError } = await supabase
+            .from('job_applicants')
+            .select('*, jobs(title)')
+            .ilike('email', decodedId)
+            .order('applied_at', { ascending: false });
+
+          if (applicationsError) throw applicationsError;
+
+          if (!applicationsData || applicationsData.length === 0) {
+            setError('No applications found for this email address.');
+            setIsLoading(false);
+            return;
+          }
+
+          if (applicationsData.length === 1) {
+            router.replace(`/my-application/${applicationsData[0].id}`);
+            return;
+          } else {
+            setApplicationsList(applicationsData);
+            
+            // Set up realtime subscription for the list of applications
+            channel = supabase
+              .channel(`applications-email-${decodedId}-changes`)
+              .on(
+                'postgres_changes',
+                {
+                  event: 'UPDATE',
+                  schema: 'public',
+                  table: 'job_applicants',
+                  filter: `email=eq.${decodedId}`,
+                },
+                (payload: { new: JobApplicant; }) => {
+                  console.log('Realtime event received for applications list:', payload);
+                  if (payload.new) {
+                    setApplicationsList((prev) => 
+                      prev ? prev.map(app => 
+                        app.id === payload.new.id ? { ...app, ...payload.new } : app
+                      ) : null
+                    );
+                  }
+                }
+              )
+              .subscribe();
+
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Load single application
         const { data: applicationData, error: applicationError } = await supabase
           .from('job_applicants')
           .select('*')
-          .eq('id', id)
+          .eq('id', decodedId)
           .single();
 
         if (applicationError) {
@@ -179,7 +237,7 @@ export default function MyApplicationPage() {
               event: 'UPDATE',
               schema: 'public',
               table: 'job_applicants',
-              filter: `id=eq.${id}`,
+              filter: `id=eq.${decodedId}`,
             },
             (payload: { new: JobApplicant; }) => {
               console.log('Realtime event received for application:', payload);
@@ -215,8 +273,8 @@ export default function MyApplicationPage() {
 
   usePageTitle(application ? `Application - ${application.first_name} ${application.last_name}` : 'My Application');
 
-  const getStatusColor = (status: JobApplicant['status']) => {
-    switch (status) {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
       case 'pending':
         return 'default';
       case 'reviewing':
@@ -236,8 +294,8 @@ export default function MyApplicationPage() {
     }
   };
 
-  const getStatusMessage = (status: JobApplicant['status']) => {
-    switch (status) {
+  const getStatusMessage = (status: string) => {
+    switch (status?.toLowerCase()) {
       case 'pending':
         return 'Your application has been received and is pending review.';
       case 'reviewing':
@@ -259,6 +317,55 @@ export default function MyApplicationPage() {
 
   if (isLoading) {
     return <JobDetailsSkeleton />;
+  }
+
+  if (applicationsList) {
+    return (
+      <Box sx={{ py: 8 }}>
+        <Container maxWidth="md">
+          <Button
+            component={Link}
+            href="/my-application"
+            startIcon={<ArrowLeft size={20} />}
+            sx={{ mb: 4 }}
+          >
+            Back to Search
+          </Button>
+          <Typography variant="h4" sx={{ mb: 4, fontWeight: 700 }}>
+            Your Applications
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {applicationsList.map((app) => (
+              <Card 
+                key={app.id} 
+                variant="outlined" 
+                onClick={() => router.push(`/my-application/${app.id}`)}
+                sx={{ 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    borderColor: 'primary.main', 
+                    bgcolor: isDark ? 'action.hover' : alpha(theme.palette.primary.main, 0.04) 
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {(app as any).jobs?.title || 'General Application'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      Applied on {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Unknown'}
+                    </Typography>
+                  </Box>
+                  <Chip label={formatStatus(app.status)} size="small" color={getStatusColor(app.status) as any} sx={{ fontWeight: 600 }} />
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Container>
+      </Box>
+    );
   }
 
   if (error || !application) {
@@ -292,9 +399,9 @@ export default function MyApplicationPage() {
         {/* Status Alert */}
         <Alert
           severity={
-            application.status === 'hired' || application.status === 'offer'
+            application.status?.toLowerCase() === 'hired' || application.status?.toLowerCase() === 'offer'
               ? 'success'
-              : application.status === 'rejected'
+              : application.status?.toLowerCase() === 'rejected'
                 ? 'error'
                 : 'info'
           }
@@ -490,24 +597,6 @@ export default function MyApplicationPage() {
                         </Button>
                       )}
                     </Box>
-                  </Box>
-                )}
-                {application.linkedin_url && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      LinkedIn Profile
-                    </Typography>
-                    <Button
-                      component="a"
-                      href={application.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<LinkIcon size={16} />}
-                    >
-                      View LinkedIn Profile
-                    </Button>
                   </Box>
                 )}
                 {application.portfolio_url && (

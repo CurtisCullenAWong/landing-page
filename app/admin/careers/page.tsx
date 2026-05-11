@@ -39,6 +39,9 @@ import {
   Divider,
   CardActions,
   Alert,
+  FormControlLabel,
+  alpha,
+  Checkbox,
 } from '@mui/material';
 
 import { AdminTableSkeleton } from '@/components/loading';
@@ -63,9 +66,17 @@ type JobFormData = {
   description: string;
   responsibilities: string;
   requirements: string;
+  benefits: string;
   salary: string;
   status: 'active' | 'closed';
   application_url: string;
+  employment_type: string;
+  work_setup: string;
+  job_level: string;
+  schedule: string;
+  application_email: string;
+  external_application_url: string;
+  featured: boolean;
   expanded: boolean;
 };
 
@@ -88,9 +99,17 @@ export default function AdminPage() {
       description: '',
       responsibilities: '',
       requirements: '',
+      benefits: '',
       salary: '',
       status: 'active',
       application_url: '',
+      employment_type: '',
+      work_setup: 'In person',
+      job_level: '',
+      schedule: '',
+      application_email: '',
+      external_application_url: '',
+      featured: false,
       expanded: true,
     }
   ]);
@@ -233,7 +252,7 @@ export default function AdminPage() {
     return <AdminTableSkeleton />;
   }
 
-  const handleInputChange = (id: string, field: keyof JobFormData, value: string) => {
+  const handleInputChange = (id: string, field: keyof JobFormData, value: string | boolean) => {
     setJobEntries(entries =>
       entries.map(entry =>
         entry.id === id ? { ...entry, [field]: value } : entry
@@ -262,10 +281,18 @@ export default function AdminPage() {
       description: '',
       responsibilities: '',
       requirements: '',
+      benefits: '',
       salary: '',
       status: 'active',
       application_url: '',
+      employment_type: '',
+      work_setup: 'In person',
+      job_level: '',
+      schedule: '',
       expanded: true,
+      application_email: '',
+      external_application_url: '',
+      featured: false
     }]);
   };
 
@@ -290,7 +317,7 @@ export default function AdminPage() {
     if (editingJob) {
       // Single edit mode
       const entry = jobEntries[0];
-      
+
       // Validate URLs if provided
       if (entry.application_url && !isValidUrl(entry.application_url)) {
         setFormError('Please enter a valid Application URL');
@@ -305,9 +332,17 @@ export default function AdminPage() {
         description: sanitizeString(entry.description),
         responsibilities: cleanList(entry.responsibilities),
         requirements: cleanList(entry.requirements),
+        benefits: cleanList(entry.benefits),
         salary: sanitizeString(entry.salary),
         status: entry.status,
         application_url: entry.application_url.trim() || undefined,
+        employment_type: sanitizeString(entry.employment_type) || undefined,
+        work_setup: sanitizeString(entry.work_setup) || undefined,
+        job_level: sanitizeString(entry.job_level) || undefined,
+        schedule: sanitizeString(entry.schedule) || undefined,
+        application_email: sanitizeString(entry.application_email) || undefined,
+        external_application_url: entry.external_application_url.trim() || undefined,
+        featured: entry.featured,
       };
       updateJob(editingJob.id, jobData);
       setEditingJob(null);
@@ -319,9 +354,9 @@ export default function AdminPage() {
         .map(entry => {
           // Internal validation
           if (entry.application_url && !isValidUrl(entry.application_url)) {
-             // In bulk mode, we might want to skip or alert
+            // In bulk mode, we might want to skip or alert
           }
-          
+
           return {
             title: sanitizeString(entry.title),
             department: formatName(entry.department),
@@ -330,9 +365,17 @@ export default function AdminPage() {
             description: sanitizeString(entry.description),
             responsibilities: cleanList(entry.responsibilities),
             requirements: cleanList(entry.requirements),
+            benefits: cleanList(entry.benefits),
             salary: sanitizeString(entry.salary),
             status: entry.status,
             application_url: entry.application_url.trim() || undefined,
+            employment_type: sanitizeString(entry.employment_type) || undefined,
+            work_setup: sanitizeString(entry.work_setup) || undefined,
+            job_level: sanitizeString(entry.job_level) || undefined,
+            schedule: sanitizeString(entry.schedule) || undefined,
+            application_email: sanitizeString(entry.application_email) || undefined,
+            external_application_url: entry.external_application_url.trim() || undefined,
+            featured: entry.featured,
           };
         });
 
@@ -356,9 +399,17 @@ export default function AdminPage() {
       description: job.description,
       responsibilities: job.responsibilities.join('\n'),
       requirements: job.requirements.join('\n'),
+      benefits: job.benefits.join('\n'),
       salary: job.salary,
       status: job.status,
       application_url: job.application_url || '',
+      employment_type: job.employment_type || '',
+      work_setup: job.work_setup || '',
+      job_level: job.job_level || '',
+      schedule: job.schedule || '',
+      application_email: job.application_email || '',
+      external_application_url: job.external_application_url || '',
+      featured: job.featured || false,
       expanded: true,
     }]);
     setIsFormOpen(true);
@@ -387,9 +438,17 @@ export default function AdminPage() {
       description: '',
       responsibilities: '',
       requirements: '',
+      benefits: '',
       salary: '',
       status: 'active',
       application_url: '',
+      employment_type: '',
+      work_setup: 'In person',
+      job_level: '',
+      schedule: '',
+      application_email: '',
+      external_application_url: '',
+      featured: false,
       expanded: true,
     }]);
     setIsFormOpen(false);
@@ -650,13 +709,93 @@ export default function AdminPage() {
                                 <TextField
                                   fullWidth
                                   size="small"
-                                  label="Application URL (optional)"
-                                  value={entry.application_url}
-                                  onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
-                                  placeholder="https://example.com/apply"
-                                  inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                                  helperText={`${entry.application_url.length}/${INPUT_LIMITS.URL}`}
+                                  label="Benefits (one per line)"
+                                  value={entry.benefits}
+                                  onChange={(e) => handleInputChange(entry.id, 'benefits', e.target.value)}
+                                  multiline
+                                  rows={4}
+                                  placeholder="Enter each benefit on a new line"
+                                  inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                  helperText={`${entry.benefits.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                 />
+
+                                <Stack direction="row" spacing={2}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Schedule"
+                                    placeholder="Mon-Fri, 8AM-5PM"
+                                    value={entry.schedule}
+                                    onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)}
+                                    inputProps={{ maxLength: 100 }}
+                                  />
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Work Setup"
+                                    placeholder="In person / Hybrid / Remote"
+                                    value={entry.work_setup}
+                                    onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)}
+                                    inputProps={{ maxLength: 50 }}
+                                  />
+                                </Stack>
+
+                                <Stack direction="row" spacing={2}>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Employment Type"
+                                    placeholder="Permanent / Full-time"
+                                    value={entry.employment_type}
+                                    onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)}
+                                    inputProps={{ maxLength: 50 }}
+                                  />
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Job Level"
+                                    placeholder="Junior / Senior"
+                                    value={entry.job_level}
+                                    onChange={(e) => handleInputChange(entry.id, 'job_level', e.target.value)}
+                                    inputProps={{ maxLength: 50 }}
+                                  />
+                                </Stack>
+
+                                <Box sx={{ mt: 2, p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05), borderRadius: 2 }}>
+                                  <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
+                                    Admin / Routing Settings
+                                  </Typography>
+                                  <Stack spacing={2}>
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      label="Application Email (Internal Admin Only)"
+                                      value={entry.application_email}
+                                      onChange={(e) => handleInputChange(entry.id, 'application_email', e.target.value)}
+                                      placeholder="hr@example.com"
+                                      inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
+                                    />
+                                    <TextField
+                                      fullWidth
+                                      size="small"
+                                      label="External Application URL (Client-Facing Redirect)"
+                                      value={entry.external_application_url || entry.application_url}
+                                      onChange={(e) => handleInputChange(entry.id, 'external_application_url', e.target.value)}
+                                      placeholder="https://example.com/apply"
+                                      inputProps={{ maxLength: INPUT_LIMITS.URL }}
+                                    />
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={entry.featured}
+                                          onChange={(e: { target: { checked: string | boolean; }; }) => handleInputChange(entry.id, 'featured', e.target.checked)}
+                                          color="primary"
+                                        />
+                                      }
+                                      label="Mark as Featured Job (Client-Facing)"
+                                    />
+                                  </Stack>
+                                </Box>
 
                               </Stack>
                             </Box>
@@ -831,25 +970,121 @@ export default function AdminPage() {
                                           onChange={(e) => handleInputChange(entry.id, 'requirements', e.target.value)}
                                           required
                                           multiline
-                                          rows={4}
+                                          rows={6}
                                           placeholder="Enter each requirement on a new line"
                                           inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
                                           helperText={`${entry.requirements.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
                                       </Grid>
-                                      <Grid size={{ xs: 12 }}>
+                                      <Grid size={{ xs: 12, md: 6 }}>
                                         <TextField
                                           fullWidth
                                           size="small"
-                                          label="Application URL (optional)"
-                                          value={entry.application_url}
-                                          onChange={(e) => handleInputChange(entry.id, 'application_url', e.target.value)}
-                                          placeholder="https://example.com/apply"
-                                          inputProps={{ maxLength: INPUT_LIMITS.URL }}
-                                          helperText={`${entry.application_url.length}/${INPUT_LIMITS.URL}`}
+                                          label="Benefits (one per line)"
+                                          value={entry.benefits}
+                                          onChange={(e) => handleInputChange(entry.id, 'benefits', e.target.value)}
+                                          multiline
+                                          rows={6}
+                                          placeholder="Enter each benefit on a new line"
+                                          inputProps={{ maxLength: INPUT_LIMITS.DESCRIPTION }}
+                                          helperText={`${entry.benefits.length}/${INPUT_LIMITS.DESCRIPTION}`}
                                           sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
                                         />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Schedule"
+                                          placeholder="Mon-Fri, 8AM-5PM"
+                                          value={entry.schedule}
+                                          onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)}
+                                          inputProps={{ maxLength: 100 }}
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Work Setup"
+                                          placeholder="In person / Hybrid / Remote"
+                                          value={entry.work_setup}
+                                          onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)}
+                                          inputProps={{ maxLength: 50 }}
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Employment Type"
+                                          placeholder="Permanent / Full-time"
+                                          value={entry.employment_type}
+                                          onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)}
+                                          inputProps={{ maxLength: 50 }}
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          label="Job Level"
+                                          placeholder="Junior / Senior"
+                                          value={entry.job_level}
+                                          onChange={(e) => handleInputChange(entry.id, 'job_level', e.target.value)}
+                                          inputProps={{ maxLength: 50 }}
+                                          sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                        />
+                                      </Grid>
+                                      <Grid size={{ xs: 12 }}>
+                                        <Box sx={{ mt: 1, p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05), borderRadius: 2 }}>
+                                          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
+                                            Admin / Routing Settings
+                                          </Typography>
+                                          <Grid container spacing={2}>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                              <TextField
+                                                fullWidth
+                                                size="small"
+                                                label="Application Email (Internal Admin Only)"
+                                                value={entry.application_email}
+                                                onChange={(e) => handleInputChange(entry.id, 'application_email', e.target.value)}
+                                                placeholder="hr@example.com"
+                                                inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
+                                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                              />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                              <TextField
+                                                fullWidth
+                                                size="small"
+                                                label="External Application URL (Client-Facing Redirect)"
+                                                value={entry.external_application_url || entry.application_url}
+                                                onChange={(e) => handleInputChange(entry.id, 'external_application_url', e.target.value)}
+                                                placeholder="https://example.com/apply"
+                                                inputProps={{ maxLength: INPUT_LIMITS.URL }}
+                                                sx={{ '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                                              />
+                                            </Grid>
+                                            <Grid size={{ xs: 12 }}>
+                                              <FormControlLabel
+                                                control={
+                                                  <Checkbox
+                                                    checked={entry.featured}
+                                                    onChange={(e: { target: { checked: string | boolean; }; }) => handleInputChange(entry.id, 'featured', e.target.checked)}
+                                                    color="primary"
+                                                    size="small"
+                                                  />
+                                                }
+                                                label={<Typography variant="body2">Mark as Featured Job (Client-Facing)</Typography>}
+                                              />
+                                            </Grid>
+                                          </Grid>
+                                        </Box>
                                       </Grid>
                                     </Grid>
                                   </Box>

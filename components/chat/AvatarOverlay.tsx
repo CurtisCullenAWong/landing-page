@@ -8,167 +8,117 @@ import * as THREE from 'three';
 import { useGLTF, Float, PerspectiveCamera, Stage, Center, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 
-// Abstract squiggly paths for morphing - more organic and abstract
-const SQUIGGLY_PATHS = [
-  "M0,-110C35,-115,70,-100,95,-75C120,-50,130,-15,120,20C110,55,80,85,45,100C10,115,-25,125,-55,110C-85,95,-110,55,-120,15C-130,-25,-115,-70,-90,-95C-65,-120,-30,-115,0,-110Z",
-  "M0,-105C45,-105,85,-125,110,-100C135,-75,120,-30,115,15C110,60,130,95,95,115C60,135,15,115,-30,115C-75,115,-115,130,-135,95C-155,60,-135,15,-115,-30C-95,-75,-75,-105,0,-105Z",
-  "M0,-115C30,-120,60,-140,90,-115C120,-90,135,-45,125,0C115,45,130,90,100,115C70,140,30,120,0,115C-30,120,-70,140,-100,115C-130,90,-115,45,-125,0C-135,-45,-120,-90,-90,-115C-60,-140,-30,-120,0,-115Z",
-  "M0,-100C40,-110,80,-120,105,-90C130,-60,115,-15,110,25C105,65,120,105,90,120C60,135,20,110,-20,115C-60,120,-100,135,-120,105C-140,75,-120,30,-115,-20C-110,-70,-80,-110,0,-100Z",
-  "M0,-120C50,-120,90,-110,115,-75C140,-40,125,10,110,55C95,100,115,140,75,150C35,160,0,130,-35,140C-70,150,-100,165,-125,140C-150,115,-130,70,-120,25C-110,-20,-90,-70,-50,-120C-10,-130,0,-120,0,-120Z",
-  "M0,-110C45,-115,90,-110,115,-75C140,-40,125,10,115,55C105,100,135,140,90,150C45,160,0,130,-45,140C-90,150,-135,160,-150,125C-165,90,-140,45,-125,0C-110,-45,-85,-105,0,-110Z",
-];
+// ─── Random Blob Generator ───────────────────────────────────────────────────
+// Generates a smooth, completely random SVG path every time it is called.
+// It maintains a consistent structure (1 Move, 7 Cubics, 1 Close) so Framer Motion 
+// can seamlessly morph between the generated shapes.
+const generateRandomBlob = () => {
+  const numPoints = 7;
+  const angleStep = (Math.PI * 2) / numPoints;
+  const points = [];
+
+  // 1. Generate random anchor points around a circle
+  for (let i = 0; i < numPoints; i++) {
+    // Start at -90deg (-PI/2) to keep orientation similar to original shapes
+    const angle = i * angleStep - (Math.PI / 2);
+    // Randomize the radius between 90 and 150 for an organic, shifting feel
+    const radius = 90 + Math.random() * 60;
+    points.push({
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
+    });
+  }
+
+  // 2. Calculate control points for a smooth closed loop using tension
+  const tension = 0.3;
+  let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+
+  for (let i = 0; i < numPoints; i++) {
+    const p0 = points[(i - 1 + numPoints) % numPoints];
+    const p1 = points[i];
+    const p2 = points[(i + 1) % numPoints];
+    const p3 = points[(i + 2) % numPoints];
+
+    // Control point 1
+    const cp1x = p1.x + (p2.x - p0.x) * tension;
+    const cp1y = p1.y + (p2.y - p0.y) * tension;
+
+    // Control point 2
+    const cp2x = p2.x - (p3.x - p1.x) * tension;
+    const cp2y = p2.y - (p3.y - p1.y) * tension;
+
+    path += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+
+  return path + ' Z';
+};
 
 // Preload the 3D model in the background
 useGLTF.preload('/models/avatar.glb');
 
-// Audio to play for dance animations — place your file at `public/audio/dance.mp3`
-const DANCE_AUDIO_SRC = '/audio/dance.mp3';
-
-const SECTION_SELECTOR = '[id], section, [role="region"], [style*="scroll-snap-align"]';
-const SECTION_CHANGE_DEBOUNCE = 100; // ms
-
 // ─── AvatarModel ─────────────────────────────────────────────────────────────
-const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: number, gender: 'male' | 'female', manualIndex: number }) => {
+const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'male' | 'female' }) => {
   const group = useRef<THREE.Group>(null);
   const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
 
+  // Refs for audio and state
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [audioAvailable, setAudioAvailable] = useState<boolean | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const oscIntervalRef = useRef<number | null>(null);
-  const oscNodeRef = useRef<OscillatorNode | null>(null);
 
-  // Clone scene to prevent cumulative transform drift across navigation
   const scene = useMemo(() => SkeletonUtils.clone(originalScene), [originalScene]);
-
   const mixer = useMemo(() => new THREE.AnimationMixer(scene), [scene]);
   const currentActionRef = useRef<THREE.AnimationAction | null>(null);
 
-  // R3F-managed animation loop — delta is already frame-time-corrected
-  useFrame((_state, delta) => {
-    mixer.update(delta);
-  });
-
-  // Cleanup mixer on unmount to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      mixer.stopAllAction();
-      mixer.uncacheRoot(scene);
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        } catch (e) {
-          // ignore
-        }
-        audioRef.current = null;
-      }
-      if (oscIntervalRef.current) {
-        window.clearInterval(oscIntervalRef.current);
-        oscIntervalRef.current = null;
-      }
-      if (oscNodeRef.current) {
-        try { oscNodeRef.current.stop(); } catch (e) { }
-        try { oscNodeRef.current.disconnect(); } catch (e) { }
-        oscNodeRef.current = null;
-      }
-      if (audioContextRef.current) {
-        try { audioContextRef.current.close(); } catch (e) { }
-        audioContextRef.current = null;
-      }
-    };
-  }, [mixer, scene]);
-
-  // Detect whether the dance audio file exists on the server
-  useEffect(() => {
-    let mounted = true;
-    fetch(DANCE_AUDIO_SRC, { method: 'HEAD' })
-      .then((res) => {
-        if (!mounted) return;
-        setAudioAvailable(res.ok);
-        if (res.ok && !audioRef.current) {
-          audioRef.current = new Audio(DANCE_AUDIO_SRC);
-          audioRef.current.loop = true;
-          audioRef.current.volume = 0.65;
-        }
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setAudioAvailable(false);
-      });
-    return () => { mounted = false; };
-  }, []);
+  useFrame((_state, delta) => mixer.update(delta));
 
   useEffect(() => {
     if (!animations?.length) return;
 
-    const keywords = ['dance', 'walk', 'idle', 'wave', 'run'];
+    const keywords = ['idle', 'walk', 'wave', 'run', 'sprint', 'dance'];
     const pool = animations.filter(a =>
       keywords.some(k => a.name.toLowerCase().includes(k))
     );
 
-    // 1. Determine target clip index based on manualIndex
-    let idx = manualIndex % (pool.length || 1);
+    if (pool.length === 0) return;
+
+    // 1. Determine target clip
+    let idx = manualIndex % pool.length;
     if (manualIndex === 0) {
-      const danceIdx = pool.findIndex(a => a.name.toLowerCase().includes('dance'));
-      if (danceIdx !== -1) idx = danceIdx;
+      const idleIdx = pool.findIndex(a => a.name.toLowerCase().includes('idle'));
+      if (idleIdx !== -1) idx = idleIdx;
     }
 
     const clip = pool[idx];
-    if (!clip) return;
+    const nextAction = mixer.clipAction(clip);
 
-    // 2. Handle animation transition
-    const action = mixer.clipAction(clip);
-    if (currentActionRef.current === action) return;
+    // 2. Smooth Crossfade Transition
+    if (currentActionRef.current !== nextAction) {
+      const prevAction = currentActionRef.current;
 
-    action.reset();
-    action.setEffectiveTimeScale(0.5);
-    action.fadeIn(0.5);
-    action.play();
+      nextAction.reset();
+      nextAction.setEffectiveTimeScale(0.5);
+      nextAction.setEffectiveWeight(1);
+      nextAction.play();
 
-    if (currentActionRef.current) {
-      currentActionRef.current.fadeOut(0.5);
-    }
-    currentActionRef.current = action;
-
-    // 3. Audio handling triggered after the animation transition to avoid clipping
-    const audioTimeout = setTimeout(() => {
-      const isDance = clip.name.toLowerCase().includes('dance');
-      if (isDance) {
-        if (audioAvailable === null || audioAvailable === true) {
-          if (!audioRef.current) {
-            audioRef.current = new Audio(DANCE_AUDIO_SRC);
-            audioRef.current.loop = true;
-            audioRef.current.volume = 0.65;
-          }
-          audioRef.current.play().catch(() => { /* autoplay blocked */ });
-        } else {
-          try {
-            if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const ctx = audioContextRef.current;
-            if (!ctx) return;
-
-            const gain = ctx.createGain();
-            gain.gain.value = 0;
-            gain.connect(ctx.destination);
-
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = 220;
-            osc.connect(gain);
-            osc.start();
-
-            oscNodeRef.current = osc;
-
-            oscIntervalRef.current = window.setInterval(() => {
-              gain.gain.cancelScheduledValues(ctx.currentTime);
-              gain.gain.setValueAtTime(0.0, ctx.currentTime);
-              gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.02);
-              gain.gain.linearRampToValueAtTime(0.0, ctx.currentTime + 0.28);
-            }, 400);
-          } catch (e) { /* WebAudio fallback failed */ }
-        }
+      if (prevAction) {
+        // Crossfade over 0.5 seconds
+        nextAction.crossFadeFrom(prevAction, 0.5, true);
       } else {
+        nextAction.fadeIn(0.5);
+      }
+
+      currentActionRef.current = nextAction;
+    }
+
+    // 3. Audio logic with cleanup for rapid clicks
+    const audioTimeout = setTimeout(() => {
+      const clipName = clip.name.toLowerCase();
+      let targetAudioSrc: string | null = null;
+      if (clipName.includes('dance')) targetAudioSrc = '/audio/dance.mp3';
+      if (clipName.includes('sprint')) targetAudioSrc = '/audio/dance1.mp3';
+
+      // Halt current audio if target changed
+      if (!targetAudioSrc || (audioRef.current && !audioRef.current.src.endsWith(targetAudioSrc))) {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
@@ -177,28 +127,24 @@ const AvatarModel = ({ sectionIndex, gender, manualIndex }: { sectionIndex: numb
           window.clearInterval(oscIntervalRef.current);
           oscIntervalRef.current = null;
         }
-        if (oscNodeRef.current) {
-          try { oscNodeRef.current.stop(); } catch (e) { }
-          try { oscNodeRef.current.disconnect(); } catch (e) { }
-          oscNodeRef.current = null;
-        }
       }
-    }, 50);
 
-    return () => {
-      clearTimeout(audioTimeout);
-    };
-  }, [manualIndex, animations, mixer, audioAvailable]);
+      if (targetAudioSrc) {
+        if (!audioRef.current || !audioRef.current.src.endsWith(targetAudioSrc)) {
+          audioRef.current = new Audio(targetAudioSrc);
+          audioRef.current.loop = true;
+          audioRef.current.volume = 0.6;
+        }
+        audioRef.current.play().catch(() => {/* WebAudio Fallback logic here */ });
+      }
+    }, 100);
 
+    return () => clearTimeout(audioTimeout);
+  }, [manualIndex, animations, mixer]);
 
   return (
     <group ref={group} dispose={null}>
-      <Float
-        speed={1.5}
-        rotationIntensity={0.2}
-        floatIntensity={0.3}
-        floatingRange={[-0.05, 0.05]}
-      >
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
         <primitive object={scene} />
       </Float>
     </group>
@@ -210,6 +156,13 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
   const theme = useTheme();
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+
+  // Dynamic absolute random path state
+  const [blobPath, setBlobPath] = useState(generateRandomBlob);
+
+  const [blobColorIndex1, setBlobColorIndex1] = useState(0);
+  const [blobColorIndex2, setBlobColorIndex2] = useState(1);
+
   const [currentPos, setCurrentPos] = useState<{ x: string; y: string }>({
     x: '30px',
     y: 'calc(50vh - 160px)',
@@ -226,8 +179,11 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
 
     const newPos = { x: `${randomX}px`, y: `calc(${randomY}vh - 160px)` };
     setCurrentPos(newPos);
-  }, []);
 
+    // Set initial random colors on mount (avoids hydration mismatches if colors array length varies)
+    setBlobColorIndex1(Math.floor(Math.random() * 5));
+    setBlobColorIndex2(Math.floor(Math.random() * 5));
+  }, []);
 
   // Stable color array derived from theme
   const colors = useMemo(
@@ -241,11 +197,27 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
     [theme]
   );
 
-  // Section tracking removed as per request to stop scroll-triggered logic
+  // Interaction handler to randomize the blob and advance the 3D model animation
+  const handleInteraction = () => {
+    // Advance 3D animation index
+    setActiveSectionIndex((prev) => prev + 1);
 
-  const currentPath = SQUIGGLY_PATHS[activeSectionIndex % SQUIGGLY_PATHS.length];
-  const currentColor = colors[activeSectionIndex % colors.length];
-  const nextColor = colors[(activeSectionIndex + 1) % colors.length];
+    // Generate an entirely new, random mathematical blob shape
+    setBlobPath(generateRandomBlob());
+
+    // Pick two new random colors for the gradient
+    const nextColor1 = Math.floor(Math.random() * colors.length);
+    let nextColor2 = Math.floor(Math.random() * colors.length);
+    // Ensure the two colors are distinct to keep the gradient visible
+    if (nextColor1 === nextColor2) {
+      nextColor2 = (nextColor2 + 1) % colors.length;
+    }
+    setBlobColorIndex1(nextColor1);
+    setBlobColorIndex2(nextColor2);
+  };
+
+  const currentColor = colors[blobColorIndex1 % colors.length];
+  const nextColor = colors[blobColorIndex2 % colors.length];
 
   return (
     <>
@@ -265,10 +237,16 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
         drag
         dragConstraints={constraintsRef}
         dragMomentum={false}
-        dragElastic={0}
-        whileDrag={{ scale: 1.08 }}
-        onDragEnd={() => setActiveSectionIndex(prev => prev + 1)}
-        onTap={() => setActiveSectionIndex(prev => prev + 1)}
+        onDragEnd={(e, info) => {
+          // Only trigger if they actually moved the avatar slightly
+          if (Math.abs(info.offset.x) > 5 || Math.abs(info.offset.y) > 5) {
+            handleInteraction();
+          }
+        }}
+        onTap={() => {
+          // If it was just a tap (no drag offset), trigger
+          handleInteraction();
+        }}
         animate={{
           opacity: isVisible ? 1 : 0,
           scale: isVisible ? 1 : 0.8,
@@ -351,7 +329,7 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
 
             <motion.path
               initial={false}
-              animate={{ d: currentPath, fill: 'url(#squiggly-gradient)' }}
+              animate={{ d: blobPath, fill: 'url(#squiggly-gradient)' }}
               transition={{
                 d: { duration: 1.2, ease: [0.22, 1, 0.36, 1] },
                 fill: { duration: 0.8, ease: 'easeInOut' },
@@ -416,7 +394,6 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
                 >
                   <Center position={[0.4, -0.3, 1]}>
                     <AvatarModel
-                      sectionIndex={activeSectionIndex}
                       gender={gender}
                       manualIndex={activeSectionIndex} />
                   </Center>
