@@ -3,9 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ClipboardList } from 'lucide-react';
-import { NAV_LINKS, scrollToHref, useActiveSection } from '@/constants/navigation';
-import { IMAGE_URLS } from '@/constants/images';
 import {
   Box,
   Container,
@@ -15,9 +12,33 @@ import {
   alpha,
   Link as MuiLink,
   useMediaQuery,
-  Collapse
+  Collapse,
 } from '@mui/material';
+import {
+  Home,
+  Info,
+  Zap,
+  Clock,
+  Users,
+  Briefcase,
+  ClipboardList,
+  Menu,
+  X,
+  Sparkles
+} from 'lucide-react';
+import { NAV_LINKS, scrollToHref, useActiveSection } from '@/constants/navigation';
+import { IMAGE_URLS } from '@/constants/images';
+import {
+  AbstractBlob,
+  FilledAbstractShape,
+  MassiveAbstractShape
+} from '../decorative/AbstractShapes';
 import ThemeSwitcher from '../theme-switcher';
+
+type NavLink = {
+  name: string;
+  href: string;
+};
 
 export function UserHeader() {
   const theme = useTheme();
@@ -72,6 +93,7 @@ export function UserHeader() {
     transition: theme.transitions.create(['background-color', 'color', 'box-shadow']),
     display: 'flex',
     alignItems: 'center',
+    textShadow: isActive(href) ? 'none' : '0 1px 2px rgba(0,0,0,0.2)', // Conditional shadow for legibility
     ...(isActive(href)
       ? {
         bgcolor: 'common.white',
@@ -98,13 +120,34 @@ export function UserHeader() {
         zIndex: theme.zIndex.appBar,
         width: '100%',
         borderBottom: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-        bgcolor: 'primary.main',
+        bgcolor: alpha(theme.palette.primary.dark, 0.98), // Darker for better contrast
         color: 'primary.contrastText',
         boxShadow: theme.shadows[3],
-        backdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(16px)',
+        overflow: 'hidden', // Contain abstract shapes
       }}
     >
-      <Container maxWidth="lg">
+      {/* Massive Abstract Background Shapes */}
+      <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <MassiveAbstractShape 
+          color={theme.palette.tertiary.main} 
+          opacity={0.3} 
+          style={{ top: '-20%', left: '-20%', width: '140%', height: '160%', mixBlendMode: 'overlay' }} 
+        />
+        <MassiveAbstractShape 
+          color={theme.palette.primary.main} 
+          opacity={0.25} 
+          delay={5}
+          style={{ bottom: '-30%', right: '-20%', width: '150%', height: '170%', transform: 'rotate(-15deg)', mixBlendMode: 'soft-light' }} 
+        />
+        <FilledAbstractShape 
+          color={theme.palette.tertiary.light} 
+          size={400} 
+          style={{ top: '5%', right: '0%', opacity: 0.2, mixBlendMode: 'overlay' }} 
+        />
+      </Box>
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Box sx={{ display: 'flex', height: 80, alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Brand Logo */}
@@ -128,12 +171,16 @@ export function UserHeader() {
               sx={{
                 position: 'relative',
                 overflow: 'hidden',
-                borderRadius: '12px',
-                background: `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
-                p: 1,
-                border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-                boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
-                transition: 'all 0.3s ease',
+                borderRadius: '24px 8px 32px 12px', // Asymmetrical
+                background: `linear-gradient(135deg, ${alpha(theme.palette.tertiary.main, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
+                p: 1.5,
+                border: `2px solid ${alpha(theme.palette.tertiary.main, 0.3)}`,
+                boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.1)}`,
+                transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                '&:hover': {
+                  borderRadius: '12px 32px 12px 32px', // Dynamic shape shift
+                  borderColor: theme.palette.tertiary.main,
+                }
               }}
             >
               <Box
@@ -157,9 +204,22 @@ export function UserHeader() {
             spacing={1}
             sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}
           >
-            {NAV_LINKS.map((item) => {
+            {NAV_LINKS.map((item: NavLink) => {
               const isApplication = item.name === 'My Application';
               const active = isActive(item.href);
+
+              const getIcon = () => {
+                switch (item.name) {
+                  case 'Home': return <Home size={18} />;
+                  case 'About Us': return <Info size={18} />;
+                  case 'Why Us': return <Zap size={18} />;
+                  case 'History': return <Clock size={18} />;
+                  case 'Partnerships': return <Users size={18} />;
+                  case 'Careers': return <Briefcase size={18} />;
+                  case 'My Application': return <ClipboardList size={18} />;
+                  default: return null;
+                }
+              };
 
               return (
                 <MuiLink
@@ -173,30 +233,46 @@ export function UserHeader() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: isApplication ? 0 : 1,
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                     position: 'relative',
                     overflow: 'hidden',
                     textDecoration: 'none !important',
-                    '&:hover': isApplication ? {
-                      gap: 1.5,
-                      pr: 2.5
-                    } : {},
+                    border: active ? `1px solid ${alpha(theme.palette.tertiary.main, 0.3)}` : '1px solid transparent',
+                    '&:hover': {
+                      ...(isApplication ? { gap: 1.5, pr: 2.5 } : {}),
+                      transform: 'translateY(-2px)',
+                      bgcolor: alpha(theme.palette.common.white, 0.15),
+                      '& .nav-icon': {
+                        color: theme.palette.tertiary.main,
+                        transform: 'scale(1.1) rotate(5deg)',
+                      }
+                    },
+                    ...(active && {
+                      bgcolor: alpha(theme.palette.tertiary.main, 0.1),
+                      color: theme.palette.tertiary.main,
+                      fontWeight: 700,
+                      boxShadow: `0 4px 12px ${alpha(theme.palette.tertiary.main, 0.2)}`,
+                      borderBottom: `2px solid ${theme.palette.tertiary.main}`,
+                      borderRadius: '8px 8px 0 0',
+                    })
                   }}
                 >
-                  {isApplication && (
-                    <ClipboardList
-                      size={18}
-                      style={{
-                        flexShrink: 0,
-                        transition: 'transform 0.3s ease',
-                      }}
-                    />
-                  )}
+                  <Box className="nav-icon" sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.3s ease',
+                    color: active ? theme.palette.tertiary.main : 'inherit'
+                  }}>
+                    {getIcon()}
+                  </Box>
                   <Box
                     component="span"
                     sx={{
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       whiteSpace: 'nowrap',
+                      fontSize: '0.8rem',
+                      letterSpacing: '0.02em',
+                      textTransform: 'uppercase',
                       ...(isApplication && {
                         maxWidth: 0,
                         opacity: 0,
@@ -235,9 +311,21 @@ export function UserHeader() {
         <Collapse in={isMobileMenuOpen}>
           <Box sx={{ pb: 2, borderTop: `1px solid ${alpha(theme.palette.common.white, 0.1)}` }}>
             <Stack spacing={1} sx={{ pt: 2 }}>
-              {NAV_LINKS.map((item) => {
-                const isApplication = item.name === 'My Application';
+              {NAV_LINKS.map((item: NavLink) => {
                 const active = isActive(item.href);
+                const getIcon = () => {
+                  switch (item.name) {
+                    case 'Home': return <Home size={20} />;
+                    case 'About Us': return <Info size={20} />;
+                    case 'Why Us': return <Zap size={20} />;
+                    case 'History': return <Clock size={20} />;
+                    case 'Partnerships': return <Users size={20} />;
+                    case 'Careers': return <Briefcase size={20} />;
+                    case 'My Application': return <ClipboardList size={20} />;
+                    default: return null;
+                  }
+                };
+
                 return (
                   <MuiLink
                     key={item.name}
@@ -248,25 +336,36 @@ export function UserHeader() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 2,
-                      px: 2,
-                      py: 1.5,
-                      borderRadius: 1,
+                      px: 2.5,
+                      py: 2,
+                      borderRadius: '12px 4px 16px 2px', // Asymmetrical
                       textDecoration: 'none !important',
-                      transition: 'background-color 0.2s',
+                      transition: 'all 0.3s ease',
+                      border: active ? `1px solid ${theme.palette.tertiary.main}` : '1px solid transparent',
                       ...(active
-                        ? { bgcolor: 'common.white', color: 'primary.main' }
-                        : { color: 'common.white', '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) } }
+                        ? {
+                          bgcolor: alpha(theme.palette.tertiary.main, 0.15),
+                          color: theme.palette.tertiary.main,
+                          fontWeight: 700,
+                        }
+                        : {
+                          color: alpha(theme.palette.common.white, 0.8),
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.common.white, 0.1),
+                            color: 'common.white'
+                          }
+                        }
                       )
                     }}
                   >
-                    {isApplication ? (
-                      <ClipboardList size={20} style={{ flexShrink: 0 }} />
-                    ) : (
-                      <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: active ? 'primary.main' : alpha(theme.palette.common.white, 0.4) }} />
-                      </Box>
-                    )}
-                    <Box component="span" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                    <Box sx={{
+                      color: active ? theme.palette.tertiary.main : 'inherit',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      {getIcon()}
+                    </Box>
+                    <Box component="span" sx={{ fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       {item.name}
                     </Box>
                   </MuiLink>

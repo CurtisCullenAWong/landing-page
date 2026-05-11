@@ -8,10 +8,14 @@ import {
   Stack,
   Divider,
   useTheme,
-  alpha, // Helper function to handle opacities
+  alpha,
   Button
 } from '@mui/material';
 import { Calculate as CalculateIcon } from '@mui/icons-material';
+import {
+  FilledAbstractShape,
+  MassiveAbstractShape
+} from '../decorative/AbstractShapes';
 import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -58,14 +62,36 @@ export function Footer() {
       sx={{
         bgcolor: footerStyles.bg,
         color: footerStyles.text,
-        pt: 8,
-        pb: 4,
+        pt: 10,
+        pb: 6,
         mt: 'auto',
         borderTop: `1px solid ${footerStyles.border}`,
-        scrollSnapAlign: 'start'
+        scrollSnapAlign: 'start',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Container maxWidth="lg">
+      {/* Massive Abstract Background Shapes for Footer */}
+      <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <MassiveAbstractShape 
+          color={theme.palette.primary.main} 
+          opacity={0.55} 
+          style={{ top: '-40%', right: '-30%', width: '170%', height: '200%' }} 
+        />
+        <MassiveAbstractShape 
+          color={theme.palette.tertiary.main} 
+          opacity={0.6} 
+          delay={10}
+          style={{ bottom: '-50%', left: '-30%', width: '180%', height: '210%', transform: 'rotate(25deg)' }} 
+        />
+        <FilledAbstractShape 
+          color={theme.palette.tertiary.main} 
+          size={550} 
+          style={{ bottom: '10%', right: '0%', opacity: 0.45 }} 
+        />
+      </Box>
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container spacing={4}>
 
           {/* Brand Section */}
@@ -91,12 +117,16 @@ export function Footer() {
                   sx={{
                     position: 'relative',
                     overflow: 'hidden',
-                    borderRadius: '16px',
+                    borderRadius: '32px 12px 48px 8px', // Asymmetrical
                     background: theme.palette.common.white,
-                    p: 2,
-                    border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-                    boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
-                    transition: 'all 0.3s ease',
+                    p: 2.5,
+                    border: `3px solid ${theme.palette.tertiary.main}`,
+                    boxShadow: `0 12px 32px ${alpha(theme.palette.common.black, 0.15)}`,
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    '&:hover': {
+                      transform: 'scale(1.05) rotate(-2deg)',
+                      borderRadius: '12px 48px 8px 32px',
+                    }
                   }}
                 >
                   <Box
@@ -129,19 +159,19 @@ export function Footer() {
                   variant="contained"
                   sx={{
                     mt: 1,
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
-                    borderRadius: '10px',
-                    px: 3,
-                    py: 1,
+                    bgcolor: theme.palette.tertiary.main,
+                    color: theme.palette.tertiary.contrastText,
+                    borderRadius: '12px',
+                    px: 4,
+                    py: 1.5,
                     textTransform: 'none',
-                    fontWeight: 600,
-                    boxShadow: `0 4px 14px 0 ${alpha(theme.palette.primary.main, 0.4)}`,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    fontWeight: 700,
+                    boxShadow: `0 8px 20px ${alpha(theme.palette.tertiary.main, 0.3)}`,
+                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                     '&:hover': {
-                      bgcolor: theme.palette.primary.dark,
-                      transform: 'translateY(-2px)',
-                      boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+                      bgcolor: theme.palette.tertiary.dark,
+                      transform: 'translateY(-3px) scale(1.02)',
+                      boxShadow: `0 12px 25px ${alpha(theme.palette.tertiary.main, 0.4)}`,
                     },
                     '&:active': {
                       transform: 'translateY(0)',
