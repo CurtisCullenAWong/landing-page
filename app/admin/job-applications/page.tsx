@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import {
@@ -106,6 +107,7 @@ export default function JobApplicationsPage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const router = useRouter();
 
   const isPDF = (url: string) => {
     return url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('.pdf');
@@ -145,6 +147,11 @@ export default function JobApplicationsPage() {
   const handleDeleteClick = (applicant: JobApplicant) => {
     setApplicantToDelete(applicant);
     setDeleteDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleViewApplication = (applicantId: string) => {
+    router.push(`/my-application/${applicantId}`);
     handleMenuClose();
   };
 
@@ -1022,6 +1029,15 @@ export default function JobApplicationsPage() {
                         <Button
                           variant="outlined"
                           size="small"
+                          startIcon={<Eye size={16} />}
+                          onClick={() => handleViewApplication(applicant.id)}
+                          sx={{ minWidth: 100 }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
                           startIcon={<Edit size={16} />}
                           onClick={() => handleEditStatus(applicant)}
                           sx={{ minWidth: 100 }}
@@ -1085,6 +1101,12 @@ export default function JobApplicationsPage() {
             horizontal: 'right',
           }}
         >
+          <MenuItem onClick={() => selectedApplicant && handleViewApplication(selectedApplicant.id)}>
+            <ListItemIcon>
+              <Eye size={18} />
+            </ListItemIcon>
+            <ListItemText>View Application</ListItemText>
+          </MenuItem>
           {selectedApplicant?.resume_url && (
             <MenuItem
               onClick={() => {
