@@ -129,21 +129,21 @@ export function UserHeader() {
     >
       {/* Massive Abstract Background Shapes */}
       <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        <MassiveAbstractShape 
-          color={theme.palette.tertiary.main} 
-          opacity={0.3} 
-          style={{ top: '-20%', left: '-20%', width: '140%', height: '160%', mixBlendMode: 'overlay' }} 
+        <MassiveAbstractShape
+          color={theme.palette.tertiary.main}
+          opacity={0.3}
+          style={{ top: '-20%', left: '-20%', width: '140%', height: '160%', mixBlendMode: 'overlay' }}
         />
-        <MassiveAbstractShape 
-          color={theme.palette.primary.main} 
-          opacity={0.25} 
+        <MassiveAbstractShape
+          color={theme.palette.primary.main}
+          opacity={0.25}
           delay={5}
-          style={{ bottom: '-30%', right: '-20%', width: '150%', height: '170%', transform: 'rotate(-15deg)', mixBlendMode: 'soft-light' }} 
+          style={{ bottom: '-30%', right: '-20%', width: '150%', height: '170%', transform: 'rotate(-15deg)', mixBlendMode: 'soft-light' }}
         />
-        <FilledAbstractShape 
-          color={theme.palette.tertiary.light} 
-          size={400} 
-          style={{ top: '5%', right: '0%', opacity: 0.2, mixBlendMode: 'overlay' }} 
+        <FilledAbstractShape
+          color={theme.palette.tertiary.light}
+          size={400}
+          style={{ top: '5%', right: '0%', opacity: 0.2, mixBlendMode: 'overlay' }}
         />
       </Box>
 

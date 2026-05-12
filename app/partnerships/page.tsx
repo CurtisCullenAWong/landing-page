@@ -171,7 +171,7 @@ export default function PartnershipsPage() {
       {/* Slide 1: Introduction & Industries */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -327,7 +327,7 @@ export default function PartnershipsPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '15vh',
+            height: '15dvh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
             zIndex: 3,
@@ -338,7 +338,7 @@ export default function PartnershipsPage() {
       {/* Slide 2: Partnership Philosophy (Alternating Orientation) */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -444,7 +444,7 @@ export default function PartnershipsPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '15vh',
+            height: '15dvh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
             pointerEvents: 'none',
             zIndex: 3,
@@ -455,7 +455,7 @@ export default function PartnershipsPage() {
       {/* Slide 3: Memberships & CTA */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

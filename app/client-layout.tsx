@@ -131,7 +131,8 @@ function MainContainer({ children }: { children: React.ReactNode }) {
       sx={{
         flexGrow: 1,
         scrollSnapAlign: pathname === '/' ? 'start' : 'none',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        pt: pathname === '/' ? 0 : '80px'
       }}
       data-initial-module="true"
       data-href={pathname}

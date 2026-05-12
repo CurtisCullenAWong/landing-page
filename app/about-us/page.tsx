@@ -129,7 +129,7 @@ export default function AboutPage() {
       {/* Slide 1: Introduction & Identity */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -367,7 +367,7 @@ export default function AboutPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '15vh',
+            height: '15dvh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
             zIndex: 3,
@@ -378,7 +378,7 @@ export default function AboutPage() {
       {/* Slide 2: News & Events */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -702,7 +702,7 @@ export default function AboutPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '15vh',
+            height: '15dvh',
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
             pointerEvents: 'none',
             zIndex: 3,
@@ -713,7 +713,7 @@ export default function AboutPage() {
       {/* Slide 3: Contact Information */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',

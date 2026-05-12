@@ -58,7 +58,7 @@ export default function HomePage() {
         sx={{
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -111,7 +111,7 @@ export default function HomePage() {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: '20vh',
+                height: '20dvh',
                 background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
                 zIndex: 1,
               }}
@@ -269,7 +269,7 @@ export default function HomePage() {
       {/* Compressed Overview Section (Philosophy + CTA + Services) */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           bgcolor: 'background.default',

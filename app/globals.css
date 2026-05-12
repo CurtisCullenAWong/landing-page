@@ -9,6 +9,8 @@ html {
 /* Applied conditionally to sequences pages */
 .scroll-lock-active {
   scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  touch-action: pan-y;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
@@ -79,7 +81,6 @@ html {
   }
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
   }
 
   @keyframes fadeInUp {

@@ -157,7 +157,7 @@ export default function HistoryPage() {
       {/* Slide 1: Introduction & Story */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -254,7 +254,7 @@ export default function HistoryPage() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: { xs: '8vh', md: '15vh' },
+            height: { xs: '8dvh', md: '15dvh' },
             background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
             pointerEvents: 'none',
             zIndex: 0, // Lower z-index so content isn't covered
@@ -267,7 +267,7 @@ export default function HistoryPage() {
         <Box
           key={slideIndex}
           sx={{
-            minHeight: 'calc(100vh - 80px)',
+            minHeight: 'calc(100dvh - 80px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -462,18 +462,7 @@ export default function HistoryPage() {
           </PageContainer>
 
           {/* Smooth transition to next section */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: { xs: '8vh', md: '15vh' },
-              background: `linear-gradient(to bottom, transparent, ${slideIndex === milestoneChunks.length - 1 ? theme.palette.background.default : theme.palette.background.paper})`,
-              pointerEvents: 'none',
-              zIndex: 0,
-            }}
-          />
+
         </Box>
       ))}
     </Box>

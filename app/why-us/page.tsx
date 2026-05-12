@@ -7,6 +7,7 @@ import {
   Paper,
   useTheme,
   Stack,
+  alpha,
 } from '@mui/material';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
@@ -22,22 +23,22 @@ const BLOB_PATHS = [
   "M48.2,-78.3C60.7,-71.1,68,-54.2,73.2,-38.4C78.4,-22.6,81.4,-7.8,81.3,7.5C81.1,22.8,77.7,38.7,69.5,51.8C61.3,64.9,48.3,75.1,33.8,80.8C19.2,86.5,3,87.7,-14.2,85.5C-31.5,83.2,-49.8,77.5,-63.9,65.9C-78.1,54.3,-88.2,36.9,-91.5,18.7C-94.8,0.4,-91.3,-18.6,-82.5,-34.5C-73.8,-50.3,-59.8,-62.9,-44.7,-69.3C-29.6,-75.7,-13.4,-75.8,2,-78.9C17.5,-82,35.6,-85.5,48.2,-78.3Z"
 ];
 
-const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.12, variant = 0 }: any) => (
+const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.15, variant = 0 }: any) => (
   <Box
     component={motion.div}
     initial={{ opacity: 0, scale: 0.8, rotate: (rotate || 0) - 10 }}
     whileInView={{
       opacity: opacity,
-      scale: [1, 1.1, 1],
-      rotate: [rotate || 0, (rotate || 0) + 10, rotate || 0],
-      y: [0, 30, 0],
+      scale: [1, 1.05, 1],
+      rotate: [rotate || 0, (rotate || 0) + 5, rotate || 0],
+      y: [0, 20, 0],
     }}
     viewport={{ once: false, amount: 0.2 }}
     transition={{
-      opacity: { duration: 1 },
-      scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
-      rotate: { duration: 20, repeat: Infinity, ease: "easeInOut" },
-      y: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+      opacity: { duration: 1.2 },
+      scale: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+      rotate: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+      y: { duration: 18, repeat: Infinity, ease: "easeInOut" },
     }}
     sx={{
       position: 'absolute',
@@ -46,7 +47,9 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
       height: size || { xs: '400px', md: '800px' },
       zIndex: 0,
       pointerEvents: 'none',
-      filter: 'blur(3px)',
+      filter: 'blur(120px)', // Massive blur for atmospheric glow
+      maskImage: 'radial-gradient(circle, black, transparent 75%)',
+      WebkitMaskImage: 'radial-gradient(circle, black, transparent 75%)',
     }}
   >
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
@@ -58,6 +61,39 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
     </svg>
   </Box>
 );
+
+const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string, position?: 'top' | 'bottom' }) => (
+  <Box
+    sx={{
+      position: 'absolute',
+      [position]: 0,
+      left: 0,
+      right: 0,
+      height: '15dvh',
+      background: `linear-gradient(to ${position === 'bottom' ? 'bottom' : 'top'}, transparent, ${toColor})`,
+      pointerEvents: 'none',
+      zIndex: 1,
+    }}
+  />
+);
+
+const BackgroundTexture = ({ opacity = 0.5 }: { opacity?: number }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  return (
+    <Box sx={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 0,
+      pointerEvents: 'none',
+      backgroundImage: `radial-gradient(${alpha(isDark ? '#fff' : '#000', 0.08)} 1px, transparent 1px)`,
+      backgroundSize: '32px 32px',
+      opacity: opacity,
+      maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+      WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+    }} />
+  );
+};
 
 const DecorativeImageFrame = ({ children, theme }: any) => {
   const tertiaryMain = (theme.palette as any).tertiary?.main || theme.palette.primary.main;
@@ -212,19 +248,13 @@ export default function WhyBossCargo() {
 
   return (
     <Box sx={{
-      height: 'calc(100vh - 80px)',
-      overflowY: 'auto',
+      minHeight: 'calc(100dvh - 80px)',
       overflowX: 'hidden',
-      scrollSnapType: 'y mandatory',
-      scrollBehavior: 'smooth',
-      '&::-webkit-scrollbar': { display: 'none' },
-      msOverflowStyle: 'none',
-      scrollbarWidth: 'none'
     }}>
       {/* Hero Slide: Nationwide Presence */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -232,10 +262,11 @@ export default function WhyBossCargo() {
           py: { xs: 8, md: 0 },
           px: { xs: 2, md: 6 },
           position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'background.default'
+          bgcolor: 'background.default',
+          overflow: 'hidden'
         }}
       >
+        <BackgroundTexture />
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ position: 'relative', zIndex: 2 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid size={{ xs: 12, md: 7 }}>
@@ -308,8 +339,8 @@ export default function WhyBossCargo() {
         <Box
           sx={{
             position: 'absolute',
-            top: '5%',
-            bottom: '5%',
+            top: '15dvh',
+            bottom: '25dvh',
             right: { xs: 'auto', md: '5%' },
             left: { xs: '0', md: 'auto' },
             width: { xs: '100%', md: '45%' },
@@ -318,14 +349,14 @@ export default function WhyBossCargo() {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1
+            zIndex: 4
           }}
         >
           <Box
             component={motion.div}
             animate={{
-              y: [0, -30, 0],
-              scale: [1.2, 1.25, 1.2],
+              y: [0, -20, 0],
+              scale: [0.95, 1.0, 0.95],
             }}
             transition={{
               duration: 10,
@@ -392,10 +423,10 @@ export default function WhyBossCargo() {
                   component={motion.div}
                   variants={{
                     initial: { scale: 0, opacity: 0 },
-                    animate: { 
+                    animate: {
                       scale: [1, 1.3, 1],
                       opacity: [1, 0.7, 1],
-                      transition: { 
+                      transition: {
                         delay: point.delay,
                         duration: 8, // Synced with map color pulse
                         repeat: Infinity,
@@ -418,14 +449,14 @@ export default function WhyBossCargo() {
                 <Box
                   component={motion.div}
                   variants={{
-                    initial: { 
-                      opacity: 0, 
-                      scale: 0, 
+                    initial: {
+                      opacity: 0,
+                      scale: 0,
                       y: point.y < 25 ? -15 : 15,
-                      transition: { duration: 0.2, ease: "easeOut" } 
+                      transition: { duration: 0.2, ease: "easeOut" }
                     },
-                    hover: { 
-                      opacity: 1, 
+                    hover: {
+                      opacity: 1,
                       scale: 1,
                       y: 0,
                       transition: { type: 'spring', stiffness: 400, damping: 20 }
@@ -455,71 +486,73 @@ export default function WhyBossCargo() {
                     }}
                     sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}
                   >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      color: isDark ? tertiaryMain : 'white',
-                      fontWeight: 900,
-                      fontSize: '0.7rem',
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      backgroundColor: secondaryMain,
-                      px: 1.2,
-                      py: 0.5,
-                      borderRadius: 1,
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
-                      border: `1px solid ${tertiaryMain}44`,
-                      backdropFilter: 'blur(8px)',
-                    }}
-                  >
-                    {point.name}
-                  </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        color: isDark ? tertiaryMain : 'white',
+                        fontWeight: 900,
+                        fontSize: '0.7rem',
+                        letterSpacing: 1,
+                        textTransform: 'uppercase',
+                        backgroundColor: secondaryMain,
+                        px: 1.2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
+                        border: `1px solid ${tertiaryMain}44`,
+                        backdropFilter: 'blur(8px)',
+                      }}
+                    >
+                      {point.name}
+                    </Typography>
 
-                  <Box
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      bgcolor: isDark ? 'rgba(15, 20, 25, 0.95)' : 'white',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '50%',
-                      p: 0.5,
-                      boxShadow: `0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px ${secondaryMain}`,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      position: 'relative'
-                    }}
-                  >
-                    <ImageWithFallback
-                      src={IMAGE_URLS.BOSS_CARGO_ICON}
-                      alt={point.name}
-                      layout="fill"
-                      objectFit="contain"
-                      style={{ padding: '4px' }}
-                    />
+                    <Box
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        bgcolor: isDark ? 'rgba(15, 20, 25, 0.95)' : 'white',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '50%',
+                        p: 0.5,
+                        boxShadow: `0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px ${secondaryMain}`,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'relative'
+                      }}
+                    >
+                      <ImageWithFallback
+                        src={IMAGE_URLS.BOSS_CARGO_ICON}
+                        alt={point.name}
+                        layout="fill"
+                        objectFit="contain"
+                        style={{ padding: '4px' }}
+                      />
+                    </Box>
                   </Box>
                 </Box>
               </Box>
-            </Box>
-          ))}
+            ))}
+          </Box>
         </Box>
       </Box>
-    </Box>
 
       {/* Slide 1: Mission & Vision */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           py: { xs: 4, md: 0 },
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          bgcolor: 'background.default'
         }}
       >
+        <BackgroundTexture />
         <AbstractBlob
           color={tertiaryMain}
           top="-15%"
@@ -674,24 +707,15 @@ export default function WhyBossCargo() {
             </Grid>
           </Grid>
         </PageContainer>
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '15vh',
-            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
-            pointerEvents: 'none',
-            zIndex: 3,
-          }}
-        />
+
+        {/* Transition to Slide 2 (background.paper) */}
+        <SectionTransition toColor={theme.palette.background.paper} />
       </Box>
 
       {/* Slide 2: Brand Values & Culture */}
       <Box
         sx={{
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: 'calc(100dvh - 80px)',
           display: 'flex',
           alignItems: 'center',
           scrollSnapAlign: 'start',
@@ -702,6 +726,7 @@ export default function WhyBossCargo() {
           overflow: 'hidden'
         }}
       >
+        <BackgroundTexture />
         <AbstractBlob
           color={tertiaryMain}
           top="10%"
@@ -895,18 +920,7 @@ export default function WhyBossCargo() {
             </Grid>
           </Grid>
         </PageContainer>
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '15vh',
-            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.default})`,
-            pointerEvents: 'none',
-            zIndex: 3,
-          }}
-        />
+
       </Box>
     </Box>
   );
