@@ -1,7 +1,7 @@
 'use client';
 
 import { Handshake, Briefcase, Package, Wrench, UtensilsCrossed, DollarSign, Store } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
@@ -16,11 +16,13 @@ import {
   Paper,
   useTheme,
   alpha,
+  Stack,
 } from '@mui/material';
 import { PageContainer, PageHeader } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 import { SECTION_SPACING } from '@/constants/layout';
+import React, { useState } from 'react';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -31,16 +33,30 @@ const BLOB_PATHS = [
 
 const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.08, variant = 0 }: any) => (
   <Box
+    component={motion.div}
+    initial={{ opacity: 0, scale: 0.8, rotate: (rotate || 0) - 10 }}
+    whileInView={{
+      opacity: opacity,
+      scale: [1, 1.1, 1],
+      rotate: [rotate || 0, (rotate || 0) + 10, rotate || 0],
+      y: [0, 30, 0],
+    }}
+    viewport={{ once: false, amount: 0.2 }}
+    transition={{
+      opacity: { duration: 1 },
+      scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+      rotate: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+      y: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+    }}
     sx={{
       position: 'absolute',
       top, left, right, bottom,
       width: size || { xs: '300px', md: '600px' },
       height: size || { xs: '300px', md: '600px' },
       zIndex: 0,
-      opacity,
-      transform: `rotate(${rotate || 0}deg)`,
       pointerEvents: 'none',
-      filter: 'blur(40px)',
+      filter: 'blur(20px)',
+      willChange: 'transform, opacity',
     }}
   >
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
@@ -102,6 +118,7 @@ export default function PartnershipsPage() {
   usePageTitle('Partnerships');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const primaryMain = theme.palette.primary.main;
   const secondaryMain = theme.palette.secondary.main;
@@ -135,6 +152,20 @@ export default function PartnershipsPage() {
     };
   });
 
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % memberships.length);
+  };
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + memberships.length) % memberships.length);
+  };
+
+  const handleDragEnd = (_: any, info: any) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold) handleNext();
+    else if (info.offset.x > threshold) handlePrev();
+  };
+
   return (
     <Box>
       {/* Slide 1: Introduction & Industries */}
@@ -154,17 +185,31 @@ export default function PartnershipsPage() {
         <AbstractBlob color={tertiaryMain} bottom="0%" left="-10%" size="600px" rotate={-20} opacity={0.08} />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <PageHeader
-            title="Strategic Alliances"
-            subtitle={SITE_CONTENT.partnerships.description}
-            bottomSpacing={SECTION_SPACING.medium}
-            sx={{
-              '& .MuiTypography-h2': { fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' } },
-              '& .MuiTypography-h6': { fontSize: { xs: '1rem', md: '1.125rem' }, opacity: 0.8, maxWidth: '700px' }
-            }}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8 }}
+          >
+            <PageHeader
+              title="Strategic Alliances"
+              subtitle={SITE_CONTENT.partnerships.description}
+              bottomSpacing={SECTION_SPACING.medium}
+              sx={{
+                '& .MuiTypography-h2': { fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' } },
+                '& .MuiTypography-h6': { fontSize: { xs: '1rem', md: '1.125rem' }, opacity: 0.8, maxWidth: '700px' }
+              }}
+            />
+          </motion.div>
 
-          <Box sx={{ mt: 2 }}>
+          <Box 
+            component={motion.div}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            sx={{ mt: 2 }}
+          >
             <Typography variant="overline" sx={{ display: 'block', textAlign: 'center', mb: 4, fontWeight: 800, color: 'primary.main', letterSpacing: { xs: 2, md: 4 }, opacity: 0.8, fontSize: { xs: '0.7rem', md: '0.875rem' } }}>
               INDUSTRIES WE SERVE
             </Typography>
@@ -218,7 +263,8 @@ export default function PartnershipsPage() {
                   display: 'flex',
                   gap: '24px',
                   width: 'fit-content',
-                  padding: '0 12px'
+                  padding: '0 12px',
+                  willChange: 'transform'
                 }}
               >
                 {/* Triple the items to ensure seamless overlap */}
@@ -303,14 +349,32 @@ export default function PartnershipsPage() {
           overflow: 'hidden'
         }}
       >
-        <AbstractBlob color={secondaryMain} top="10%" left="-15%" size="900px" rotate={45} opacity={0.08} />
-        <AbstractBlob color={tertiaryMain} bottom="-10%" right="-10%" size="700px" rotate={-15} opacity={0.06} />
+        <AbstractBlob color={secondaryMain} top="10%" left="-15%" size="900px" rotate={45} opacity={0.06} />
+        <AbstractBlob color={tertiaryMain} bottom="-10%" right="-10%" size="700px" rotate={-15} opacity={0.04} />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <Grid container spacing={8} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 2, lg: 1 } }}>
-              <Box sx={{ position: 'relative' }}>
+              <Box 
+                component={motion.div}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: 'transform, opacity' }}
+                sx={{ position: 'relative' }}
+              >
                 <Box
+                  component={motion.div}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.1, 0.15, 0.1],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                   sx={{
                     position: 'absolute',
                     top: -20,
@@ -349,17 +413,26 @@ export default function PartnershipsPage() {
               </Box>
             </Grid>
             <Grid size={{ xs: 12, lg: 6 }} sx={{ order: { xs: 1, lg: 2 } }}>
-              <DecorativeImageFrame theme={theme}>
-                <ImageWithFallback
-                  src={IMAGE_URLS.PARTNERSHIPS_HANDSHAKE}
-                  alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
-                  layout="responsive"
-                  aspectRatio="4:3"
-                  rounded={0}
-                  shadow={0}
-                  hoverZoom
-                />
-              </DecorativeImageFrame>
+              <Box
+                component={motion.div}
+                initial={{ opacity: 0, scale: 0.9, x: 50 }}
+                whileInView={{ opacity: 1, scale: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: 'transform, opacity' }}
+              >
+                <DecorativeImageFrame theme={theme}>
+                  <ImageWithFallback
+                    src={IMAGE_URLS.PARTNERSHIPS_HANDSHAKE}
+                    alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
+                    layout="responsive"
+                    aspectRatio="4:3"
+                    rounded={0}
+                    shadow={0}
+                    hoverZoom
+                  />
+                </DecorativeImageFrame>
+              </Box>
             </Grid>
           </Grid>
         </PageContainer>
@@ -394,11 +467,19 @@ export default function PartnershipsPage() {
           overflow: 'visible'
         }}
       >
-        <AbstractBlob color={primaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.1} />
-        <AbstractBlob color={tertiaryMain} bottom="10%" left="-15%" size="600px" rotate={30} opacity={0.08} />
+        <AbstractBlob color={primaryMain} top="5%" right="-10%" size="800px" rotate={-15} opacity={0.08} />
+        <AbstractBlob color={tertiaryMain} bottom="10%" left="-15%" size="600px" rotate={30} opacity={0.06} />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Box 
+            component={motion.div}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: 'transform, opacity' }}
+            sx={{ textAlign: 'center', mb: 6 }}
+          >
             <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
               ACCREDITATIONS
             </Typography>
@@ -407,59 +488,142 @@ export default function PartnershipsPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={4} sx={{ mb: 8 }}>
-            {memberships.map((membership, index) => (
-              <Grid size={{ xs: 12, md: 4 }} key={index}>
-                <Card
-                  elevation={0}
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    bgcolor: 'background.paper',
-                    border: '1px solid',
-                    borderColor: isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.1),
-                    borderRadius: 4,
-                    transition: 'all 0.3s ease',
-                    '&:hover': { boxShadow: theme.shadows[10], borderColor: primaryMain }
-                  }}
-                >
-                  <Box
-                    sx={{
-                      p: 4,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      height: 160,
-                      position: 'relative',
-                      bgcolor: membership.whiteBackground ? '#fff' : 'transparent',
-                      borderRadius: '16px 16px 0 0'
-                    }}
-                  >
-                    <Box sx={{ position: 'relative', width: '80%', height: '80%', maxHeight: { xs: 80, md: '100%' } }}>
-                      <ImageWithFallback
-                        src={membership.image}
-                        alt={membership.fullName}
-                        layout="fill"
-                        objectFit="contain"
-                      />
-                    </Box>
-                  </Box>
-                  <CardContent sx={{ p: 4, flexGrow: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main', fontWeight: 800, fontSize: { xs: '1rem', md: '1.25rem' } }}>
-                      {membership.fullName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      {membership.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          <Box sx={{
+            position: 'relative',
+            height: { xs: 450, md: 520 },
+            width: '100%',
+            overflow: 'visible',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            perspective: '1500px',
+            mb: 8
+          }}>
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={handleDragEnd}
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                touchAction: 'none'
+              }}
+            >
+              <AnimatePresence initial={false}>
+                {memberships.map((membership, index) => {
+                  let relIndex = (index - activeIndex);
+                  const half = Math.floor(memberships.length / 2);
+                  if (relIndex > half) relIndex -= memberships.length;
+                  if (relIndex < -half) relIndex += memberships.length;
+
+                  const absRel = Math.abs(relIndex);
+                  const isActive = relIndex === 0;
+
+                  // Visibility check - show up to 5 cards for memberships
+                  if (absRel > 2) return null;
+
+                  const baseSpacing = (typeof window !== 'undefined' && window.innerWidth < 1000 ? 160 : 320);
+                  const xOffset = relIndex * baseSpacing;
+                  const yOffset = absRel * absRel * 20;
+                  const rotateZ = relIndex * 8;
+                  const scale = isActive ? 1.05 : (1 - absRel * 0.15);
+                  const opacity = 1 - absRel * 0.3;
+                  const zIndex = 10 - absRel;
+
+                  return (
+                    <motion.div
+                      key={membership.name}
+                      initial={false}
+                      animate={{
+                        x: xOffset,
+                        y: yOffset,
+                        rotateZ: rotateZ,
+                        scale: scale,
+                        opacity: opacity,
+                        zIndex: zIndex
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 200,
+                        damping: 25,
+                        mass: 1
+                      }}
+                      style={{
+                        position: 'absolute',
+                        width: '90%',
+                        maxWidth: 400,
+                        cursor: isActive ? 'default' : 'pointer',
+                        willChange: 'transform, opacity'
+                      }}
+                      onClick={() => {
+                        if (!isActive) setActiveIndex(index);
+                      }}
+                    >
+                      <Card
+                        elevation={0}
+                        sx={{
+                          height: { xs: 380, md: 440 },
+                          display: 'flex',
+                          flexDirection: 'column',
+                          bgcolor: 'background.paper',
+                          border: '1px solid',
+                          borderColor: isActive ? primaryMain : (isDark ? alpha(primaryMain, 0.2) : alpha(primaryMain, 0.1)),
+                          borderRadius: 6,
+                          boxShadow: isActive ? theme.shadows[15] : theme.shadows[5],
+                          overflow: 'hidden',
+                          ...(absRel === 2 && {
+                            maskImage: 'linear-gradient(to top, transparent, black 40%)',
+                            WebkitMaskImage: 'linear-gradient(to top, transparent, black 40%)'
+                          })
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            p: 4,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 180,
+                            position: 'relative',
+                            bgcolor: membership.whiteBackground ? '#fff' : alpha(primaryMain, 0.03),
+                          }}
+                        >
+                          <Box sx={{ position: 'relative', width: '85%', height: '85%' }}>
+                            <ImageWithFallback
+                              src={membership.image}
+                              alt={membership.fullName}
+                              layout="fill"
+                              objectFit="contain"
+                            />
+                          </Box>
+                        </Box>
+                        <CardContent sx={{ p: 4, flexGrow: 1, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <Typography variant="h5" sx={{ mb: 1.5, color: 'primary.main', fontWeight: 900, textAlign: 'center' }}>
+                            {membership.fullName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, textAlign: 'center', fontSize: '1rem' }}>
+                            {membership.description}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </motion.div>
+          </Box>
 
           {/* Opportunities & CTA */}
           <Paper
+            component={motion.div}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8 }}
             elevation={0}
             sx={{
               p: { xs: 4, md: 6 },

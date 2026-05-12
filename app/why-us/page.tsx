@@ -11,9 +11,9 @@ import {
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer } from '../../components/layout';
-import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { motion } from 'framer-motion';
 
 // Abstract squiggly shape for background variety
 const BLOB_PATHS = [
@@ -24,14 +24,27 @@ const BLOB_PATHS = [
 
 const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.12, variant = 0 }: any) => (
   <Box
+    component={motion.div}
+    initial={{ opacity: 0, scale: 0.8, rotate: (rotate || 0) - 10 }}
+    whileInView={{
+      opacity: opacity,
+      scale: [1, 1.1, 1],
+      rotate: [rotate || 0, (rotate || 0) + 10, rotate || 0],
+      y: [0, 30, 0],
+    }}
+    viewport={{ once: false, amount: 0.2 }}
+    transition={{
+      opacity: { duration: 1 },
+      scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+      rotate: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+      y: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+    }}
     sx={{
       position: 'absolute',
       top, left, right, bottom,
       width: size || { xs: '400px', md: '800px' },
       height: size || { xs: '400px', md: '800px' },
       zIndex: 0,
-      opacity,
-      transform: `rotate(${rotate || 0}deg)`,
       pointerEvents: 'none',
       filter: 'blur(3px)',
     }}
@@ -48,11 +61,28 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
 
 const DecorativeImageFrame = ({ children, theme }: any) => {
   const tertiaryMain = (theme.palette as any).tertiary?.main || theme.palette.primary.main;
-  
+
   return (
-    <Box sx={{ position: 'relative', p: 1 }}>
+    <Box
+      component={motion.div}
+      initial={{ opacity: 0, scale: 0.9, x: 20 }}
+      whileInView={{ opacity: 1, scale: 1, x: 0 }}
+      viewport={{ once: false, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      sx={{ position: 'relative', p: 1 }}
+    >
       {/* Emphasized accent border using tertiary */}
       <Box
+        component={motion.div}
+        animate={{
+          rotate: [0, 2, -2, 0],
+          scale: [1, 1.02, 0.98, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
         sx={{
           position: 'absolute',
           inset: -8,
@@ -66,6 +96,16 @@ const DecorativeImageFrame = ({ children, theme }: any) => {
       />
       {/* Secondary background shape */}
       <Box
+        component={motion.div}
+        animate={{
+          x: [0, 10, 0],
+          rotate: [2, 4, 2],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
         sx={{
           position: 'absolute',
           top: 20,
@@ -127,93 +167,99 @@ export default function WhyBossCargo() {
           overflow: 'hidden'
         }}
       >
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          top="-15%" 
-          right="-10%" 
-          size="900px" 
-          rotate={15} 
-          opacity={isDark ? 0.04 : 0.06} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          top="-15%"
+          right="-10%"
+          size="900px"
+          rotate={15}
+          opacity={isDark ? 0.04 : 0.06}
           variant={0}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          bottom="5%" 
-          left="-15%" 
-          size="700px" 
-          rotate={-20} 
-          opacity={isDark ? 0.03 : 0.05} 
+        <AbstractBlob
+          color={tertiaryMain}
+          bottom="5%"
+          left="-15%"
+          size="700px"
+          rotate={-20}
+          opacity={isDark ? 0.03 : 0.05}
           variant={1}
         />
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          top="30%" 
-          left="20%" 
-          size="500px" 
-          rotate={180} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          top="30%"
+          left="20%"
+          size="500px"
+          rotate={180}
+          opacity={isDark ? 0.02 : 0.04}
           variant={2}
         />
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          top="10%" 
-          left="5%" 
-          size="400px" 
-          rotate={45} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          top="10%"
+          left="5%"
+          size="400px"
+          rotate={45}
+          opacity={isDark ? 0.02 : 0.04}
           variant={1}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          top="-5%" 
-          left="40%" 
-          size="300px" 
-          rotate={-15} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={tertiaryMain}
+          top="-5%"
+          left="40%"
+          size="300px"
+          rotate={-15}
+          opacity={isDark ? 0.02 : 0.04}
           variant={0}
         />
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          bottom="-10%" 
-          right="20%" 
-          size="600px" 
-          rotate={90} 
-          opacity={isDark ? 0.03 : 0.05} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          bottom="-10%"
+          right="20%"
+          size="600px"
+          rotate={90}
+          opacity={isDark ? 0.03 : 0.05}
           variant={1}
         />
         {/* Crowded shapes */}
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          bottom="20%" 
-          left="30%" 
-          size="350px" 
-          rotate={110} 
-          opacity={0.03} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          bottom="20%"
+          left="30%"
+          size="350px"
+          rotate={110}
+          opacity={0.03}
           variant={2}
         />
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          top="50%" 
-          right="5%" 
-          size="450px" 
-          rotate={240} 
-          opacity={0.02} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          top="50%"
+          right="5%"
+          size="450px"
+          rotate={240}
+          opacity={0.02}
           variant={0}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          top="5%" 
-          right="35%" 
-          size="250px" 
-          rotate={10} 
-          opacity={0.03} 
+        <AbstractBlob
+          color={tertiaryMain}
+          top="5%"
+          right="35%"
+          size="250px"
+          rotate={10}
+          opacity={0.03}
           variant={1}
         />
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <Grid container spacing={6} alignItems="center">
             {/* Left side: Content */}
             <Grid size={{ xs: 12, md: 7 }}>
-              <Box>
+              <Box
+                component={motion.div}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8 }}
+              >
                 <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2, mb: 1, display: 'block' }}>
                   CORE IDENTITY
                 </Typography>
@@ -225,7 +271,13 @@ export default function WhyBossCargo() {
                 </Typography>
 
                 <Stack spacing={4}>
-                  <Box>
+                  <Box
+                    component={motion.div}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'primary.main', boxShadow: `0 0 15px ${theme.palette.primary.main}` }} />
                       Our Mission
@@ -235,7 +287,13 @@ export default function WhyBossCargo() {
                     </Typography>
                   </Box>
 
-                  <Box>
+                  <Box
+                    component={motion.div}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                  >
                     <Typography variant="h6" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'secondary.main', boxShadow: `0 0 15px ${theme.palette.secondary.main}` }} />
                       Our Dream (Vision)
@@ -290,103 +348,115 @@ export default function WhyBossCargo() {
           position: 'relative'
         }}
       >
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          top="10%" 
-          left="-20%" 
-          size="900px" 
-          rotate={45} 
-          opacity={isDark ? 0.03 : 0.06} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          top="10%"
+          left="-20%"
+          size="900px"
+          rotate={45}
+          opacity={isDark ? 0.03 : 0.06}
           variant={1}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          bottom="-15%" 
-          right="-15%" 
-          size="850px" 
-          rotate={-30} 
-          opacity={isDark ? 0.02 : 0.05} 
+        <AbstractBlob
+          color={tertiaryMain}
+          bottom="-15%"
+          right="-15%"
+          size="850px"
+          rotate={-30}
+          opacity={isDark ? 0.02 : 0.05}
           variant={2}
         />
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          top="40%" 
-          right="10%" 
-          size="600px" 
-          rotate={120} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          top="40%"
+          right="10%"
+          size="600px"
+          rotate={120}
+          opacity={isDark ? 0.02 : 0.04}
           variant={0}
         />
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          bottom="20%" 
-          left="10%" 
-          size="500px" 
-          rotate={-60} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          bottom="20%"
+          left="10%"
+          size="500px"
+          rotate={-60}
+          opacity={isDark ? 0.02 : 0.04}
           variant={2}
         />
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          top="-10%" 
-          right="30%" 
-          size="450px" 
-          rotate={30} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          top="-10%"
+          right="30%"
+          size="450px"
+          rotate={30}
+          opacity={isDark ? 0.02 : 0.04}
           variant={1}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          bottom="10%" 
-          right="40%" 
-          size="350px" 
-          rotate={200} 
-          opacity={isDark ? 0.02 : 0.04} 
+        <AbstractBlob
+          color={tertiaryMain}
+          bottom="10%"
+          right="40%"
+          size="350px"
+          rotate={200}
+          opacity={isDark ? 0.02 : 0.04}
           variant={0}
         />
         {/* Crowded shapes */}
-        <AbstractBlob 
-          color={theme.palette.secondary.main} 
-          top="50%" 
-          left="40%" 
-          size="400px" 
-          rotate={15} 
-          opacity={0.03} 
+        <AbstractBlob
+          color={theme.palette.secondary.main}
+          top="50%"
+          left="40%"
+          size="400px"
+          rotate={15}
+          opacity={0.03}
           variant={1}
         />
-        <AbstractBlob 
-          color={theme.palette.primary.main} 
-          bottom="5%" 
-          left="30%" 
-          size="300px" 
-          rotate={180} 
-          opacity={0.02} 
+        <AbstractBlob
+          color={theme.palette.primary.main}
+          bottom="5%"
+          left="30%"
+          size="300px"
+          rotate={180}
+          opacity={0.02}
           variant={0}
         />
-        <AbstractBlob 
-          color={tertiaryMain} 
-          top="20%" 
-          right="25%" 
-          size="500px" 
-          rotate={70} 
-          opacity={0.03} 
+        <AbstractBlob
+          color={tertiaryMain}
+          top="20%"
+          right="25%"
+          size="500px"
+          rotate={70}
+          opacity={0.03}
           variant={2}
         />
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <Grid container spacing={4}>
             {/* Left: Brand Values */}
             <Grid size={{ xs: 12, md: 7 }}>
-              <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
-                Our Brand Values
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
-                Creating a strong and positive perception of our company in our customers' minds.
-              </Typography>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
+                  Our Brand Values
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
+                  Creating a strong and positive perception of our company in our customers' minds.
+                </Typography>
+              </motion.div>
 
               <Grid container spacing={2}>
                 {values.map((value, index) => (
                   <Grid size={{ xs: 12, sm: 6 }} key={index}>
                     <Paper
+                      component={motion.div}
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                      viewport={{ once: false, amount: 0.2 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
                       elevation={0}
                       sx={{
                         p: 2.5,
@@ -395,12 +465,13 @@ export default function WhyBossCargo() {
                         borderLeft: `4px solid ${index % 2 === 0 ? primaryMain : tertiaryMain}`,
                         borderRadius: '0 12px 12px 0',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': { 
-                          transform: 'translateX(8px)',
+                        '&:hover': {
+                          transform: 'translateX(8px) !important', // Override motion transform if needed, or better, use whileHover
                           bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
                           boxShadow: `0 4px 20px -10px ${theme.palette.primary.main}`
                         }
                       }}
+                      whileHover={{ x: 8 }}
                     >
                       <Typography variant="subtitle1" sx={{ mb: 1, color: index % 2 === 0 ? 'primary.main' : 'text.primary', fontWeight: 700 }}>
                         {value.title}
@@ -416,7 +487,14 @@ export default function WhyBossCargo() {
 
             {/* Right: Culture */}
             <Grid size={{ xs: 12, md: 5 }}>
-              <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Box
+                component={motion.div}
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+              >
                 <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'secondary.main' }}>
                   Our Culture
                 </Typography>
@@ -435,7 +513,19 @@ export default function WhyBossCargo() {
                   <Typography variant="body2" sx={{ lineHeight: 1.7, fontStyle: 'italic', position: 'relative', zIndex: 1 }}>
                     "{SITE_CONTENT.missionVision.culture}"
                   </Typography>
-                  <Box sx={{ position: 'absolute', top: -10, right: -10, width: 60, height: 60, bgcolor: 'tertiary.main', opacity: 0.1, borderRadius: '50%' }} />
+                  <Box
+                    component={motion.div}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.1, 0.2, 0.1],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    sx={{ position: 'absolute', top: -10, right: -10, width: 60, height: 60, bgcolor: 'tertiary.main', opacity: 0.1, borderRadius: '50%' }}
+                  />
                 </Paper>
                 <DecorativeImageFrame theme={theme}>
                   <ImageWithFallback

@@ -17,6 +17,7 @@ import {
 import { SECTION_SPACING } from '../../constants/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { motion } from 'framer-motion';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -27,16 +28,30 @@ const BLOB_PATHS = [
 
 const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.08, variant = 0 }: any) => (
   <Box
+    component={motion.div}
+    initial={{ opacity: 0, scale: 0.8, rotate: (rotate || 0) - 10 }}
+    whileInView={{
+      opacity: opacity,
+      scale: [1, 1.1, 1],
+      rotate: [rotate || 0, (rotate || 0) + 10, rotate || 0],
+      y: [0, 30, 0],
+    }}
+    viewport={{ once: false, amount: 0.2 }}
+    transition={{
+      opacity: { duration: 1 },
+      scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+      rotate: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+      y: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+    }}
     sx={{
       position: 'absolute',
       top, left, right, bottom,
       width: size || { xs: '300px', md: '600px' },
       height: size || { xs: '300px', md: '600px' },
       zIndex: 0,
-      opacity,
-      transform: `rotate(${rotate || 0}deg)`,
       pointerEvents: 'none',
-      filter: 'blur(40px)',
+      filter: 'blur(20px)',
+      willChange: 'transform, opacity',
     }}
   >
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
@@ -53,9 +68,25 @@ const DecorativeImageFrame = ({ children, theme }: any) => {
   const tertiaryMain = (theme.palette as any).tertiary?.main || theme.palette.primary.main;
 
   return (
-    <Box sx={{ position: 'relative', p: 1 }}>
+    <Box 
+      component={motion.div}
+      initial={{ opacity: 0, scale: 0.9, x: 20 }}
+      whileInView={{ opacity: 1, scale: 1, x: 0 }}
+      viewport={{ once: false, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      sx={{ position: 'relative', p: 1 }}
+    >
       {/* Architectural accent borders */}
       <Box
+        component={motion.div}
+        animate={{
+          rotate: [0, 360],
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "linear"
+        }}
         sx={{
           position: 'absolute',
           inset: -12,
@@ -64,14 +95,19 @@ const DecorativeImageFrame = ({ children, theme }: any) => {
           borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
           opacity: 0.2,
           zIndex: 0,
-          animation: 'rotate 20s linear infinite',
-          '@keyframes rotate': {
-            '0%': { transform: 'rotate(0deg)' },
-            '100%': { transform: 'rotate(360deg)' },
-          }
+          willChange: 'transform',
         }}
       />
       <Box
+        component={motion.div}
+        animate={{
+          rotate: [360, 0],
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "linear"
+        }}
         sx={{
           position: 'absolute',
           inset: -6,
@@ -80,11 +116,7 @@ const DecorativeImageFrame = ({ children, theme }: any) => {
           borderRadius: '60% 40% 30% 70% / 60% 60% 40% 40%',
           opacity: 0.1,
           zIndex: 0,
-          animation: 'rotate-reverse 25s linear infinite',
-          '@keyframes rotate-reverse': {
-            '0%': { transform: 'rotate(360deg)' },
-            '100%': { transform: 'rotate(0deg)' },
-          }
+          willChange: 'transform',
         }}
       />
       <Box sx={{ position: 'relative', zIndex: 1, borderRadius: 4, overflow: 'hidden', boxShadow: theme.shadows[10] }}>
@@ -140,16 +172,40 @@ export default function HistoryPage() {
         <AbstractBlob color={secondaryMain} top="20%" left="15%" size="400px" rotate={45} opacity={0.06} />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <PageHeader
-            title="Our Journey"
-            subtitle="Embark on a sustainable and transformative journey with us."
-            bottomSpacing={SECTION_SPACING.medium}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.8 }}
+          >
+            <PageHeader
+              title="Our Journey"
+              subtitle="Embark on a sustainable and transformative journey with us."
+              bottomSpacing={SECTION_SPACING.medium}
+            />
+          </motion.div>
 
           <Grid container spacing={{ xs: 6, lg: 8 }} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }}>
-              <Box sx={{ position: 'relative' }}>
+              <Box 
+                component={motion.div}
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8 }}
+                sx={{ position: 'relative' }}
+              >
                 <Box
+                  component={motion.div}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.1, 0.2, 0.1],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                   sx={{
                     position: 'absolute',
                     top: -20,
@@ -251,13 +307,21 @@ export default function HistoryPage() {
               opacity: 1, // Explicitly not faded
               display: { xs: 'none', md: 'block' },
               zIndex: 4,
-              boxShadow: `0 0 10px ${alpha(isDark ? '#fff' : '#000', 0.1)}`
+              boxShadow: `0 0 10px ${alpha(isDark ? '#fff' : '#000', 0.1)}`,
+              willChange: 'transform, opacity',
             }}
           />
 
           <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 5 }}>
             {slideIndex === 0 && (
-              <Box sx={{ textAlign: 'center', mb: 6 }}>
+              <Box 
+                component={motion.div}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.8 }}
+                sx={{ textAlign: 'center', mb: 6 }}
+              >
                 <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4 }}>
                   CHRONICLES
                 </Typography>
@@ -273,7 +337,17 @@ export default function HistoryPage() {
                 const isLeft = globalIndex % 2 === 0;
 
                 return (
-                  <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center" key={globalIndex}>
+                  <Grid 
+                    container 
+                    spacing={{ xs: 4, md: 8 }} 
+                    alignItems="center" 
+                    key={globalIndex}
+                    component={motion.div}
+                    initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: false, amount: 0.2 }}
+                    transition={{ duration: 0.8, delay: index * 0.2 }}
+                  >
                     {/* Left Position */}
                     <Grid size={{ xs: 12, md: 5 }} sx={{ order: isLeft ? 1 : 3 }}>
                       <Card
@@ -308,6 +382,11 @@ export default function HistoryPage() {
                     {/* Timeline Center Dot */}
                     <Grid size={{ xs: 0, md: 2 }} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center', order: 2 }}>
                       <Box
+                        component={motion.div}
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: false }}
+                        transition={{ type: 'spring', stiffness: 200, delay: 0.5 + index * 0.2 }}
                         sx={{
                           width: 32,
                           height: 32,
@@ -331,7 +410,14 @@ export default function HistoryPage() {
 
               {/* Vision Section (Appended to last milestone slide) */}
               {slideIndex === milestoneChunks.length - 1 && (
-                <Box sx={{ mt: 10, position: 'relative' }}>
+                <Box 
+                  component={motion.div}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 1 }}
+                  sx={{ mt: 10, position: 'relative' }}
+                >
                   <Paper
                     elevation={0}
                     sx={{

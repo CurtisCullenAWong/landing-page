@@ -20,16 +20,16 @@ import Grid from '@mui/material/Grid'; // Using Grid2 for modern layout
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { 
-  Facebook, 
-  Linkedin, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Briefcase, 
-  Users, 
-  Info, 
-  History, 
+import {
+  Facebook,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  Users,
+  Info,
+  History,
   Handshake,
   LayoutDashboard,
   ClipboardList,
@@ -59,7 +59,7 @@ export function Footer() {
 
   // Helper to get icon for nav name
   const getNavIcon = (name: string) => {
-    switch(name) {
+    switch (name) {
       case 'Home': return <LayoutDashboard size={16} />;
       case 'About Us': return <Info size={16} />;
       case 'Why Us': return <Users size={16} />;
@@ -103,21 +103,21 @@ export function Footer() {
     >
       {/* Massive Abstract Background Shapes for Footer */}
       <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        <MassiveAbstractShape 
-          color={theme.palette.primary.main} 
-          opacity={0.55} 
-          style={{ top: '-40%', right: '-30%', width: '170%', height: '200%' }} 
+        <MassiveAbstractShape
+          color={theme.palette.primary.main}
+          opacity={0.55}
+          style={{ top: '-40%', right: '-30%', width: '170%', height: '200%' }}
         />
-        <MassiveAbstractShape 
-          color={theme.palette.tertiary.main} 
-          opacity={0.6} 
+        <MassiveAbstractShape
+          color={theme.palette.tertiary.main}
+          opacity={0.6}
           delay={10}
-          style={{ bottom: '-50%', left: '-30%', width: '180%', height: '210%', transform: 'rotate(25deg)' }} 
+          style={{ bottom: '-50%', left: '-30%', width: '180%', height: '210%', transform: 'rotate(25deg)' }}
         />
-        <FilledAbstractShape 
-          color={theme.palette.tertiary.main} 
-          size={550} 
-          style={{ bottom: '10%', right: '0%', opacity: 0.45 }} 
+        <FilledAbstractShape
+          color={theme.palette.tertiary.main}
+          size={550}
+          style={{ bottom: '10%', right: '0%', opacity: 0.45 }}
         />
       </Box>
 
@@ -234,7 +234,7 @@ export function Footer() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1.5,
-                    '&:hover': { 
+                    '&:hover': {
                       color: theme.palette.common.white,
                       transform: 'translateX(4px)'
                     }
@@ -257,7 +257,7 @@ export function Footer() {
                   alignItems: 'center',
                   gap: 1.5,
                   transition: 'all 0.2s',
-                  '&:hover': { 
+                  '&:hover': {
                     color: theme.palette.common.white,
                     transform: 'translateX(4px)'
                   }
@@ -289,7 +289,7 @@ export function Footer() {
                   alignItems: 'center',
                   gap: 1.5,
                   transition: 'all 0.2s',
-                  '&:hover': { 
+                  '&:hover': {
                     color: theme.palette.common.white,
                     transform: 'translateX(4px)'
                   }
@@ -312,7 +312,7 @@ export function Footer() {
                   alignItems: 'center',
                   gap: 1.5,
                   transition: 'all 0.2s',
-                  '&:hover': { 
+                  '&:hover': {
                     color: theme.palette.common.white,
                     transform: 'translateX(4px)'
                   }
@@ -335,7 +335,7 @@ export function Footer() {
                   alignItems: 'center',
                   gap: 1.5,
                   transition: 'all 0.2s',
-                  '&:hover': { 
+                  '&:hover': {
                     color: theme.palette.common.white,
                     transform: 'translateX(4px)'
                   }
@@ -367,7 +367,7 @@ export function Footer() {
                     alignItems: 'center',
                     gap: 1.5,
                     transition: 'all 0.2s',
-                    '&:hover': { 
+                    '&:hover': {
                       color: theme.palette.common.white,
                       transform: 'translateX(4px)'
                     }
@@ -384,7 +384,7 @@ export function Footer() {
                   <MapPin size={16} />
                 </Box>
                 <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                  Main Office: Brgy. San Dionisio, Parañaque City, Philippines
+                  Main Office: Unit B, Block 3 Lot 6, Angelina Canaynay Ave., BF Martinville Subdivision, Barangay Manuyo Dos, Las Piñas, Metro Manila.
                 </Typography>
               </Box>
             </Stack>

@@ -123,7 +123,7 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
         scale: [1, 1.2, 0.8, 1]
       }}
       transition={{
-        duration: 35 + Math.random() * 20,
+        duration: 45,
         delay,
         repeat: Infinity,
         ease: "easeInOut"

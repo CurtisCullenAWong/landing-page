@@ -3,7 +3,7 @@
 import { Truck, Globe, Users, Award } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Box,
   Container,
@@ -119,14 +119,19 @@ export default function HomePage() {
             {/* Subtle Hero Abstract Shapes */}
             <Box
               component={motion.div}
-              animate={{
+              initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+              whileInView={{
+                opacity: 0.1,
+                scale: 1,
                 y: [0, -20, 0],
                 rotate: [0, 5, 0],
               }}
+              viewport={{ once: false, amount: 0.3 }}
               transition={{
-                duration: 12,
-                repeat: Infinity,
-                ease: "easeInOut"
+                y: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+                rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+                opacity: { duration: 1.5 },
+                scale: { duration: 1.5 },
               }}
               sx={{
                 position: 'absolute',
@@ -136,7 +141,7 @@ export default function HomePage() {
                 height: '300px',
                 borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
                 background: tertiaryMain,
-                opacity: 0.1,
+                opacity: 0,
                 filter: 'blur(60px)',
                 zIndex: 0,
               }}
@@ -159,7 +164,8 @@ export default function HomePage() {
             <Typography
               component={motion.h1}
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
               variant="h1"
               sx={{
@@ -178,7 +184,8 @@ export default function HomePage() {
             <Typography
               component={motion.h3}
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               variant="h3"
               sx={{
@@ -200,7 +207,8 @@ export default function HomePage() {
             <Box
               component={motion.div}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
               transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
               sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}
             >
@@ -286,14 +294,15 @@ export default function HomePage() {
           {/* Massive Squiggly Tertiary Blob */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
-            whileInView={{ opacity: isDark ? 0.12 : 0.18, scale: 1, rotate: -5 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8, rotate: -15, x: 0, y: 0 }}
+            whileInView={{
+              opacity: isDark ? 0.12 : 0.18,
+              scale: 1,
+              rotate: -5,
               x: [0, 30, -20, 0],
               y: [0, -40, 20, 0],
             }}
-            // @ts-ignore
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
               x: { duration: 15, repeat: Infinity, ease: "easeInOut" },
               y: { duration: 18, repeat: Infinity, ease: "easeInOut" },
@@ -315,14 +324,15 @@ export default function HomePage() {
           {/* Massive Squiggly Primary Blob */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, scale: 0.8, rotate: 15 }}
-            whileInView={{ opacity: isDark ? 0.1 : 0.15, scale: 1, rotate: 5 }}
-            transition={{ duration: 1.8, ease: "easeOut" }}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8, rotate: 15, x: 0, y: 0 }}
+            whileInView={{
+              opacity: isDark ? 0.1 : 0.15,
+              scale: 1,
+              rotate: 5,
               x: [0, -40, 30, 0],
               y: [0, 30, -40, 0],
             }}
-            // @ts-ignore
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
               x: { duration: 20, repeat: Infinity, ease: "easeInOut" },
               y: { duration: 16, repeat: Infinity, ease: "easeInOut" },
@@ -344,14 +354,14 @@ export default function HomePage() {
           {/* Additional Primary Squiggle */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, x: -100 }}
-            whileInView={{ opacity: 0.08, x: 0 }}
-            transition={{ duration: 1.2, delay: 0.2 }}
-            animate={{
+            initial={{ opacity: 0, x: -100, rotate: -10, scale: 1 }}
+            whileInView={{
+              opacity: 0.08,
+              x: 0,
               rotate: [-10, -5, -12, -10],
               scale: [1, 1.05, 0.98, 1],
             }}
-            // @ts-ignore
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
               rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
@@ -372,13 +382,13 @@ export default function HomePage() {
           {/* Overlapping Squiggly Accent */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, x: 100 }}
-            whileInView={{ opacity: isDark ? 0.08 : 0.12, x: 0 }}
-            transition={{ duration: 1.2, delay: 0.4 }}
-            animate={{
+            initial={{ opacity: 0, x: 100, y: 0 }}
+            whileInView={{
+              opacity: isDark ? 0.08 : 0.12,
+              x: 0,
               y: [0, 20, -20, 0],
             }}
-            // @ts-ignore
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
               y: { duration: 8, repeat: Infinity, ease: "easeInOut" },
               opacity: { duration: 1.2 },
@@ -397,14 +407,13 @@ export default function HomePage() {
           {/* Decorative Floating Ring (Sharper) */}
           <Box
             component={motion.div}
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 0.2, scale: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
-            animate={{
-              rotate: 360,
+            initial={{ opacity: 0, scale: 0.5, rotate: 0 }}
+            whileInView={{
+              opacity: 0.2,
               scale: [1, 1.1, 1],
+              rotate: [0, 360],
             }}
-            // @ts-ignore
+            viewport={{ once: false, amount: 0.3 }}
             transition={{
               rotate: { duration: 25, repeat: Infinity, ease: "linear" },
               scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
@@ -432,7 +441,7 @@ export default function HomePage() {
                     component={motion.h2}
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false, amount: 0.5 }}
                     transition={{ duration: 0.8 }}
                     variant="h2"
                     sx={{ mb: 3, fontWeight: 600 }}
@@ -443,7 +452,7 @@ export default function HomePage() {
                     component={motion.div}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false, amount: 0.5 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                     sx={{
                       p: 3,
@@ -463,21 +472,23 @@ export default function HomePage() {
                     component={motion.div}
                     initial={{ opacity: 0, scale: 0.9, x: 30 }}
                     whileInView={{ opacity: 1, scale: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false, amount: 0.3 }}
                     transition={{ duration: 1, ease: "easeOut" }}
                     sx={{ position: 'relative', p: 1 }}
                   >
                     {/* Decorative Image Frame */}
                     <Box
                       component={motion.div}
-                      animate={{
+                      whileInView={{
+                        opacity: 0.6,
                         rotate: [0, 5, -5, 0],
                         scale: [1, 1.02, 0.98, 1],
                       }}
+                      viewport={{ once: false, amount: 0.3 }}
                       transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: "easeInOut"
+                        rotate: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                        scale: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                        opacity: { duration: 1 }
                       }}
                       sx={{
                         position: 'absolute',
@@ -530,7 +541,7 @@ export default function HomePage() {
                       component={motion.div}
                       initial={{ opacity: 0, y: 30 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: false, amount: 0.2 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       sx={{
                         height: '100%',
@@ -598,7 +609,7 @@ export default function HomePage() {
                 component={motion.div}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.3 }}
                 transition={{ duration: 0.8 }}
                 sx={{
                   p: 3,
@@ -632,20 +643,6 @@ export default function HomePage() {
                   We grow by empowering our people and our partners, ensuring a logistics experience that is as dependable as it is human.
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <Button
-                    component={Link}
-                    href="/#why-us"
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      bgcolor: 'background.paper',
-                      color: isDark ? 'text.primary' : 'primary.main',
-                      fontWeight: 600,
-                      '&:hover': { bgcolor: isDark ? 'action.hover' : 'action.selected' },
-                    }}
-                  >
-                    Why Choose Us?
-                  </Button>
                   <Button
                     component={Link}
                     href="/#partnerships"

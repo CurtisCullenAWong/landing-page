@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, MapPin, User, Linkedin, ExternalLink, Facebook, Zap, Globe, Award, Clock, Target, Eye } from 'lucide-react';
+import { Mail, Phone, MapPin, User, Linkedin, ExternalLink, Facebook, Zap, Globe, Target } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer, PageHeader } from '../../components/layout';
@@ -122,85 +122,6 @@ export default function AboutPage() {
     else if (info.offset.x > threshold) handlePrev();
   };
 
-  // Shared "Corner Accents" component
-  const CornerAccents = () => (
-    <>
-      {/* Top Left Squiggle */}
-      <Box
-        component={motion.div}
-        animate={{
-          scale: [1, 1.1, 1],
-          rotate: [-15, -12, -15],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        sx={{
-          position: 'absolute',
-          top: -12,
-          left: -12,
-          width: 40,
-          height: 40,
-          bgcolor: alpha(tertiaryMain, 0.25),
-          borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-          zIndex: 0,
-          pointerEvents: 'none',
-          transform: 'rotate(-15deg)'
-        }}
-      />
-      <Box sx={{
-        position: 'absolute',
-        top: -1,
-        left: -1,
-        width: 20,
-        height: 20,
-        borderTop: `3px solid ${tertiaryMain}`,
-        borderLeft: `3px solid ${tertiaryMain}`,
-        borderTopLeftRadius: 'inherit',
-        zIndex: 2,
-        pointerEvents: 'none'
-      }} />
-      {/* Bottom Right Squiggle */}
-      <Box
-        component={motion.div}
-        animate={{
-          scale: [1, 1.15, 1],
-          rotate: [15, 18, 15],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        sx={{
-          position: 'absolute',
-          bottom: -12,
-          right: -12,
-          width: 32,
-          height: 32,
-          bgcolor: alpha(tertiaryMain, 0.2),
-          borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-          zIndex: 0,
-          pointerEvents: 'none',
-          transform: 'rotate(15deg)'
-        }}
-      />
-      <Box sx={{
-        position: 'absolute',
-        bottom: -1,
-        right: -1,
-        width: 20,
-        height: 20,
-        borderBottom: `3px solid ${tertiaryMain}`,
-        borderRight: `3px solid ${tertiaryMain}`,
-        borderBottomRightRadius: 'inherit',
-        zIndex: 2,
-        pointerEvents: 'none'
-      }} />
-    </>
-  );
 
 
   return (
@@ -213,7 +134,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 5, md: 7 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -230,15 +151,19 @@ export default function AboutPage() {
           {/* Massive Squiggly Shape 1 (Teal) */}
           <Box
             component={motion.div}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
+            whileInView={{
+              opacity: 0.12,
+              scale: [1, 1.05, 1],
               y: [0, 40, 0],
               rotate: [-15, -10, -15],
-              scale: [1, 1.05, 1],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut"
+              y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 }
             }}
             sx={{
               position: 'absolute',
@@ -254,15 +179,21 @@ export default function AboutPage() {
           {/* Massive Squiggly Shape 2 (Yellow) */}
           <Box
             component={motion.div}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8, rotate: 20 }}
+            whileInView={{
+              opacity: 0.15,
               x: [0, -30, 0],
               y: [0, 20, 0],
               rotate: [20, 25, 20],
+              scale: [1, 1.02, 1],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "easeInOut"
+              x: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 }
             }}
             sx={{
               position: 'absolute',
@@ -289,7 +220,7 @@ export default function AboutPage() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.3 }}
             transition={{ duration: 0.8 }}
           >
             <PageHeader
@@ -306,107 +237,77 @@ export default function AboutPage() {
           <Grid container spacing={4} alignItems="center">
             {/* Left: Who We Are & Mission/Vision */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Paper
-                component={motion.div}
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                sx={{
-                  p: 2.5,
-                  mb: 1.5,
-                  borderRadius: 1.5,
-                  bgcolor: alpha(isDark ? primaryDark : primaryMain, 0.08),
-                  backdropFilter: 'blur(10px)',
-                  border: `1px solid ${alpha(primaryMain, 0.2)}`,
-                  position: 'relative',
-                  overflow: 'visible'
-                }}
-              >
-                <CornerAccents />
 
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: primaryMain, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Zap size={20} /> At a Glance
-                </Typography>
+              <Stack spacing={4} sx={{ mt: 3 }}>
+                <Box
+                  component={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                >
+                  <Typography variant="body1" sx={{ lineHeight: 1.9, color: 'text.secondary', fontSize: '1.05rem', mb: 2 }}>
+                    Founded in 2014 in Puerto Princesa City, Palawan, <Box component="span" sx={{ fontWeight: 900, color: 'text.primary' }}>Boss Cargo Express (BCE)</Box> has grown from its local roots into a formidable logistics presence across the Philippine archipelago. Our journey is driven by a team of skilled professionals with years of solid experience in ground, sea, and air freight, dedicated to delivering transformative solutions to a diverse range of industries.
+                  </Typography>
+                  <Typography variant="body1" sx={{ lineHeight: 1.9, color: 'text.secondary', fontSize: '1.05rem' }}>
+                    Our commitment to expansion and sustainability allows us to surmount unforeseen challenges through sound financial planning and effective resource management.
+                  </Typography>
+                </Box>
+
                 <Grid container spacing={2}>
                   {[
-                    { icon: <Clock size={20} />, label: 'Since 2014', sub: 'A decade of logistics excellence.' },
-                    { icon: <Globe size={20} />, label: 'Nationwide', sub: 'Network across the archipelago.' },
-                    { icon: <Award size={20} />, label: 'Expert Team', sub: 'Years of solid freight experience.' },
-                    { icon: <Zap size={20} />, label: 'CANI Driven', sub: 'Constant and never-ending improvement.' },
-                  ].map((stat, i) => (
-                    <Grid size={{ xs: 6 }} key={i}>
+                    {
+                      title: 'Strategic Roots',
+                      text: 'From our 2014 origins in Palawan to a nationwide network serving various industries.',
+                      icon: <Globe size={18} />
+                    },
+                    {
+                      title: 'Expert Solutions',
+                      text: 'Multimodal freight handling powered by a team with years of deep operational experience.',
+                      icon: <Zap size={18} />
+                    },
+                    {
+                      title: 'Future Readiness',
+                      text: 'Adopting tech-driven supply chain strategies to ensure long-term enterprise sustainability.',
+                      icon: <Target size={18} />
+                    }
+                  ].map((point, i) => (
+                    <Grid size={{ xs: 12, sm: 4 }} key={i}>
                       <Box
                         component={motion.div}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
-                        sx={{ p: 1.5, borderRadius: 1, bgcolor: alpha(primaryMain, 0.05), border: `1px solid ${alpha(primaryMain, 0.1)}` }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: false, amount: 0.3 }}
+                        transition={{ duration: 0.6, delay: 0.4 + i * 0.1 }}
+                        sx={{
+                          p: 2.5,
+                          height: '100%',
+                          borderRadius: 2,
+                          bgcolor: alpha(isDark ? '#fff' : '#000', 0.03),
+                          borderLeft: `4px solid ${i % 2 === 0 ? primaryMain : tertiaryMain}`,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            bgcolor: alpha(i % 2 === 0 ? primaryMain : tertiaryMain, 0.05),
+                            transform: 'translateY(-5px)'
+                          }
+                        }}
                       >
-                        <Box sx={{ color: primaryMain, mb: 0.5 }}>{stat.icon}</Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: '0.8125rem' }}>{stat.label}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.2 }}>{stat.sub}</Typography>
+                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                          <Box sx={{ color: i % 2 === 0 ? primaryMain : tertiaryMain, display: 'flex' }}>
+                            {point.icon}
+                          </Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 2 }}>
+                            {point.title}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', lineHeight: 1.6 }}>
+                          {point.text}
+                        </Typography>
                       </Box>
                     </Grid>
                   ))}
                 </Grid>
-              </Paper>
-
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Card
-                    component={motion.div}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.6 }}
-                    sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}
-                  >
-                    <CornerAccents />
-
-                    <CardContent sx={{ p: 2.5 }}>
-                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
-                        <Box sx={{ p: 1, borderRadius: 1, bgcolor: alpha(primaryMain, 0.1), color: primaryMain }}>
-                          <Target size={18} />
-                        </Box>
-                        <Typography variant="subtitle2" sx={{ color: primaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-                          Mission
-                        </Typography>
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                        Empowering businesses through customized, tech-driven, and sustainable logistics solutions.
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Card
-                    component={motion.div}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.8 }}
-                    sx={{ height: '100%', position: 'relative', borderRadius: 1.5, bgcolor: isDark ? 'action.hover' : 'background.paper', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}
-                  >
-                    <CornerAccents />
-
-                    <CardContent sx={{ p: 2.5 }}>
-                      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
-                        <Box sx={{ p: 1, borderRadius: 1, bgcolor: alpha(tertiaryMain, 0.1), color: tertiaryMain }}>
-                          <Eye size={18} />
-                        </Box>
-                        <Typography variant="subtitle2" sx={{ color: tertiaryMain, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>
-                          Vision
-                        </Typography>
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                        To be the country's preeminent and technologically driven logistics leader.
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
+              </Stack>
             </Grid>
 
             {/* Right: Hero Image with Offset Decorative Frame */}
@@ -415,21 +316,24 @@ export default function AboutPage() {
                 component={motion.div}
                 initial={{ opacity: 0, scale: 0.9, x: 50 }}
                 whileInView={{ opacity: 1, scale: 1, x: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.3 }}
                 transition={{ duration: 1, ease: "easeOut" }}
                 sx={{ position: 'relative', p: 1 }}
               >
                 {/* Decorative Squiggly Frame */}
                 <Box
                   component={motion.div}
-                  animate={{
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{
+                    opacity: 0.6,
                     rotate: [0, 5, -5, 0],
                     scale: [1, 1.05, 0.95, 1],
                   }}
+                  viewport={{ once: false, amount: 0.3 }}
                   transition={{
-                    duration: 10,
-                    repeat: Infinity,
-                    ease: "easeInOut"
+                    rotate: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                    scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                    opacity: { duration: 1 }
                   }}
                   sx={{
                     position: 'absolute',
@@ -482,7 +386,7 @@ export default function AboutPage() {
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
           bgcolor: paperColor,
-          py: { xs: 5, md: 7 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'visible'
         }}
@@ -499,15 +403,19 @@ export default function AboutPage() {
           {/* Massive Squiggly Shape (Yellow) */}
           <Box
             component={motion.div}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8, rotate: 15 }}
+            whileInView={{
+              opacity: 0.12,
               y: [0, -30, 0],
               rotate: [15, 10, 15],
               scale: [1, 1.02, 1],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut"
+              y: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 }
             }}
             sx={{
               position: 'absolute',
@@ -523,15 +431,21 @@ export default function AboutPage() {
           {/* Organic Shape (Teal) */}
           <Box
             component={motion.div}
-            animate={{
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{
+              opacity: 0.15,
               x: [0, 40, 0],
               y: [0, 20, 0],
               rotate: [0, -5, 0],
+              scale: [1, 1.05, 1],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 22,
-              repeat: Infinity,
-              ease: "easeInOut"
+              x: { duration: 22, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 22, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 22, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 22, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.2 }
             }}
             sx={{
               position: 'absolute',
@@ -549,7 +463,7 @@ export default function AboutPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false, amount: 0.3 }}
             transition={{ duration: 0.8 }}
           >
             <PageHeader
@@ -804,7 +718,7 @@ export default function AboutPage() {
           alignItems: 'center',
           scrollSnapAlign: 'start',
           scrollSnapStop: 'always',
-          py: { xs: 5, md: 7 },
+          py: { xs: 10, md: 15 },
           position: 'relative',
           overflow: 'hidden'
         }}
@@ -821,259 +735,244 @@ export default function AboutPage() {
           {/* Massive Organic Shape (Teal) */}
           <Box
             component={motion.div}
-            animate={{
-              x: [0, 30, 0],
-              y: [0, -20, 0],
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{
+              opacity: 0.18,
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+              scale: [1, 1.05, 1],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut"
+              x: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              y: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 25, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.5 }
             }}
             sx={{
               position: 'absolute',
-              top: '-10%',
-              left: '-10%',
-              width: '1000px',
-              height: '1200px',
-              bgcolor: alpha(primaryMain, 0.1),
+              top: '-20%',
+              left: '-15%',
+              width: '1800px',
+              height: '1500px',
+              bgcolor: alpha(primaryMain, 0.18),
               borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
-              maskImage: 'linear-gradient(to right, black, transparent)',
+              maskImage: 'linear-gradient(to bottom right, black, transparent 70%)',
             }}
           />
           {/* Secondary Squiggle (Yellow) */}
           <Box
             component={motion.div}
-            animate={{
-              rotate: [-10, -5, -10],
-              scale: [1, 1.08, 1],
+            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+            whileInView={{
+              opacity: 0.12,
+              rotate: [-10, -5, -12, -10],
+              scale: [1, 1.1, 1],
+              x: [0, -40, 0],
             }}
+            viewport={{ once: false, amount: 0.2 }}
             transition={{
-              duration: 22,
-              repeat: Infinity,
-              ease: "easeInOut"
+              rotate: { duration: 28, repeat: Infinity, ease: "easeInOut" },
+              scale: { duration: 28, repeat: Infinity, ease: "easeInOut" },
+              x: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1.5 }
             }}
             sx={{
               position: 'absolute',
-              bottom: '-20%',
-              right: '-5%',
-              width: '800px',
-              height: '800px',
-              bgcolor: alpha(tertiaryMain, 0.08),
+              bottom: '-25%',
+              right: '-10%',
+              width: '1400px',
+              height: '1200px',
+              bgcolor: alpha(tertiaryMain, 0.12),
               borderRadius: '50% 50% 20% 80% / 25% 80% 20% 75%',
-              transform: 'rotate(-10deg)'
+              transform: 'rotate(-10deg)',
+              filter: 'blur(40px)'
             }}
           />
         </Box>
 
-        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
-          <Box
-            component={motion.div}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            sx={{
-              p: { xs: 2.5, sm: 3, md: 4 },
-              mb: { xs: 3, md: 4 },
-              borderRadius: 2,
-              background: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: 8,
-              borderLeft: `4px solid ${tertiaryMain}`
-            }}
-          >
-            {/* Tertiary Squiggle Overlay */}
-            <Box sx={{
-              position: 'absolute',
-              top: '-15%',
-              right: '-5%',
-              width: '300px',
-              height: '300px',
-              bgcolor: alpha(tertiaryMain, 0.15),
-              borderRadius: '40% 60% 70% 30% / 30% 30% 70% 70%',
-              zIndex: 0,
-              transform: 'rotate(15deg)',
-            }} />
-            <Box sx={{
-              position: 'absolute',
-              bottom: '-20%',
-              left: '20%',
-              width: '150px',
-              height: '150px',
-              bgcolor: alpha(tertiaryMain, 0.1),
-              borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-              zIndex: 0,
-            }} />
-
-            <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography variant="h3" sx={{
-                fontWeight: 900,
-                mb: 1,
-                textTransform: 'uppercase',
-                letterSpacing: -1,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }
-              }}>
-                Get In Touch
-              </Typography>
-              <Typography variant="h6" sx={{
-                opacity: 0.9,
-                fontWeight: 400,
-                maxWidth: 600,
-                fontSize: { xs: '0.9375rem', sm: '1.125rem', md: '1.25rem' }
-              }}>
-                We're ready to handle your logistics needs with precision and care.
-              </Typography>
-            </Box>
-          </Box>
-
-
+        <PageContainer maxWidth="xl" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="stretch">
+            {/* Column 1: Get In Touch Banner */}
+            <Grid
+              size={{ xs: 12, md: 4, lg: 3.5 }}
+              component={motion.div}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Box
+                sx={{
+                  p: { xs: 4, md: 6, lg: 8 },
+                  height: '100%',
+                  borderRadius: 3,
+                  background: `linear-gradient(135deg, ${primaryMain} 0%, ${primaryDark} 100%)`,
+                  color: 'white',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxShadow: 8,
+                  borderLeft: `4px solid ${tertiaryMain}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}
+              >
+                {/* Tertiary Squiggle Overlay */}
+                <Box sx={{
+                  position: 'absolute',
+                  top: '-15%',
+                  right: '-5%',
+                  width: '200px',
+                  height: '200px',
+                  bgcolor: alpha(tertiaryMain, 0.15),
+                  borderRadius: '40% 60% 70% 30% / 30% 30% 70% 70%',
+                  zIndex: 0,
+                  transform: 'rotate(15deg)',
+                }} />
+
+                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                  <Typography variant="h3" sx={{
+                    fontWeight: 900,
+                    mb: 2,
+                    textTransform: 'uppercase',
+                    letterSpacing: -1,
+                    fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                    lineHeight: 1
+                  }}>
+                    Get In <br /> Touch
+                  </Typography>
+                  <Typography variant="body1" sx={{
+                    opacity: 0.9,
+                    fontWeight: 400,
+                    fontSize: { xs: '0.9375rem', md: '1.125rem' }
+                  }}>
+                    We're ready to handle your logistics needs with precision and care.
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+
             {offices.map((office, index) => (
               <React.Fragment key={index}>
-                {/* Left side: Contact Details */}
+                {/* Column 2: Contact Details */}
                 <Grid
-                  size={{ xs: 12, md: 5 }}
+                  size={{ xs: 12, md: 4, lg: 4 }}
                   component={motion.div}
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false, amount: 0.3 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <Stack spacing={3} sx={{ height: '100%' }}>
+                  <Stack spacing={4} sx={{ height: '100%', justifyContent: 'center' }}>
                     <Box>
                       <Typography variant="h4" sx={{
                         color: primaryMain,
                         fontWeight: 800,
-                        mb: 1,
+                        mb: 2,
                         textTransform: 'uppercase',
                         letterSpacing: -1,
-                        fontSize: { xs: '1.75rem', sm: '2rem', md: '2.25rem' }
+                        fontSize: { xs: '1.75rem', sm: '2.25rem' }
                       }}>
                         {office.name}
                       </Typography>
-                      <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 400 }}>
-                        Corporate headquarters providing comprehensive logistics solutions.
-                      </Typography>
                     </Box>
 
-                    <Stack spacing={2}>
+                    <Stack spacing={3}>
                       {/* Address */}
                       <Paper variant="outlined" sx={{
-                        p: 2,
+                        p: 3,
                         borderRadius: 2,
                         bgcolor: alpha(primaryMain, 0.03),
-                        borderColor: alpha(primaryMain, 0.2),
-                        position: 'relative'
+                        borderColor: alpha(primaryMain, 0.2)
                       }}>
                         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: primaryMain, color: 'white', display: 'flex', boxShadow: 2 }}>
-                            <MapPin size={24} />
+                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: primaryMain, color: 'white', display: 'flex' }}>
+                            <MapPin size={20} />
                           </Box>
                           <Box>
-                            <Typography variant="overline" sx={{ fontWeight: 800, color: tertiaryDark, lineHeight: 1 }}>Location</Typography>
-                            <Typography variant="body1" sx={{ fontWeight: 700, mt: 0.5 }}>{office.address}</Typography>
-                            <Typography variant="body2" color="text.secondary">{office.city}</Typography>
+                            <Typography variant="caption" sx={{ fontWeight: 800, color: tertiaryDark, display: 'block', lineHeight: 1 }}>Location</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.5 }}>{office.address}</Typography>
+                            <Typography variant="caption" color="text.secondary">{office.city}</Typography>
                           </Box>
                         </Box>
                       </Paper>
 
                       {/* Phone Numbers */}
                       <Paper variant="outlined" sx={{
-                        p: 2,
+                        p: 3,
                         borderRadius: 2,
                         bgcolor: alpha(tertiaryMain, 0.03),
                         borderColor: alpha(tertiaryMain, 0.2)
                       }}>
-                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex', boxShadow: 2, alignSelf: 'flex-start' }}>
-                            <Phone size={24} />
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex' }}>
+                            <Phone size={20} />
                           </Box>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="overline" sx={{ fontWeight: 800, color: primaryDark, lineHeight: 1 }}>Communication</Typography>
-                            <Grid container spacing={2} sx={{ mt: 1 }}>
-                              <Grid size={6}>
-                                <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 700, display: 'block' }}>General</Typography>
-                                <Typography variant="body1" sx={{ fontWeight: 700 }}>{office.phone}</Typography>
-                              </Grid>
-                              <Grid size={6}>
-                                <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 700, display: 'block' }}>Cust. Service</Typography>
-                                <Typography variant="body1" sx={{ fontWeight: 700 }}>{office.customerService}</Typography>
-                              </Grid>
-                            </Grid>
+                            <Typography variant="caption" sx={{ fontWeight: 800, color: primaryDark, display: 'block', lineHeight: 1 }}>Communication</Typography>
+                            <Stack spacing={0.5} sx={{ mt: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>{office.phone}</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>{office.customerService}</Typography>
+                            </Stack>
                           </Box>
-                        </Box>
-                        <Divider sx={{ my: 1.5, opacity: 0.2 }} />
-                        <Box sx={{ pl: 5 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.disabled', display: 'block', mb: 0.5 }}>Mobile Contacts</Typography>
-                          <Stack direction="row" spacing={3}>
-                            {office.mobile.map((num, i) => (
-                              <Typography key={i} variant="body1" sx={{ fontWeight: 800, color: primaryMain }}>{num}</Typography>
-                            ))}
-                          </Stack>
                         </Box>
                       </Paper>
 
                       {/* Emails & Socials */}
-                      <Box sx={{ px: 1 }}>
-                        <Grid container spacing={3} alignItems="center">
-                          <Grid size={7}>
-                            <Stack spacing={1}>
-                              {[office.email, 'people@bosscargo.express'].map((email, i) => (
-                                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                  <Mail size={16} color={primaryMain} />
-                                  <Typography component="a" href={`mailto:${email}`} sx={{ textDecoration: 'none', color: 'text.primary', fontWeight: 700, '&:hover': { color: primaryMain } }}>
-                                    {email}
-                                  </Typography>
-                                </Box>
-                              ))}
-                            </Stack>
-                          </Grid>
-                          <Grid size={5}>
-                            <Stack direction="row" spacing={2} justifyContent="flex-end">
-                              {[
-                                { icon: <Linkedin size={22} />, url: "https://www.linkedin.com/company/boss-cargo-express" },
-                                { icon: <Facebook size={22} />, url: "https://www.facebook.com/ikawangbossko20" },
-                                { icon: <ExternalLink size={22} />, url: "https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs" }
-                              ].map((social, i) => (
-                                <Typography key={i} component="a" href={social.url} target="_blank" sx={{ color: 'text.secondary', transition: 'color 0.2s', '&:hover': { color: primaryMain } }}>
-                                  {social.icon}
-                                </Typography>
-                              ))}
-                            </Stack>
-                          </Grid>
-                        </Grid>
+                      <Box sx={{ px: 1, pt: 1 }}>
+                        <Stack spacing={2}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <Mail size={16} color={primaryMain} />
+                            <Typography component="a" href={`mailto:${office.email}`} variant="body2" sx={{ textDecoration: 'none', color: 'text.primary', fontWeight: 700, '&:hover': { color: primaryMain } }}>
+                              {office.email}
+                            </Typography>
+                          </Box>
+                          <Stack direction="row" spacing={2.5}>
+                            {[
+                              { icon: <Linkedin size={20} />, url: "https://www.linkedin.com/company/boss-cargo-express" },
+                              { icon: <Facebook size={20} />, url: "https://www.facebook.com/ikawangbossko20" },
+                              { icon: <ExternalLink size={20} />, url: "https://ph.indeed.com/cmp/Boss-Cargo-Express-3/jobs" }
+                            ].map((social, i) => (
+                              <Typography key={i} component="a" href={social.url} target="_blank" sx={{ color: 'text.secondary', transition: 'color 0.2s', '&:hover': { color: primaryMain } }}>
+                                {social.icon}
+                              </Typography>
+                            ))}
+                          </Stack>
+                        </Stack>
                       </Box>
                     </Stack>
                   </Stack>
                 </Grid>
 
+                {/* Column 3: Map */}
                 <Grid
-                  size={{ xs: 12, md: 7 }}
+                  size={{ xs: 12, md: 4, lg: 4.5 }}
                   component={motion.div}
                   initial={{ opacity: 0, x: 30 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false, amount: 0.3 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
-                  <Box sx={{ position: 'relative', height: '100%', minHeight: { xs: 300, md: 500 } }}>
+                  <Box sx={{ position: 'relative', height: '100%', minHeight: { xs: 400, md: 550, lg: 650 } }}>
                     {/* Decorative Squiggly Frame for Map */}
                     <Box
                       component={motion.div}
-                      animate={{
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{
+                        opacity: 1,
                         rotate: [0, -3, 3, 0],
                         scale: [1, 1.02, 0.98, 1],
                       }}
+                      viewport={{ once: false, amount: 0.3 }}
                       transition={{
-                        duration: 12,
-                        repeat: Infinity,
-                        ease: "easeInOut"
+                        rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+                        scale: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+                        opacity: { duration: 1 }
                       }}
                       sx={{
                         position: 'absolute',
-                        inset: '20px -20px -20px 20px',
+                        inset: '15px -15px -15px 15px',
                         border: `2px solid ${tertiaryMain}`,
                         borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
                         zIndex: 0
@@ -1251,10 +1150,10 @@ export default function AboutPage() {
                         fontSize: '1.125rem',
                         color: 'text.primary',
                         flexGrow: 1,
-                        '& h1, & h2, & h3, & h4': { 
-                          mt: 2, 
-                          mb: 1.5, 
-                          fontWeight: 900, 
+                        '& h1, & h2, & h3, & h4': {
+                          mt: 2,
+                          mb: 1.5,
+                          fontWeight: 900,
                           color: 'text.primary',
                           lineHeight: 1.2
                         },
@@ -1265,33 +1164,33 @@ export default function AboutPage() {
                         '& p': { mb: 2 },
                         '& strong, & b': { fontWeight: 900, color: theme.palette.text.primary },
                         '& em, & i': { fontStyle: 'italic' },
-                        '& ul, & ol': { 
-                          mb: 2, 
+                        '& ul, & ol': {
+                          mb: 2,
                           pl: 3,
                           listStyleType: 'disc'
                         },
                         '& ol': {
                           listStyleType: 'decimal'
                         },
-                        '& li': { 
+                        '& li': {
                           mb: 1,
                           display: 'list-item'
                         },
-                        '& blockquote': { 
-                          borderLeft: `4px solid ${primaryMain}`, 
-                          pl: 3, 
-                          py: 1.5, 
-                          m: 0, 
-                          mb: 3, 
+                        '& blockquote': {
+                          borderLeft: `4px solid ${primaryMain}`,
+                          pl: 3,
+                          py: 1.5,
+                          m: 0,
+                          mb: 3,
                           bgcolor: alpha(primaryMain, 0.05),
                           borderRadius: '0 8px 8px 0',
                           fontStyle: 'italic'
                         },
-                        '& code': { 
-                          bgcolor: alpha(theme.palette.divider, 0.4), 
-                          px: 1, 
-                          py: 0.5, 
-                          borderRadius: 1, 
+                        '& code': {
+                          bgcolor: alpha(theme.palette.divider, 0.4),
+                          px: 1,
+                          py: 0.5,
+                          borderRadius: 1,
                           fontFamily: 'monospace',
                           fontSize: '0.9em'
                         },
@@ -1303,8 +1202,8 @@ export default function AboutPage() {
                           mb: 4,
                           '& code': { bgcolor: 'transparent', p: 0 }
                         },
-                        '& img': { 
-                          maxWidth: '100%', 
+                        '& img': {
+                          maxWidth: '100%',
                           borderRadius: 2,
                           boxShadow: 4,
                           my: 4
