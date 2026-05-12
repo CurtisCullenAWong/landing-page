@@ -355,7 +355,11 @@ export default function AdminPage() {
 
       // Validate URLs if provided
       if (entry.application_url && !isValidUrl(entry.application_url)) {
-        setFormError('Please enter a valid Application URL');
+        setFormError('Please enter a valid Internal Application URL');
+        return;
+      }
+      if (entry.external_application_url && !isValidUrl(entry.external_application_url)) {
+        setFormError('Please enter a valid External Application URL (include https://)');
         return;
       }
 
@@ -378,15 +382,20 @@ export default function AdminPage() {
         work_setup: sanitizeString(entry.work_setup) || undefined,
         job_level: sanitizeString(entry.job_level) || undefined,
         schedule: sanitizeString(entry.schedule) || undefined,
-        application_email: sanitizeString(entry.application_email) || undefined,
-        external_application_url: entry.external_application_url.trim() || undefined,
+        application_email: sanitizeString(entry.application_email) || null,
+        external_application_url: entry.external_application_url.trim() || null,
         featured: entry.featured,
         published_at: entry.published_at ? new Date(entry.published_at).toISOString() : undefined,
         expires_at: entry.expires_at ? new Date(entry.expires_at).toISOString() : undefined,
       };
-      updateJob(editingJob.id, jobData);
-      setEditingJob(null);
-      resetForm();
+      try {
+        await updateJob(editingJob.id, jobData);
+        setEditingJob(null);
+        resetForm();
+      } catch (error) {
+        console.error('Failed to update job:', error);
+        setFormError(error instanceof Error ? error.message : 'An error occurred while updating the job');
+      }
     } else {
       // Bulk create mode
       const jobsToAdd = jobEntries

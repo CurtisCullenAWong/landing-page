@@ -19,6 +19,8 @@ import JobsOfficeEnvironment from '@/assets/images/careers/JOBS_OFFICE_ENVIRONME
 
 import WhyUsValues from '@/assets/images/why-us/WHY_US_VALUES.jpg';
 import WhyUsCulture from '@/assets/images/why-us/WHY_US_CULTURE.jpg';
+import PhMap from '@/assets/images/ph.svg';
+import BossCargoIcon from '@/assets/images/bosscargo.png';
 
 import JobDetailsProfessional from '@/assets/images/job-details/JOB_DETAILS_PROFESSIONAL.jpg';
 
@@ -32,6 +34,7 @@ export const IMAGE_URLS = {
   LOGO: Logo,
   LOGO_ALT: LogoAlt,
   FAVICON: '/favicon.ico',
+  BOSS_CARGO_ICON: BossCargoIcon,
 
 
   // Hero & Landing Images
@@ -66,6 +69,7 @@ export const IMAGE_URLS = {
   // Why Us Page
   WHY_US_VALUES: WhyUsValues,
   WHY_US_CULTURE: WhyUsCulture,
+  PH_MAP: PhMap,
 } as const;
 
 /**
@@ -127,6 +131,14 @@ export const IMAGE_METADATA = {
   [(IMAGE_URLS.MEMBERSHIP_JCTRANS as any).src || IMAGE_URLS.MEMBERSHIP_JCTRANS]: {
     alt: 'JCtrans Logo',
     description: 'JCtrans Network-International Freight Forwarders Network logo',
+  },
+  [(IMAGE_URLS.PH_MAP as any).src || IMAGE_URLS.PH_MAP]: {
+    alt: 'Philippine Map',
+    description: 'Map of the Philippines showing nationwide reach',
+  },
+  [(IMAGE_URLS.BOSS_CARGO_ICON as any).src || IMAGE_URLS.BOSS_CARGO_ICON]: {
+    alt: 'Boss Cargo Icon',
+    description: 'Company brand icon for markers and highlights',
   },
 } as const;
 

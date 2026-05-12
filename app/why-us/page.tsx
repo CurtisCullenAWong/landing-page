@@ -144,16 +144,369 @@ export default function WhyBossCargo() {
 
   // Defensive Theme Extraction
   const primaryMain = theme.palette.primary?.main || '#00A39D';
-  const primaryDark = theme.palette.primary?.dark || '#007A76';
   const secondaryMain = theme.palette.secondary?.main || '#202945';
-  const secondaryDark = theme.palette.secondary?.dark || '#111626';
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
-  const tertiaryDark = (theme.palette as any).tertiary?.dark || primaryDark;
 
   const values = SITE_CONTENT.missionVision.values;
 
+  const COVERAGE_POINTS = [
+    // North Luzon
+    { name: 'Abra', x: 45, y: 23 },
+    { name: 'Aparri', x: 53, y: 20 }, // Moved Inland
+    { name: 'Baguio', x: 45, y: 30 },
+    { name: 'Ilocos Sur', x: 42, y: 25 },
+    { name: 'Ilocos Norte', x: 45, y: 20 }, // Moved Inland
+    { name: 'Cauayan', x: 56, y: 28 },
+    { name: 'Isabela', x: 57, y: 30 },
+    { name: 'La Union', x: 43, y: 28 },
+    { name: 'Solano NV', x: 51, y: 35 },
+    { name: 'Tuguegarao', x: 55, y: 22 },
+    { name: 'Vigan', x: 42, y: 23 },
+    // Central Luzon
+    { name: 'Bataan', x: 43, y: 44 },
+    { name: 'Bulacan', x: 47, y: 43 },
+    { name: 'Zambales', x: 41, y: 40 },
+    { name: 'Nueva Ecija', x: 49, y: 37 },
+    { name: 'Olongapo', x: 42, y: 42 },
+    { name: 'Pampanga', x: 45, y: 42 },
+    { name: 'Pangasinan', x: 44, y: 34 },
+    { name: 'Santiago', x: 55, y: 32 },
+    { name: 'Tarlac', x: 46, y: 38 },
+    { name: 'Aurora', x: 55, y: 38 },
+    // Metro Manila
+    { name: 'Parañaque Hub', x: 46.5, y: 45.5 },
+    { name: 'Taytay Hub', x: 48.5, y: 45 },
+    { name: 'Las Piñas', x: 46.2, y: 46.5 },
+    // South Luzon
+    { name: 'Camarines Norte', x: 57, y: 47 },
+    { name: 'Camarines Sur', x: 60, y: 51 },
+    { name: 'Legaspi', x: 64, y: 55 },
+    { name: 'Lucena', x: 51, y: 48 },
+    { name: 'Masbate', x: 64, y: 62 },
+    { name: 'Naga', x: 61, y: 51 },
+    { name: 'Palawan', x: 30, y: 76 }, // Moved Inland
+    { name: 'Quezon Province', x: 53, y: 46 },
+    { name: 'San Jose Occidental Mindoro', x: 43, y: 58 },
+    { name: 'Calapan Oriental Mindoro', x: 46, y: 52 },
+    // Visayas
+    { name: 'Bacolod', x: 55, y: 71 },
+    { name: 'Cebu', x: 65, y: 72 },
+    { name: 'Dumaguete', x: 59, y: 81 },
+    { name: 'Iloilo', x: 53, y: 71 },
+    { name: 'Kalibo', x: 52, y: 63 },
+    { name: 'Tacloban', x: 72, y: 68 }, // Moved Inland
+    { name: 'Tagbilaran', x: 66, y: 78 },
+    { name: 'Roxas', x: 57, y: 63 },
+    // Mindanao
+    { name: 'Butuan', x: 75, y: 84 }, // Moved Inland
+    { name: 'Cagayan de Oro', x: 68, y: 85 },
+    { name: 'Cotabato', x: 65, y: 93 },
+    { name: 'Davao', x: 78, y: 92 },
+    { name: 'Dipolog', x: 56, y: 83 },
+    { name: 'General Santos', x: 73, y: 97 },
+    { name: 'Ozamis', x: 61, y: 87 },
+    { name: 'Surigao', x: 76, y: 81 }, // Moved Inland
+    { name: 'Zamboanga', x: 48, y: 89 }, // Moved Inland
+    { name: 'Pagadian', x: 57, y: 90 },
+  ].map((p, i) => ({ ...p, delay: (i % 30) * 0.03 }));
+
   return (
-    <Box>
+    <Box sx={{
+      height: 'calc(100vh - 80px)',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      scrollSnapType: 'y mandatory',
+      scrollBehavior: 'smooth',
+      '&::-webkit-scrollbar': { display: 'none' },
+      msOverflowStyle: 'none',
+      scrollbarWidth: 'none'
+    }}>
+      {/* Hero Slide: Nationwide Presence */}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 80px)',
+          display: 'flex',
+          alignItems: 'center',
+          scrollSnapAlign: 'start',
+          scrollSnapStop: 'always',
+          py: { xs: 8, md: 0 },
+          px: { xs: 2, md: 6 },
+          position: 'relative',
+          overflow: 'hidden',
+          bgcolor: 'background.default'
+        }}
+      >
+        <PageContainer maxWidth="lg" disableVerticalPadding sx={{ position: 'relative', zIndex: 2 }}>
+          <Grid container spacing={4} alignItems="center">
+            <Grid size={{ xs: 12, md: 7 }}>
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: 'primary.main',
+                    fontWeight: 800,
+                    letterSpacing: 4,
+                    display: 'block',
+                    mb: 2
+                  }}
+                >
+                  Our Reach
+                </Typography>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontWeight: 900,
+                    mb: 3,
+                    fontSize: { xs: '3rem', md: '5rem' },
+                    lineHeight: 1,
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  Nationwide <br />
+                  <Box component="span" sx={{ color: 'primary.main' }}>Archipelago</Box>
+                </Typography>
+                <Typography variant="h5" sx={{ mb: 4, maxWidth: '600px', opacity: 0.8, fontWeight: 400 }}>
+                  We bridge the gap across the 7,641 islands of the Philippines with a robust logistics network designed for the modern era.
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                      borderLeft: `4px solid ${primaryMain}`,
+                      borderRadius: '0 8px 8px 0'
+                    }}
+                  >
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>50+</Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700 }}>Service Points</Typography>
+                  </Paper>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                      borderLeft: `4px solid ${tertiaryMain}`,
+                      borderRadius: '0 8px 8px 0'
+                    }}
+                  >
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: 'secondary.main' }}>81</Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700 }}>Provinces Reached</Typography>
+                  </Paper>
+                </Box>
+              </motion.div>
+            </Grid>
+          </Grid>
+        </PageContainer>
+
+        {/* Map Visualization Container */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '5%',
+            bottom: '5%',
+            right: { xs: 'auto', md: '5%' },
+            left: { xs: '0', md: 'auto' },
+            width: { xs: '100%', md: '45%' },
+            opacity: { xs: 0.3, md: 1 },
+            pointerEvents: 'none',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1
+          }}
+        >
+          <Box
+            component={motion.div}
+            animate={{
+              y: [0, -30, 0],
+              scale: [1.2, 1.25, 1.2],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            sx={{
+              width: '100%',
+              aspectRatio: '1/1',
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Box
+              component={motion.div}
+              animate={{
+                backgroundColor: [primaryMain, tertiaryMain, primaryMain],
+                rotate: [0, 1, -1, 0],
+                filter: isDark
+                  ? [`drop-shadow(0 0 40px ${primaryMain}44)`, `drop-shadow(0 0 60px ${tertiaryMain}44)`, `drop-shadow(0 0 40px ${primaryMain}44)`]
+                  : ['drop-shadow(0 20px 40px rgba(0,0,0,0.1))', 'drop-shadow(0 30px 50px rgba(0,0,0,0.15))', 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))']
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              sx={{
+                width: '100%',
+                height: '100%',
+                maskImage: `url(${(IMAGE_URLS.PH_MAP as any).src || IMAGE_URLS.PH_MAP})`,
+                WebkitMaskImage: `url(${(IMAGE_URLS.PH_MAP as any).src || IMAGE_URLS.PH_MAP})`,
+                maskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                backgroundColor: primaryMain,
+                zIndex: 1,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+            />
+
+            {COVERAGE_POINTS.map((point) => (
+              <Box
+                key={point.name}
+                component={motion.div}
+                initial="initial"
+                whileInView="animate"
+                whileHover="hover"
+                viewport={{ once: false, amount: 0.1 }}
+                sx={{
+                  position: 'absolute',
+                  left: `${point.x}%`,
+                  top: `${point.y}%`,
+                  zIndex: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  pointerEvents: 'auto',
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                {/* Compact Subtle Dot with synced pulse */}
+                <Box
+                  component={motion.div}
+                  variants={{
+                    initial: { scale: 0, opacity: 0 },
+                    animate: { 
+                      scale: [1, 1.3, 1],
+                      opacity: [1, 0.7, 1],
+                      transition: { 
+                        delay: point.delay,
+                        duration: 8, // Synced with map color pulse
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }
+                    },
+                    hover: { scale: 0 }
+                  }}
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    bgcolor: secondaryMain,
+                    borderRadius: '50%',
+                    border: `1px solid ${isDark ? 'white' : 'black'}`,
+                    boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                  }}
+                />
+
+                {/* Combined Hover Badge (Icon + Label) */}
+                <Box
+                  component={motion.div}
+                  variants={{
+                    initial: { 
+                      opacity: 0, 
+                      scale: 0, 
+                      y: point.y < 25 ? -15 : 15,
+                      transition: { duration: 0.2, ease: "easeOut" } 
+                    },
+                    hover: { 
+                      opacity: 1, 
+                      scale: 1,
+                      y: 0,
+                      transition: { type: 'spring', stiffness: 400, damping: 20 }
+                    }
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    [point.y < 25 ? 'top' : 'bottom']: '100%',
+                    [point.y < 25 ? 'mt' : 'mb']: 1.5,
+                    display: 'flex',
+                    flexDirection: point.y < 25 ? 'column-reverse' : 'column',
+                    alignItems: 'center',
+                    gap: 1,
+                    zIndex: 20,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <Box
+                    component={motion.div}
+                    animate={{
+                      y: [0, -4, 0] // Subtle synced float isolated from hover transitions
+                    }}
+                    transition={{
+                      duration: 8, // Synced with map color pulse
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}
+                  >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      color: isDark ? tertiaryMain : 'white',
+                      fontWeight: 900,
+                      fontSize: '0.7rem',
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      backgroundColor: secondaryMain,
+                      px: 1.2,
+                      py: 0.5,
+                      borderRadius: 1,
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
+                      border: `1px solid ${tertiaryMain}44`,
+                      backdropFilter: 'blur(8px)',
+                    }}
+                  >
+                    {point.name}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      bgcolor: isDark ? 'rgba(15, 20, 25, 0.95)' : 'white',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '50%',
+                      p: 0.5,
+                      boxShadow: `0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px ${secondaryMain}`,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      position: 'relative'
+                    }}
+                  >
+                    <ImageWithFallback
+                      src={IMAGE_URLS.BOSS_CARGO_ICON}
+                      alt={point.name}
+                      layout="fill"
+                      objectFit="contain"
+                      style={{ padding: '4px' }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Box>
+
       {/* Slide 1: Mission & Vision */}
       <Box
         sx={{
@@ -168,48 +521,48 @@ export default function WhyBossCargo() {
         }}
       >
         <AbstractBlob
-          color={theme.palette.primary.main}
+          color={tertiaryMain}
           top="-15%"
           right="-10%"
-          size="900px"
+          size="950px"
           rotate={15}
-          opacity={isDark ? 0.04 : 0.06}
+          opacity={isDark ? 0.06 : 0.1}
           variant={0}
         />
         <AbstractBlob
-          color={tertiaryMain}
+          color={theme.palette.primary.main}
           bottom="5%"
           left="-15%"
-          size="700px"
+          size="800px"
           rotate={-20}
-          opacity={isDark ? 0.03 : 0.05}
+          opacity={isDark ? 0.05 : 0.09}
           variant={1}
         />
         <AbstractBlob
-          color={theme.palette.secondary.main}
+          color={tertiaryMain}
           top="30%"
           left="20%"
-          size="500px"
+          size="600px"
           rotate={180}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={2}
         />
         <AbstractBlob
           color={theme.palette.primary.main}
           top="10%"
           left="5%"
-          size="400px"
+          size="500px"
           rotate={45}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={1}
         />
         <AbstractBlob
           color={tertiaryMain}
           top="-5%"
           left="40%"
-          size="300px"
+          size="400px"
           rotate={-15}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={0}
         />
         <AbstractBlob
@@ -345,61 +698,62 @@ export default function WhyBossCargo() {
           scrollSnapStop: 'always',
           bgcolor: 'background.paper',
           py: { xs: 4, md: 0 },
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
         <AbstractBlob
-          color={theme.palette.secondary.main}
+          color={tertiaryMain}
           top="10%"
           left="-20%"
-          size="900px"
+          size="950px"
           rotate={45}
-          opacity={isDark ? 0.03 : 0.06}
+          opacity={isDark ? 0.05 : 0.08}
           variant={1}
         />
         <AbstractBlob
           color={tertiaryMain}
           bottom="-15%"
           right="-15%"
-          size="850px"
+          size="900px"
           rotate={-30}
-          opacity={isDark ? 0.02 : 0.05}
+          opacity={isDark ? 0.04 : 0.07}
           variant={2}
         />
         <AbstractBlob
           color={theme.palette.primary.main}
           top="40%"
           right="10%"
-          size="600px"
+          size="650px"
           rotate={120}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={0}
         />
         <AbstractBlob
-          color={theme.palette.secondary.main}
+          color={tertiaryMain}
           bottom="20%"
           left="10%"
-          size="500px"
+          size="550px"
           rotate={-60}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={2}
         />
         <AbstractBlob
           color={theme.palette.primary.main}
           top="-10%"
           right="30%"
-          size="450px"
+          size="500px"
           rotate={30}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={1}
         />
         <AbstractBlob
           color={tertiaryMain}
           bottom="10%"
           right="40%"
-          size="350px"
+          size="400px"
           rotate={200}
-          opacity={isDark ? 0.02 : 0.04}
+          opacity={isDark ? 0.04 : 0.07}
           variant={0}
         />
         {/* Crowded shapes */}

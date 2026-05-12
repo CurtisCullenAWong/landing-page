@@ -877,10 +877,11 @@ export default function JobPostingsPage() {
                           <TableCell>
                             <Typography variant="caption" sx={{
                               px: 1.5, py: 0.5, borderRadius: 1,
-                              bgcolor: alpha(secondaryMain, 0.1),
-                              color: secondaryMain,
-                              fontWeight: 700,
-                              textTransform: 'uppercase'
+                              bgcolor: alpha(primaryMain, 0.1),
+                              color: isDark ? '#fff' : primaryMain,
+                              fontWeight: 800,
+                              textTransform: 'uppercase',
+                              border: `1px solid ${alpha(primaryMain, 0.2)}`
                             }}>
                               {job.type}
                             </Typography>
@@ -931,7 +932,16 @@ export default function JobPostingsPage() {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                           <Clock size={16} color={primaryMain} />
-                          <Typography variant="body2">{job.type}</Typography>
+                          <Typography variant="caption" sx={{
+                            px: 1.2, py: 0.3, borderRadius: 1,
+                            bgcolor: alpha(primaryMain, 0.1),
+                            color: isDark ? '#fff' : primaryMain,
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            border: `1px solid ${alpha(primaryMain, 0.2)}`
+                          }}>
+                            {job.type}
+                          </Typography>
                         </Box>
                       </Stack>
                       <Button component={Link} href={`/careers/job-details/${job.id}`} variant="contained" fullWidth sx={{ borderRadius: 2, fontWeight: 700 }}>

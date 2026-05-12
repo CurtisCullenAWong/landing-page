@@ -14,23 +14,23 @@ export interface Job {
   requirements: string[];
   benefits: string[];
   salary: string;
-  salary_min?: number;
-  salary_max?: number;
-  salary_frequency?: string;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  salary_frequency?: string | null;
   postedDate: string;
   status: 'active' | 'closed';
-  application_url?: string;
-  employment_type?: string;
-  work_setup?: string;
-  job_level?: string;
-  schedule?: string;
-  application_email?: string;
-  external_application_url?: string;
+  application_url?: string | null;
+  employment_type?: string | null;
+  work_setup?: string | null;
+  job_level?: string | null;
+  schedule?: string | null;
+  application_email?: string | null;
+  external_application_url?: string | null;
   views_count?: number;
   applications_count?: number;
   featured?: boolean;
-  published_at?: string;
-  expires_at?: string;
+  published_at?: string | null;
+  expires_at?: string | null;
 }
 
 export interface Department {
@@ -76,8 +76,8 @@ interface JobContextType {
   isLoading: boolean;
   addJob: (job: Omit<Job, 'id' | 'postedDate'>) => Promise<void>;
   addJobs: (jobs: Omit<Job, 'id' | 'postedDate'>[]) => Promise<void>;
-  updateJob: (id: string, job: Partial<Job>) => void;
-  deleteJob: (id: string) => void;
+  updateJob: (id: string, job: Partial<Job>) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
   getJobById: (id: string) => Job | undefined;
 }
 
@@ -395,17 +395,17 @@ export function JobProvider({ children }: { children: ReactNode }) {
       if (updatedJob.status !== undefined) updateData.status = updatedJob.status;
       if (updatedJob.postedDate !== undefined) updateData.posted_date = updatedJob.postedDate;
       if (updatedJob.application_url !== undefined) updateData.application_url = updatedJob.application_url || null;
-      if (updatedJob.employment_type !== undefined) updateData.employment_type = updatedJob.employment_type;
-      if (updatedJob.work_setup !== undefined) updateData.work_setup = updatedJob.work_setup;
-      if (updatedJob.job_level !== undefined) updateData.job_level = updatedJob.job_level;
-      if (updatedJob.schedule !== undefined) updateData.schedule = updatedJob.schedule;
-      if (updatedJob.application_email !== undefined) updateData.application_email = updatedJob.application_email;
-      if (updatedJob.external_application_url !== undefined) updateData.external_application_url = updatedJob.external_application_url;
+      if (updatedJob.employment_type !== undefined) updateData.employment_type = updatedJob.employment_type || null;
+      if (updatedJob.work_setup !== undefined) updateData.work_setup = updatedJob.work_setup || null;
+      if (updatedJob.job_level !== undefined) updateData.job_level = updatedJob.job_level || null;
+      if (updatedJob.schedule !== undefined) updateData.schedule = updatedJob.schedule || null;
+      if (updatedJob.application_email !== undefined) updateData.application_email = updatedJob.application_email || null;
+      if (updatedJob.external_application_url !== undefined) updateData.external_application_url = updatedJob.external_application_url || null;
       if (updatedJob.views_count !== undefined) updateData.views_count = updatedJob.views_count;
       if (updatedJob.applications_count !== undefined) updateData.applications_count = updatedJob.applications_count;
       if (updatedJob.featured !== undefined) updateData.featured = updatedJob.featured;
-      if (updatedJob.published_at !== undefined) updateData.published_at = updatedJob.published_at;
-      if (updatedJob.expires_at !== undefined) updateData.expires_at = updatedJob.expires_at;
+      if (updatedJob.published_at !== undefined) updateData.published_at = updatedJob.published_at || null;
+      if (updatedJob.expires_at !== undefined) updateData.expires_at = updatedJob.expires_at || null;
 
       const { data, error } = await supabase
         .from('jobs')
@@ -421,7 +421,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
       if (data) {
         const updated = mapDatabaseJobToJob(data);
-        setJobs(jobs.map(job => job.id === id ? updated : job));
+        setJobs(prevJobs => prevJobs.map(job => job.id === id ? updated : job));
       }
     } catch (error) {
       console.error('Error updating job:', error);
@@ -442,7 +442,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
         throw error;
       }
 
-      setJobs(jobs.filter(job => job.id !== id));
+      setJobs(prevJobs => prevJobs.filter((job) => job.id !== id));
     } catch (error) {
       console.error('Error deleting job:', error);
       throw error;
