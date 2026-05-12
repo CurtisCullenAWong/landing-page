@@ -350,6 +350,7 @@ export default function AboutPage() {
                     alt={getImageMetadata(IMAGE_URLS.ABOUT_WAREHOUSE_TEAM).alt}
                     layout="responsive"
                     aspectRatio="4:3"
+                    sizes="(max-width: 900px) 100vw, 50vw"
                     rounded={6}
                     shadow={8}
                     priority

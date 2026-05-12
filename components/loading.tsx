@@ -28,7 +28,7 @@ export function PageLoading() {
 // Job listings skeleton loader
 export function JobListingsSkeleton() {
   return (
-    <Box sx={{ py: 8 }}>
+    <Box sx={{ py: 8, width: '100%', overflow: 'hidden' }}>
       <Box sx={{ maxWidth: 'lg', mx: 'auto', px: { xs: 2, sm: 3 } }}>
         {/* Header skeleton */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>

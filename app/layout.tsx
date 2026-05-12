@@ -1,4 +1,5 @@
 import localFont from "next/font/local";
+import Script from 'next/script'
 import { ClientLayout } from "./client-layout";
 import "./globals.css";
 import { SITE_CONTENT } from "../constants/site-content";
@@ -80,21 +81,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* 1. INSTANT THEME DETECTION: Prevents white flash in dark mode */}
-        <script
-          id="theme-detection"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
+        <Script id="theme-detection" strategy="beforeInteractive">
+          {`(function() {
                 try {
                   const stored = localStorage.getItem('theme');
                   const isDark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
                   document.documentElement.classList.toggle('dark', isDark);
                   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
                 } catch (e) {}
-              })();
-            `,
-          }}
-        />
+              })();`}
+        </Script>
 
         {/* 2. CRITICAL CSS: Renders the splash screen instantly */}
         <style
@@ -112,6 +108,32 @@ export default function RootLayout({
                 --brand-color: #00ced1; 
                 --primary-color: #1ECAD3;
               }
+              
+              html.scroll-lock-active {
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE and Edge */
+              }
+              
+              html.scroll-lock-active::-webkit-scrollbar {
+                display: none; /* Chrome, Safari, Opera */
+              }`
+          }}
+        />
+
+        {/* 3. PREVENT SCROLLBAR FLASH: Apply scroll-lock before page renders */}
+        <Script id="scroll-lock-init" strategy="beforeInteractive">
+          {`(function() {
+                const sequencePages = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'];
+                const pathname = window.location.pathname;
+                if (sequencePages.includes(pathname)) {
+                  document.documentElement.classList.add('scroll-lock-active');
+                }
+              })();`}
+        </Script>
+
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
 
               #initial-loader {
                 position: fixed;

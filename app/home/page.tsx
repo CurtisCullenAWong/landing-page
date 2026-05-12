@@ -511,7 +511,7 @@ export default function HomePage() {
                       }}
                     >
                       <ImageWithFallback
-                        src={IMAGE_URLS.HOME_TEAM_COLLABORATION.src}
+                        src={IMAGE_URLS.HOME_TEAM_COLLABORATION}
                         alt={getImageMetadata(IMAGE_URLS.HOME_TEAM_COLLABORATION).alt}
                         layout="responsive"
                         rounded={24}

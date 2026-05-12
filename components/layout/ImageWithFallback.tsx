@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { Box, Skeleton, useTheme } from '@mui/material'
 
 const ERROR_IMG_SRC =
@@ -82,9 +83,19 @@ export function ImageWithFallback({
   }
 
   const { src, alt, style, className, ...rest } = props
+  const normalizedSrc = typeof src === 'string' ? src : (src as any)?.src || src
+  const intrinsicWidth = typeof src === 'object' ? (src as any)?.width : undefined
+  const intrinsicHeight = typeof src === 'object' ? (src as any)?.height : undefined
+  const hasIntrinsicDimensions = !!(intrinsicWidth && intrinsicHeight)
+  const useFill = layout === 'fill' || (layout === 'responsive' && !hasIntrinsicDimensions)
 
   // Calculate aspect ratio padding
-  const aspectRatioValue = aspectRatio !== 'auto' ? ASPECT_RATIO_MAP[aspectRatio] : 0
+  const aspectRatioValue =
+    aspectRatio !== 'auto'
+      ? ASPECT_RATIO_MAP[aspectRatio]
+      : intrinsicWidth && intrinsicHeight
+        ? intrinsicWidth / intrinsicHeight
+        : 0
   const paddingBottom = aspectRatioValue > 0 ? `${(1 / aspectRatioValue) * 100}%` : undefined
 
   // Rounded corners
@@ -108,18 +119,18 @@ export function ImageWithFallback({
 
     switch (layout) {
       case 'fill':
+        // Keep container as positioning context for Next/Image fill
         return {
           ...baseStyles,
           width: '100%',
           height: '100%',
-          position: 'absolute',
-          inset: 0,
+          position: 'relative',
         }
       case 'responsive':
         return {
           ...baseStyles,
           width: style?.width || '100%',
-          ...(aspectRatioValue > 0 && { paddingBottom }),
+          ...(useFill && aspectRatioValue > 0 && { paddingBottom }),
         }
       case 'fixed':
         return {
@@ -151,16 +162,17 @@ export function ImageWithFallback({
         width: '100%',
         height: '100%',
       }),
-      ...(layout === 'responsive' && aspectRatioValue > 0 && {
+      ...(layout === 'responsive' && useFill && aspectRatioValue > 0 && {
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
       }),
-      ...(layout === 'responsive' && aspectRatioValue === 0 && {
+      ...(layout === 'responsive' && !useFill && {
         width: '100%',
         height: 'auto',
+        display: 'block',
       }),
       ...(layout === 'fixed' && {
         width: style?.width || '100%',
@@ -232,16 +244,55 @@ export function ImageWithFallback({
           animation="wave"
         />
       )}
-      <Box
-        component="img"
-        src={typeof src === 'string' ? src : (src as any)?.src}
-        alt={alt || 'Image'}
-        loading={lazy && !priority ? 'lazy' : 'eager'}
-        sx={getImageStyles()}
-        onError={handleError}
-        onLoad={handleLoad}
-        {...rest}
-      />
+      {/* Use Next.js Image to leverage built-in optimization when possible */}
+      {(() => {
+        try {
+          const sizes = useFill ? (rest['sizes'] as string | undefined) || '100vw' : (rest['sizes'] as string | undefined)
+
+          // Prepare styles for Next/Image. When using `fill`, Next/Image manages width/height.
+          const rawStyles = getImageStyles()
+          const cleanedStyles: React.CSSProperties = { ...rawStyles }
+          if (useFill) {
+            // Remove properties that conflict with fill
+            delete (cleanedStyles as any).width
+            delete (cleanedStyles as any).height
+            delete (cleanedStyles as any).position
+            delete (cleanedStyles as any).top
+            delete (cleanedStyles as any).left
+          }
+
+          // Next/Image expects numeric width/height when not using fill.
+          const widthProp = !useFill && hasIntrinsicDimensions ? { width: intrinsicWidth as number } : (!useFill && typeof rawStyles.width === 'number' ? { width: rawStyles.width } : {})
+          const heightProp = !useFill && hasIntrinsicDimensions ? { height: intrinsicHeight as number } : (!useFill && typeof rawStyles.height === 'number' ? { height: rawStyles.height } : {})
+
+          return (
+            <Image
+              src={normalizedSrc}
+              alt={alt || 'Image'}
+              {...(useFill ? { fill: true } : { ...widthProp, ...heightProp })}
+              style={{ objectFit, ...cleanedStyles }}
+              sizes={sizes}
+              priority={!!priority}
+              onLoad={handleLoad}
+              onError={handleError}
+            />
+          )
+        } catch (e) {
+          // Fallback to native img if Next/Image can't handle src
+          return (
+            <Box
+              component="img"
+              src={typeof src === 'string' ? src : (src as any)?.src}
+              alt={alt || 'Image'}
+              loading={lazy && !priority ? 'lazy' : 'eager'}
+              sx={getImageStyles()}
+              onError={handleError}
+              onLoad={handleLoad}
+              {...rest}
+            />
+          )
+        }
+      })()}
     </Box>
   )
 }

@@ -427,6 +427,7 @@ export default function PartnershipsPage() {
                     alt={getImageMetadata(IMAGE_URLS.PARTNERSHIPS_HANDSHAKE).alt}
                     layout="responsive"
                     aspectRatio="4:3"
+                    sizes="(max-width: 900px) 100vw, 50vw"
                     rounded={0}
                     shadow={0}
                     hoverZoom
@@ -598,6 +599,7 @@ export default function PartnershipsPage() {
                               alt={membership.fullName}
                               layout="fill"
                               objectFit="contain"
+                              sizes="160px"
                             />
                           </Box>
                         </Box>

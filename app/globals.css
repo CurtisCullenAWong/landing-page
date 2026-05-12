@@ -4,6 +4,7 @@
 
 html {
   scroll-padding-top: 80px;
+  scrollbar-gutter: stable; /* Reserve space for scrollbar to prevent layout shift */
 }
 
 /* Applied conditionally to sequences pages */
@@ -11,12 +12,6 @@ html {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   touch-action: pan-y;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-.scroll-lock-active::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
 }
 
 @layer base {

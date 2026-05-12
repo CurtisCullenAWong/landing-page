@@ -344,6 +344,7 @@ export default function JobPostingsPage() {
                         alt={getImageMetadata(IMAGE_URLS.JOBS_OFFICE_ENVIRONMENT).alt}
                         layout="responsive"
                         aspectRatio="4:3"
+                        sizes="(max-width: 900px) 100vw, 50vw"
                         rounded={4}
                         shadow={20}
                       />
@@ -560,6 +561,7 @@ export default function JobPostingsPage() {
                               alt={getImageMetadata(IMAGE_URLS.JOBS_CAREER_GROWTH.src).alt}
                               layout="responsive"
                               aspectRatio="21:9"
+                              sizes="(max-width: 900px) 90vw, 400px"
                               rounded={2}
                               shadow={24}
                             />
@@ -617,8 +619,13 @@ export default function JobPostingsPage() {
                 scrollSnapAlign: 'start',
                 scrollSnapStop: 'always',
                 bgcolor: paperColor,
+                background: isDark
+                  ? `linear-gradient(180deg, ${alpha(secondaryDark, 0.96)} 0%, ${paperColor} 100%)`
+                  : `linear-gradient(180deg, ${alpha(primaryMain, 0.04)} 0%, ${paperColor} 56%, ${alpha(tertiaryMain, 0.03)} 100%)`,
                 py: { xs: 8, md: 10 },
-                position: 'relative'
+                position: 'relative',
+                overflow: 'hidden',
+                isolation: 'isolate'
               }}
             >
 
@@ -628,6 +635,7 @@ export default function JobPostingsPage() {
                 inset: 0,
                 zIndex: 0,
                 pointerEvents: 'none',
+                mixBlendMode: 'multiply',
               }}>
                 {/* Gradient Glow */}
                 <Box sx={{
