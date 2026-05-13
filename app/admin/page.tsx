@@ -58,6 +58,14 @@ export default function AdminDashboardPage() {
     return map;
   }, [jobs]);
 
+  const analyticsHeaderBg = theme.palette.mode === 'dark'
+    ? theme.palette.grey[900]
+    : theme.palette.grey[100];
+
+  const analyticsHeaderText = theme.palette.mode === 'dark'
+    ? theme.palette.grey[200]
+    : theme.palette.text.primary;
+
   useEffect(() => {
     const loadJobApplicants = async () => {
       try {
@@ -164,116 +172,108 @@ export default function AdminDashboardPage() {
             {/* Compact metric row */}
             <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
               <Grid size={{ xs: 6, sm: 3 }}>
-                <Card variant="outlined" sx={{ p: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: theme.palette.primary.main, color: 'white', width: 36, height: 36, mr: 1 }}>
-                      <Eye size={18} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Total</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.totalVisits}</Typography>
-                    </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 2, px: 1.25, py: 1, bgcolor: 'background.paper' }}>
+                  <Avatar sx={{ bgcolor: theme.palette.primary.main, color: 'white', width: 36, height: 36, mr: 1 }}>
+                    <Eye size={18} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Total</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.totalVisits}</Typography>
                   </Box>
-                </Card>
+                </Box>
               </Grid>
 
               <Grid size={{ xs: 6, sm: 3 }}>
-                <Card variant="outlined" sx={{ p: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: theme.palette.info.main, color: 'white', width: 36, height: 36, mr: 1 }}>
-                      <Users size={18} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Unique</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.uniqueVisitors}</Typography>
-                    </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 2, px: 1.25, py: 1, bgcolor: 'background.paper' }}>
+                  <Avatar sx={{ bgcolor: theme.palette.info.main, color: 'white', width: 36, height: 36, mr: 1 }}>
+                    <Users size={18} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Unique</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.uniqueVisitors}</Typography>
                   </Box>
-                </Card>
+                </Box>
               </Grid>
 
               <Grid size={{ xs: 6, sm: 3 }}>
-                <Card variant="outlined" sx={{ p: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: theme.palette.success.main, color: 'white', width: 36, height: 36, mr: 1 }}>
-                      <TrendingUp size={18} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Top pages</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.topPages.length}</Typography>
-                    </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 2, px: 1.25, py: 1, bgcolor: 'background.paper' }}>
+                  <Avatar sx={{ bgcolor: theme.palette.success.main, color: 'white', width: 36, height: 36, mr: 1 }}>
+                    <TrendingUp size={18} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Top pages</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.topPages.length}</Typography>
                   </Box>
-                </Card>
+                </Box>
               </Grid>
 
               <Grid size={{ xs: 6, sm: 3 }}>
-                <Card variant="outlined" sx={{ p: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: theme.palette.warning.main, color: 'white', width: 36, height: 36, mr: 1 }}>
-                      <LinkIcon size={18} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Referrers</Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.topReferrers.length}</Typography>
-                    </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 2, px: 1.25, py: 1, bgcolor: 'background.paper' }}>
+                  <Avatar sx={{ bgcolor: theme.palette.warning.main, color: 'white', width: 36, height: 36, mr: 1 }}>
+                    <LinkIcon size={18} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Referrers</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{analyticsMetrics.topReferrers.length}</Typography>
                   </Box>
-                </Card>
+                </Box>
               </Grid>
             </Grid>
 
             {/* Collapsible details */}
             <Collapse in={showAnalyticsDetails}>
               {analyticsMetrics.topPages.length > 0 && (
-                <Card sx={{ mb: 2, mt: 1 }}>
-                  <CardContent>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Top Pages</Typography>
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
-                            <TableCell sx={{ fontWeight: 700 }}>Page</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 700 }}>Visits</TableCell>
+                <Box sx={{ mb: 2, mt: 1, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden', bgcolor: 'background.paper' }}>
+                  <Box sx={{ px: 2, py: 1.25 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Top Pages</Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: analyticsHeaderBg }}>
+                          <TableCell sx={{ fontWeight: 700, color: analyticsHeaderText }}>Page</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: analyticsHeaderText }}>Visits</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {analyticsMetrics.topPages.map((page, idx) => (
+                          <TableRow key={idx} hover>
+                            <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <code style={{ fontSize: '0.85em' }}>{page.path}</code>
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 500 }}>{page.visits}</TableCell>
                           </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {analyticsMetrics.topPages.map((page, idx) => (
-                            <TableRow key={idx} hover>
-                              <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                <code style={{ fontSize: '0.85em' }}>{page.path}</code>
-                              </TableCell>
-                              <TableCell align="right" sx={{ fontWeight: 500 }}>{page.visits}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
               )}
 
               {analyticsMetrics.topReferrers.length > 0 && (
-                <Card sx={{ mb: 1 }}>
-                  <CardContent>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Top Referrers</Typography>
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
-                            <TableCell sx={{ fontWeight: 700 }}>Source</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 700 }}>Visits</TableCell>
+                <Box sx={{ mb: 1, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden', bgcolor: 'background.paper' }}>
+                  <Box sx={{ px: 2, py: 1.25 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Top Referrers</Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: analyticsHeaderBg }}>
+                          <TableCell sx={{ fontWeight: 700, color: analyticsHeaderText }}>Source</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: analyticsHeaderText }}>Visits</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {analyticsMetrics.topReferrers.map((ref, idx) => (
+                          <TableRow key={idx} hover>
+                            <TableCell><code style={{ fontSize: '0.85em' }}>{ref.referrer || 'Direct'}</code></TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 500 }}>{ref.visits}</TableCell>
                           </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {analyticsMetrics.topReferrers.map((ref, idx) => (
-                            <TableRow key={idx} hover>
-                              <TableCell><code style={{ fontSize: '0.85em' }}>{ref.referrer || 'Direct'}</code></TableCell>
-                              <TableCell align="right" sx={{ fontWeight: 500 }}>{ref.visits}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </CardContent>
-                </Card>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
               )}
             </Collapse>
           </CardContent>
