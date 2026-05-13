@@ -658,11 +658,11 @@ export default function JobPostingsPage() {
                 justifyContent: { xs: 'flex-start', md: 'center' },
                 alignItems: 'center',
                 scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
+                scrollSnapStop: { xs: 'normal', md: 'always' },
                 bgcolor: paperColor,
                 background: `linear-gradient(180deg, ${bgColor} 0%, ${paperColor} 100%)`,
                 py: { xs: 10, md: 15 }, // Increased padding
-                pb: { xs: 12, md: 20 }, // Extra bottom margin/padding
+                pb: { xs: 24, md: 20 }, // Extra bottom margin/padding
                 position: 'relative',
                 overflow: 'visible', // Allow content to flow
                 isolation: 'isolate'
@@ -1043,6 +1043,7 @@ export default function JobPostingsPage() {
                         </CardContent>
                       </Card>
                     ))}
+                    <Box sx={{ height: { xs: 96, sm: 120 } }} />
                   </Box>
                 </Card>
               </Container>
