@@ -9,11 +9,17 @@ export function useTrackPageView() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Generate or retrieve session ID
+    // Retrieve session ID
     let sessionId = localStorage.getItem('analytics_session_id');
     if (!sessionId) {
       sessionId = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
       localStorage.setItem('analytics_session_id', sessionId);
+    }
+
+    // List of paths to exclude from tracking
+    const excludedPaths = ['/my-application', '/admin', '/api'];
+    if (excludedPaths.some(path => pathname.startsWith(path))) {
+      return;
     }
 
     // Track the page view

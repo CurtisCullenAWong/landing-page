@@ -132,7 +132,7 @@ export default function AdminPage() {
       status: 'active',
       application_url: '',
       employment_type: '',
-      work_setup: 'In person',
+      work_setup: 'On-site',
       job_level: '',
       schedule: '',
       application_email: '',
@@ -319,7 +319,7 @@ export default function AdminPage() {
       status: 'active',
       application_url: '',
       employment_type: '',
-      work_setup: 'In person',
+      work_setup: 'On-site',
       job_level: '',
       schedule: '',
       application_email: '',
@@ -505,7 +505,7 @@ export default function AdminPage() {
       status: 'active',
       application_url: '',
       employment_type: '',
-      work_setup: 'In person',
+      work_setup: 'On-site',
       job_level: '',
       schedule: '',
       application_email: '',
@@ -624,24 +624,24 @@ export default function AdminPage() {
                 <Stack spacing={3} sx={{ mb: 3 }}>
                   {jobEntries.map((entry, index) => (
                     <Card key={entry.id} variant="outlined" sx={{ borderRadius: 2, border: 1, borderColor: 'divider', overflow: 'hidden' }}>
-                      <Box sx={{ 
-                        p: 2, 
+                      <Box sx={{
+                        p: 2,
                         bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
                         borderBottom: 1,
                         borderColor: 'divider',
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center' 
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
                       }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ 
-                            width: 24, 
-                            height: 24, 
-                            borderRadius: '50%', 
-                            bgcolor: 'primary.main', 
-                            color: 'white', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                          <Box sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '0.75rem'
                           }}>
@@ -669,7 +669,7 @@ export default function AdminPage() {
                           </IconButton>
                         </Box>
                       </Box>
-                      
+
                       <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
                         <CardContent sx={{ p: 3 }}>
                           <Grid container spacing={3}>
@@ -858,7 +858,7 @@ export default function AdminPage() {
                                       <TextField fullWidth size="small" label="Schedule" placeholder="Mon-Fri, 8AM-5PM" value={entry.schedule} onChange={(e) => handleInputChange(entry.id, 'schedule', e.target.value)} />
                                     </Grid>
                                     <Grid size={{ xs: 6 }}>
-                                      <TextField fullWidth size="small" label="Work Setup" placeholder="In person / Hybrid / Remote" value={entry.work_setup} onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)} />
+                                      <TextField fullWidth size="small" label="Work Setup" placeholder="On-site / Hybrid / Remote" value={entry.work_setup} onChange={(e) => handleInputChange(entry.id, 'work_setup', e.target.value)} />
                                     </Grid>
                                     <Grid size={{ xs: 6 }}>
                                       <TextField fullWidth size="small" label="Employment Type" placeholder="Permanent / Full-time" value={entry.employment_type} onChange={(e) => handleInputChange(entry.id, 'employment_type', e.target.value)} />

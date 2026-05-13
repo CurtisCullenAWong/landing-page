@@ -37,7 +37,9 @@ import {
   formatPhone,
   isValidUrl,
   isValidEmail,
-  INPUT_LIMITS
+  INPUT_LIMITS,
+  formatPhoneNumberLive,
+  sanitizeObject
 } from '@/lib/input-utils';
 
 
@@ -180,7 +182,14 @@ export default function GeneralApplicationPage() {
   usePageTitle('Employment Application');
 
   const handleInputChange = (field: keyof ApplicationFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let finalValue = value;
+    
+    // Real-time formatting for phone
+    if (field === 'phone') {
+      finalValue = formatPhoneNumberLive(value);
+    }
+    
+    setFormData((prev) => ({ ...prev, [field]: finalValue }));
     setSubmitError(null);
   };
 
@@ -233,18 +242,20 @@ export default function GeneralApplicationPage() {
       }
 
       const supabase = createClient();
+      const sanitizedData = sanitizeObject(formData);
+      
       const { data, error } = await supabase
         .from('job_applicants')
         .insert({
           id: applicationId, // Use the generated UUID
           job_id: null, // General application - no specific job
-          first_name: formatName(formData.first_name),
-          last_name: formatName(formData.last_name),
-          email: normalizeEmail(formData.email),
-          phone: formatPhone(formData.phone) || null,
-          cover_letter: sanitizeString(formData.cover_letter) || null,
+          first_name: formatName(sanitizedData.first_name),
+          last_name: formatName(sanitizedData.last_name),
+          email: normalizeEmail(sanitizedData.email),
+          phone: formatPhone(sanitizedData.phone) || null,
+          cover_letter: sanitizedData.cover_letter || null,
           resume_url: resumeUrl,
-          portfolio_url: formData.portfolio_url.trim() || null,
+          portfolio_url: sanitizedData.portfolio_url || null,
           status: 'pending',
           applied_at: new Date().toISOString(),
         })

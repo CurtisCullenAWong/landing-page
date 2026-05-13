@@ -915,6 +915,7 @@ export default function JobPostingsPage() {
                                     size="small"
                                     sx={{
                                       mt: 0.5,
+                                      mr: 0.5,
                                       mb: 0.5,
                                       height: 20,
                                       fontWeight: 700,

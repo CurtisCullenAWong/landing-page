@@ -13,7 +13,8 @@ import {
   IconButton,
   useTheme,
   alpha,
-  Collapse
+  Collapse,
+  Typography
 } from '@mui/material';
 import ThemeSwitcher from '../theme-switcher';
 import { AuthButton } from '../auth-button';
@@ -88,26 +89,24 @@ export function AdminHeader() {
               alignItems: 'center',
               outline: 'none',
               textDecoration: 'none',
-              '&:hover .logo-container': {
-                background: alpha(theme.palette.common.white, 0.3),
-                transform: 'scale(1.02)',
+              transition: 'transform 0.2s ease',
+              '&:hover': {
+                transform: 'translateY(-1px)',
               }
             }}
           >
             <Box
-              className="logo-container"
               sx={{
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: '12px',
-                background: `linear-gradient(135deg, ${alpha(theme.palette.common.white, 0.2)} 0%, ${alpha(theme.palette.common.white, 0.05)} 100%)`,
-                p: 1,
-                border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-                boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.1)}`,
-                transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1.5,
+                mr: 1,
+                gap: 2,
+                bgcolor: alpha(theme.palette.common.white, 0.05),
+                px: 2,
+                py: 1,
+                borderRadius: '12px',
+                border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
+                backdropFilter: 'blur(4px)',
               }}
             >
               <Box
@@ -115,40 +114,38 @@ export function AdminHeader() {
                 src={IMAGE_URLS.LOGO.src}
                 alt="Boss Cargo Express"
                 sx={{
-                  height: 50,
+                  height: 40,
                   width: 'auto',
                   display: 'block',
-                  transition: 'transform 0.3s ease',
-                  '.logo-container:hover &': { transform: 'scale(1.05)' }
                 }}
               />
-              <Box sx={{ display: 'flex', flexDirection: 'column', pr: 1 }}>
-                <Box
-                  component="span"
+              <Box sx={{ display: 'flex', flexDirection: 'column', borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, pl: 2 }}>
+                <Typography
+                  variant="caption"
                   sx={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    color: alpha(theme.palette.common.white, 0.6),
+                    fontWeight: 800,
+                    color: 'common.white',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.2em',
-                    lineHeight: 1,
+                    letterSpacing: '0.1em',
+                    lineHeight: 1.2,
+                    fontSize: '0.75rem',
                   }}
                 >
                   Admin
-                </Box>
-                <Box
-                  component="span"
+                </Typography>
+                <Typography
+                  variant="caption"
                   sx={{
-                    fontSize: '10px',
-                    fontWeight: 700,
+                    fontWeight: 500,
                     color: alpha(theme.palette.common.white, 0.6),
                     textTransform: 'uppercase',
-                    letterSpacing: '0.2em',
-                    lineHeight: 1,
+                    letterSpacing: '0.05em',
+                    lineHeight: 1.2,
+                    fontSize: '0.625rem',
                   }}
                 >
-                  Panel
-                </Box>
+                  Dashboard
+                </Typography>
               </Box>
             </Box>
           </Box>

@@ -19,11 +19,18 @@ import {
   Alert,
   CircularProgress,
   alpha,
+  Grid,
+  Stack,
 } from '@mui/material';
 import { JobDetailsSkeleton } from '@/components/loading';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { PDFViewer } from '@/components/pdf-viewer';
 import { formatStatus } from '@/lib/utils';
+import { useRef } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { PDFDocument } from 'pdf-lib';
+import { Printer, Download as DownloadIcon } from 'lucide-react';
 
 
 interface JobApplicant {
@@ -59,6 +66,8 @@ export default function MyApplicationPage() {
   const [error, setError] = useState<string | null>(null);
   const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [resumeSignedUrl, setResumeSignedUrl] = useState<string | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const detailsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -103,9 +112,9 @@ export default function MyApplicationPage() {
   }, [application?.resume_url, pdfViewerOpen]);
 
   useEffect(() => {
-    if (!id) {
+    if (!id || id === 'null' || id === 'undefined') {
       setIsLoading(false);
-      setError('Application ID is required');
+      setError('Please provide a valid Application ID or Email Address');
       return;
     }
 
@@ -117,7 +126,7 @@ export default function MyApplicationPage() {
       // Validate UUID or Email format before querying Supabase
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      
+
       const isUuid = uuidRegex.test(decodedId);
       const isEmail = emailRegex.test(decodedId);
 
@@ -149,7 +158,7 @@ export default function MyApplicationPage() {
             return;
           } else {
             setApplicationsList(applicationsData);
-            
+
             // Set up realtime subscription for the list of applications
             channel = supabase
               .channel(`applications-email-${decodedId}-changes`)
@@ -164,8 +173,8 @@ export default function MyApplicationPage() {
                 (payload: { new: JobApplicant; }) => {
                   console.log('Realtime event received for applications list:', payload);
                   if (payload.new) {
-                    setApplicationsList((prev) => 
-                      prev ? prev.map(app => 
+                    setApplicationsList((prev) =>
+                      prev ? prev.map(app =>
                         app.id === payload.new.id ? { ...app, ...payload.new } : app
                       ) : null
                     );
@@ -184,16 +193,10 @@ export default function MyApplicationPage() {
           .from('job_applicants')
           .select('*')
           .eq('id', decodedId)
-          .single();
+          .maybeSingle();
 
         if (applicationError) {
-          console.error('Error loading application:', {
-            message: applicationError?.message || 'Unknown error',
-            details: applicationError?.details || null,
-            hint: applicationError?.hint || null,
-            code: applicationError?.code || null,
-            fullError: applicationError,
-          });
+          console.error('Error loading application:', applicationError);
           setError(applicationError?.message || 'Application not found');
           setIsLoading(false);
           return;
@@ -214,15 +217,10 @@ export default function MyApplicationPage() {
             .from('jobs')
             .select('id, title, department, location, type')
             .eq('id', applicationData.job_id)
-            .single();
+            .maybeSingle();
 
           if (jobError) {
-            console.error('Error loading job:', {
-              message: jobError?.message || 'Unknown error',
-              details: jobError?.details || null,
-              code: jobError?.code || null,
-              fullError: jobError,
-            });
+            console.error('Error loading job:', jobError);
           } else if (jobData) {
             setJob(jobData);
           }
@@ -315,6 +313,184 @@ export default function MyApplicationPage() {
     }
   };
 
+  const generateFullApplicationPDF = async () => {
+    if (!application || !detailsRef.current) return;
+
+    setIsGeneratingPdf(true);
+    try {
+      // 1. Generate Application Details Page manually using jsPDF (Document Format)
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const margin = 20;
+      let y = 20;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const contentWidth = pageWidth - (margin * 2);
+
+      // Helper for adding horizontal lines
+      const addLine = (currY: number) => {
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(margin, currY, pageWidth - margin, currY);
+      };
+
+      // Header
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(24);
+      pdf.text('Job Application', margin, y);
+      y += 10;
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`Application ID: ${application.id}`, margin, y);
+      y += 15;
+
+      // Status
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Current Status:', margin, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(formatStatus(application.status), margin + 35, y);
+      y += 15;
+
+      // Section: Personal Information
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('Personal Information', margin, y);
+      y += 2;
+      addLine(y);
+      y += 8;
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Full Name: ${application.first_name} ${application.last_name}`, margin, y); y += 7;
+      pdf.text(`Email: ${application.email}`, margin, y); y += 7;
+      if (application.phone) {
+        pdf.text(`Phone: ${application.phone}`, margin, y); y += 7;
+      }
+      y += 10;
+
+      // Section: Job Information
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('Job Information', margin, y);
+      y += 2;
+      addLine(y);
+      y += 8;
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      if (job) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(job.title, margin, y); y += 6;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`${job.department} | ${job.location} | ${job.type}`, margin, y);
+        pdf.setTextColor(0, 0, 0);
+      } else {
+        pdf.text('General Application', margin, y);
+      }
+      y += 12;
+
+      // Section: Application Timeline
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('Application Timeline', margin, y);
+      y += 2;
+      addLine(y);
+      y += 8;
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      if (application.applied_at) {
+        pdf.text(`Applied On: ${new Date(application.applied_at).toLocaleString()}`, margin, y);
+        y += 7;
+      }
+      if (application.updated_at && application.updated_at !== application.applied_at) {
+        pdf.text(`Last Updated: ${new Date(application.updated_at).toLocaleString()}`, margin, y);
+        y += 7;
+      }
+      y += 10;
+
+      // Section: Cover Letter
+      if (application.cover_letter) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.text('Cover Letter', margin, y);
+        y += 2;
+        addLine(y);
+        y += 8;
+
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        const splitLines = pdf.splitTextToSize(application.cover_letter, contentWidth);
+        pdf.text(splitLines, margin, y);
+        y += (splitLines.length * 6);
+      }
+
+      const appPdfBytes = pdf.output('arraybuffer');
+
+      // 2. Merge with Resume if it exists and is a PDF
+      if (application.resume_url && isPDF(application.resume_url)) {
+        try {
+          let resumeUrl = application.resume_url;
+
+          // If it's a storage path, we need to generate a signed URL
+          if (isStoragePath(resumeUrl)) {
+            const supabase = createClient();
+            const filePath = resumeUrl.replace('applicant-files:', '');
+            const { data, error: urlError } = await supabase.storage
+              .from('applicant-files')
+              .createSignedUrl(filePath, 60); // 60 seconds is enough for the fetch
+
+            if (urlError || !data?.signedUrl) {
+              throw new Error('Failed to generate signed URL for resume');
+            }
+            resumeUrl = data.signedUrl;
+          }
+
+          const response = await fetch(resumeUrl);
+          if (!response.ok) throw new Error('Failed to fetch resume');
+          const resumeBytes = await response.arrayBuffer();
+
+          const mergedPdf = await PDFDocument.create();
+
+          // Load application details PDF
+          const appDoc = await PDFDocument.load(appPdfBytes);
+          const copiedAppPages = await mergedPdf.copyPages(appDoc, appDoc.getPageIndices());
+          copiedAppPages.forEach(page => mergedPdf.addPage(page));
+
+          // Load resume PDF
+          const resumeDoc = await PDFDocument.load(resumeBytes);
+          const copiedResumePages = await mergedPdf.copyPages(resumeDoc, resumeDoc.getPageIndices());
+          copiedResumePages.forEach(page => mergedPdf.addPage(page));
+
+          const finalPdfBytes = await mergedPdf.save();
+
+          // Create blob and download
+          const blob = new Blob([finalPdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${application.first_name}_${application.last_name}_Application_Full.pdf`;
+          link.click();
+          URL.revokeObjectURL(url);
+        } catch (mergeError) {
+          console.error('Error merging PDFs:', mergeError);
+          // Fallback: just download the application details
+          pdf.save(`${application.first_name}_${application.last_name}_Application_Details.pdf`);
+        }
+      } else {
+        // No resume or not a PDF, just save details
+        pdf.save(`${application.first_name}_${application.last_name}_Application_Details.pdf`);
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   if (isLoading) {
     return <JobDetailsSkeleton />;
   }
@@ -336,16 +512,16 @@ export default function MyApplicationPage() {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {applicationsList.map((app) => (
-              <Card 
-                key={app.id} 
-                variant="outlined" 
+              <Card
+                key={app.id}
+                variant="outlined"
                 onClick={() => router.push(`/my-application/${app.id}`)}
-                sx={{ 
+                sx={{
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  '&:hover': { 
-                    borderColor: 'primary.main', 
-                    bgcolor: isDark ? 'action.hover' : alpha(theme.palette.primary.main, 0.04) 
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    bgcolor: isDark ? 'action.hover' : alpha(theme.palette.primary.main, 0.04)
                   }
                 }}
               >
@@ -386,248 +562,311 @@ export default function MyApplicationPage() {
   return (
     <Box sx={{ py: 8 }}>
       <Container maxWidth="md">
-        {/* Back Button */}
-        <Button
-          component={Link}
-          href="/#careers"
-          startIcon={<ArrowLeft size={20} />}
-          sx={{ mb: 4 }}
-        >
-          Back to Careers
-        </Button>
-
-        {/* Status Alert */}
-        <Alert
-          severity={
-            application.status?.toLowerCase() === 'hired' || application.status?.toLowerCase() === 'offer'
-              ? 'success'
-              : application.status?.toLowerCase() === 'rejected'
-                ? 'error'
-                : 'info'
-          }
-          sx={{ mb: 4 }}
-        >
-          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-            Status: <Chip label={formatStatus(application.status)} size="small" color={getStatusColor(application.status) as any} sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body2">{getStatusMessage(application.status)}</Typography>
-        </Alert>
-
-        {/* Application Details Card */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
+        {/* Header Section */}
+        <Box sx={{ mb: 6, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'flex-end' }, gap: 3 }}>
+          <Box>
+            <Button
+              component={Link}
+              href="/#careers"
+              startIcon={<ArrowLeft size={20} />}
+              sx={{ mb: 2, color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
+            >
+              Back to Careers
+            </Button>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 1, letterSpacing: '-0.02em' }}>
               Application Details
             </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Review your submission and tracking status
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              size="large"
+              color="primary"
+              startIcon={isGeneratingPdf ? <CircularProgress size={20} color="inherit" /> : <DownloadIcon size={20} />}
+              onClick={generateFullApplicationPDF}
+              disabled={isGeneratingPdf}
+              sx={{
+                fontWeight: 600,
+                px: 3,
+                py: 1.5,
+                borderRadius: '12px',
+                boxShadow: theme.shadows[4],
+                '&:hover': {
+                  boxShadow: theme.shadows[8],
+                }
+              }}
+            >
+              {isGeneratingPdf ? 'Generating PDF...' : 'Download Full Application'}
+            </Button>
+          </Box>
+        </Box>
 
-            {/* Personal Information */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Briefcase size={20} />
-                Personal Information
+        {/* Status Card */}
+        <Card
+          sx={{
+            mb: 4,
+            borderRadius: '16px',
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            overflow: 'hidden',
+            boxShadow: 'none',
+            bgcolor: isDark ? alpha(theme.palette.primary.main, 0.05) : alpha(theme.palette.primary.main, 0.02),
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: `${getStatusColor(application.status)}.main` }} />
+                Current Status
               </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Full Name
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                    {application.first_name} {application.last_name}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Mail size={16} style={{ color: theme.palette.text.secondary }} />
+              <Chip
+                label={formatStatus(application.status)}
+                color={getStatusColor(application.status) as any}
+                sx={{ fontWeight: 700, px: 1 }}
+              />
+            </Box>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 0 }}>
+              {getStatusMessage(application.status)}
+            </Typography>
+          </CardContent>
+        </Card>
+
+        {/* Application Details Grid */}
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Card sx={{ height: '100%', borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, boxShadow: theme.shadows[1] }} ref={detailsRef}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h5" sx={{ mb: 4, fontWeight: 700 }}>
+                  Personal Information
+                </Typography>
+
+                <Stack spacing={3}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Email
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Full Name
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {application.email}
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {application.first_name} {application.last_name}
                     </Typography>
                   </Box>
-                </Box>
-                {application.phone && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Phone size={16} style={{ color: theme.palette.text.secondary }} />
+
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Box sx={{ p: 1, borderRadius: '8px', bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}>
+                      <Mail size={20} />
+                    </Box>
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Phone
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Email Address
                       </Typography>
                       <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {application.phone}
+                        {application.email}
                       </Typography>
                     </Box>
                   </Box>
-                )}
-              </Box>
-            </Box>
 
-            {/* Job Information */}
-            {job ? (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Briefcase size={20} />
-                  Job Applied For
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                    {job.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {job.department} • {job.location} • {job.type}
-                  </Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Briefcase size={20} />
-                  Application Type
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-                    General Application
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    You submitted a general application for future opportunities.
-                  </Typography>
-                </Box>
-              </Box>
-            )}
+                  {application.phone && (
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                      <Box sx={{ p: 1, borderRadius: '8px', bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}>
+                        <Phone size={20} />
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          Phone Number
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          {application.phone}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
 
-            {/* Application Dates */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Calendar size={20} />
-                Application Timeline
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {application.applied_at && (
+                  {application.cover_letter && (
+                    <Box sx={{ pt: 2 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1, display: 'block' }}>
+                        Cover Letter
+                      </Typography>
+                      <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', bgcolor: isDark ? 'action.hover' : 'grey.50', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line', lineHeight: 1.7, color: 'text.secondary' }}>
+                          {application.cover_letter}
+                        </Typography>
+                      </Paper>
+                    </Box>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Stack spacing={4}>
+              {/* Job Info */}
+              <Card sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, boxShadow: theme.shadows[1] }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Briefcase size={20} />
+                    Job Details
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Applied At
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
+                      {job?.title || 'General Application'}
                     </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {new Date(application.applied_at).toLocaleString()}
-                    </Typography>
+                    {job ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {job.department} • {job.location} • {job.type}
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Submitted for future opportunities
+                      </Typography>
+                    )}
                   </Box>
-                )}
-                {application.updated_at && application.updated_at !== application.applied_at && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Last Updated
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {new Date(application.updated_at).toLocaleString()}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
+                </CardContent>
+              </Card>
 
-            {/* Cover Letter */}
-            {application.cover_letter && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FileText size={20} />
-                  Cover Letter
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Paper sx={{ p: 2, bgcolor: isDark ? 'action.hover' : 'grey.50' }}>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                    {application.cover_letter}
+              {/* Timeline */}
+              <Card sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, boxShadow: theme.shadows[1] }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Calendar size={20} />
+                    Timeline
                   </Typography>
-                </Paper>
-              </Box>
-            )}
+                  <Divider sx={{ mb: 3 }} />
+                  <Stack spacing={2}>
+                    {application.applied_at && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                          Applied On
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {new Date(application.applied_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                        </Typography>
+                      </Box>
+                    )}
+                    {application.updated_at && application.updated_at !== application.applied_at && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                          Last Update
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {new Date(application.updated_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
 
-            {/* Links */}
-            <Box>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LinkIcon size={20} />
-                Links & Documents
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                {application.resume_url && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Resume
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {isPDF(application.resume_url) ? (
-                        <>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<Eye size={16} />}
-                            onClick={() => setPdfViewerOpen(true)}
-                          >
-                            View PDF
-                          </Button>
-                          {resumeSignedUrl && (
+              {/* Links */}
+              <Card sx={{ borderRadius: '16px', border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, boxShadow: theme.shadows[1] }}>
+                <CardContent sx={{ p: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <LinkIcon size={20} />
+                    Documents
+                  </Typography>
+                  <Divider sx={{ mb: 3 }} />
+                  <Stack spacing={2}>
+                    {application.resume_url && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+                          Resume
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                          {isPDF(application.resume_url) ? (
+                            <>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<Eye size={16} />}
+                                onClick={() => setPdfViewerOpen(true)}
+                                data-html2canvas-ignore
+                                sx={{ 
+                                  bgcolor: alpha(theme.palette.primary.main, 0.05), 
+                                  borderColor: alpha(theme.palette.primary.main, 0.2),
+                                  color: 'primary.main', 
+                                  '&:hover': { 
+                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                    borderColor: 'primary.main',
+                                  } 
+                                }}
+                              >
+                                View
+                              </Button>
+                              {resumeSignedUrl && (
+                                <Button
+                                  component="a"
+                                  href={resumeSignedUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<DownloadIcon size={16} />}
+                                  data-html2canvas-ignore
+                                  sx={{ 
+                                    bgcolor: alpha(theme.palette.info.main, 0.05), 
+                                    borderColor: alpha(theme.palette.info.main, 0.2),
+                                    color: 'info.main', 
+                                    '&:hover': { 
+                                      bgcolor: alpha(theme.palette.info.main, 0.1),
+                                      borderColor: 'info.main',
+                                    } 
+                                  }}
+                                >
+                                  Get File
+                                </Button>
+                              )}
+                            </>
+                          ) : (
                             <Button
                               component="a"
-                              href={resumeSignedUrl}
+                              href={application.resume_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               variant="outlined"
                               size="small"
                               startIcon={<FileText size={16} />}
+                              data-html2canvas-ignore
                             >
-                              Download
+                              Download Resume
                             </Button>
                           )}
-                        </>
-                      ) : (
+                        </Stack>
+                      </Box>
+                    )}
+                    {application.portfolio_url && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+                          Portfolio
+                        </Typography>
                         <Button
                           component="a"
-                          href={application.resume_url}
+                          href={application.portfolio_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
                           size="small"
-                          startIcon={<FileText size={16} />}
+                          startIcon={<LinkIcon size={16} />}
+                          data-html2canvas-ignore
                         >
-                          View Resume
+                          Visit Portfolio
                         </Button>
-                      )}
-                    </Box>
-                  </Box>
-                )}
-                {application.portfolio_url && (
-                  <Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                      Portfolio
-                    </Typography>
-                    <Button
-                      component="a"
-                      href={application.portfolio_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<LinkIcon size={16} />}
-                    >
-                      View Portfolio
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+                      </Box>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+          </Grid>
+        </Grid>
 
-        {/* Application ID */}
-        <Paper sx={{ p: 2, textAlign: 'center', bgcolor: isDark ? 'action.hover' : 'grey.50' }}>
-          <Typography variant="body2" color="text.secondary">
-            Application ID: <strong>{application.id}</strong>
+        {/* Footer ID */}
+        <Box sx={{ mt: 6, textAlign: 'center' }}>
+          <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 500 }}>
+            Application ID: {application.id}
           </Typography>
-        </Paper>
+        </Box>
       </Container>
 
       {/* PDF Viewer */}
