@@ -761,7 +761,7 @@ export default function JobPostingsPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Search size={20} color={primaryMain} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, color: 'text.secondary' }}>
-                          Refine Search Parameters
+                          Search
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

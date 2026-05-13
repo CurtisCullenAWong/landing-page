@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTrackPageView } from "@/hooks/use-track-page-view";
 
 // Dynamic imports for heavy components
 const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget").then(mod => mod.ChatWidget), {
@@ -38,6 +39,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [gender, setGender] = useState<'male' | 'female'>('female');
   const [mounted, setMounted] = useState(false);
+
+  // Track page views for analytics
+  useTrackPageView();
 
   useEffect(() => {
     const _warn = console.warn.bind(console);
