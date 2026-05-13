@@ -32,7 +32,7 @@ export const SITE_CONTENT = {
         },
         {
           title: "Technology & Sustainability",
-          description: "Focused on supply chain technology adoption, infrastructural developments, and economic growth. Key strategies encompass extending product scope, expanding geographical locations, and serving wider market segments through effective resource management and sound financial planning."
+          description: "Focused on supply chain innovation, infrastructure growth, and strategic market expansion through efficient resource and financial management."
         }
       ]
     }

@@ -17,19 +17,25 @@ export const AbstractBlob = ({ color, size = 400, opacity = 0.5, ...props }: any
       filter: 'blur(60px)',
       position: 'absolute',
       zIndex: -1,
+      maskImage: 'radial-gradient(circle, black, transparent 80%)',
+      WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
       ...props.style
     }}
     animate={{
       borderRadius: [
         '40% 60% 70% 30% / 40% 50% 60% 50%',
-        '60% 40% 30% 70% / 50% 60% 40% 60%',
+        '55% 45% 65% 35% / 45% 55% 35% 65%',
+        '30% 70% 50% 50% / 60% 40% 70% 30%',
+        '65% 35% 35% 65% / 35% 65% 65% 35%',
         '40% 60% 70% 30% / 40% 50% 60% 50%'
       ],
-      scale: [1, 1.1, 0.9, 1],
-      rotate: [0, 15, -15, 0]
+      scale: [1, 1.08, 0.95, 1.03, 0.98, 1],
+      rotate: [0, 8, -12, 18, -6, 0],
+      x: [0, 20, -15, 10, -25, 0],
+      y: [0, -15, 25, -10, 15, 0]
     }}
     transition={{
-      duration: 12,
+      duration: 25 + Math.random() * 10, // Randomized duration for each instance
       repeat: Infinity,
       ease: "easeInOut"
     }}
@@ -59,16 +65,18 @@ export const FilledAbstractShape = ({ color, size = 400, delay = 0, opacity = 0.
         position: 'absolute',
         zIndex: -1,
         filter: 'blur(50px) drop-shadow(0 20px 40px rgba(0,0,0,0.15))',
+        maskImage: 'radial-gradient(circle, black, transparent 80%)',
+        WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
         ...props.style
       }}
       animate={{
-        y: [0, -40, 0],
-        x: [0, 30, 0],
-        rotate: [0, 15, -15, 0],
-        scale: [1, 1.2, 0.8, 1],
+        y: [0, -45, 20, -30, 15, 0],
+        x: [0, 35, -25, 40, -15, 0],
+        rotate: [0, 25, -15, 35, -20, 0],
+        scale: [1, 1.15, 0.85, 1.1, 0.9, 1],
       }}
       transition={{
-        duration: 15,
+        duration: 20 + Math.random() * 15,
         delay,
         repeat: Infinity,
         ease: "easeInOut"
@@ -114,6 +122,8 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
         position: 'absolute',
         zIndex: -1,
         filter: 'blur(160px)',
+        maskImage: 'radial-gradient(circle, black, transparent 80%)',
+        WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
         ...props.style
       }}
       animate={{
@@ -134,10 +144,15 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
         d={paths[0]}
         fill={alpha(color, opacity)}
         animate={{
-          d: paths,
+          d: [
+            paths[0],
+            paths[1],
+            paths[2],
+            paths[0]
+          ],
         }}
         transition={{
-          duration: 60,
+          duration: 70 + Math.random() * 20,
           repeat: Infinity,
           ease: "easeInOut"
         }}

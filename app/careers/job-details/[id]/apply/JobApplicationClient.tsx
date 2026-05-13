@@ -50,6 +50,7 @@ import {
 } from '@/lib/input-utils';
 
 import type { Job } from '../../../../../contexts/JobContext';
+import { incrementJobCounterOnce } from '@/lib/services/job-metrics-service';
 
 
 interface ApplicationFormData {
@@ -437,6 +438,8 @@ export default function JobApplicationClient() {
       if (error) {
         throw error;
       }
+
+      await incrementJobCounterOnce(id, 'applications_count', 'application');
 
       setApplicationId(data.id);
 

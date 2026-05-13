@@ -906,8 +906,8 @@ export default function AboutPage() {
                         bgcolor: alpha(tertiaryMain, 0.03),
                         borderColor: alpha(tertiaryMain, 0.2)
                       }}>
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex' }}>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: tertiaryMain, color: secondaryDark, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <Phone size={20} />
                           </Box>
                           <Box sx={{ flex: 1 }}>

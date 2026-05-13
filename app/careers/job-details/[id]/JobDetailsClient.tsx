@@ -23,8 +23,9 @@ import {
 } from '@mui/material';
 import { JobDetailsSkeleton } from '@/components/loading';
 import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePageTitle } from '../../../../lib/usePageTitle';
+import { incrementJobCounterOnce } from '@/lib/services/job-metrics-service';
 
 // Shared "Corner Brackets" component for architectural emphasis
 const CornerBrackets = ({ color, size = 24, radius = 16 }: { color: string, size?: number, radius?: number }) => (
@@ -60,6 +61,7 @@ export default function JobDetailsClient() {
   const { getJobById, isLoading: contextLoading } = useJobs();
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const hasRecordedViewRef = useRef(false);
   const theme = useTheme();
 
 
@@ -226,6 +228,15 @@ export default function JobDetailsClient() {
       supabase.removeChannel(channel);
     };
   }, [id, getJobById, contextLoading]);
+
+  useEffect(() => {
+    if (!job?.id || hasRecordedViewRef.current) {
+      return;
+    }
+
+    hasRecordedViewRef.current = true;
+    void incrementJobCounterOnce(job.id, 'views_count', 'view');
+  }, [job?.id]);
 
   usePageTitle(job ? job.title : 'Job Details');
 
@@ -581,4 +592,4 @@ export default function JobDetailsClient() {
       </Container>
     </Box>
   );
-}
+}

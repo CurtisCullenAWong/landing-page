@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 
 import { useJobs } from '../../contexts/JobContext';
-import { MapPin, Briefcase, Clock, Search, X, ChevronDown, ChevronUp, GraduationCap, Target, Users } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, X, ChevronDown, ChevronUp, GraduationCap, Target, Users, Sparkles } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
@@ -34,12 +34,14 @@ import {
   alpha,
   Stack,
   Divider,
+  Chip,
 } from '@mui/material';
 import Link from 'next/link';
 import { JobListingsSkeleton } from '@/components/loading';
 import { Footer } from '@/components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { motion } from 'framer-motion';
 
 type SortField = 'title' | 'department' | 'location' | 'type' | 'postedDate';
 type SortDirection = 'asc' | 'desc';
@@ -166,6 +168,13 @@ export default function JobPostingsPage() {
 
     // Apply sorting
     filtered.sort((a, b) => {
+      const aFeatured = !!a.featured;
+      const bFeatured = !!b.featured;
+
+      if (aFeatured !== bFeatured) {
+        return aFeatured ? -1 : 1;
+      }
+
       let aValue: string | number;
       let bValue: string | number;
 
@@ -276,21 +285,40 @@ export default function JobPostingsPage() {
               inset: 0,
               zIndex: 0,
               pointerEvents: 'none',
-              maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              overflow: 'hidden',
+              maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
             }}>
               {/* Massive Squiggly Shape (Teal Gradient) */}
-              <Box sx={{
-                position: 'absolute',
-                top: '-15%',
-                right: '-10%',
-                width: { xs: '150%', md: '1400px' },
-                height: { xs: '80%', md: '1000px' },
-                background: `linear-gradient(135deg, ${alpha(primaryMain, 0.15)}, ${alpha(tertiaryMain, 0.05)})`,
-                borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
-                transform: 'rotate(-12deg)',
-                filter: 'blur(60px)',
-              }} />
+              <Box
+                component={motion.div}
+                animate={{
+                  borderRadius: [
+                    '40% 60% 70% 30% / 40% 40% 60% 60%',
+                    '50% 50% 60% 40% / 45% 55% 45% 55%',
+                    '40% 60% 70% 30% / 40% 40% 60% 60%'
+                  ],
+                  scale: [1, 1.05, 0.98, 1],
+                  rotate: [-12, -8, -15, -12],
+                  x: [0, 10, -10, 0],
+                  y: [0, -15, 15, 0]
+                }}
+                transition={{
+                  duration: 25 + Math.random() * 10,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                sx={{
+                  position: 'absolute',
+                  top: '-15%',
+                  right: '-10%',
+                  width: { xs: '150%', md: '1400px' },
+                  height: { xs: '80%', md: '1000px' },
+                  background: `linear-gradient(135deg, ${alpha(primaryMain, 0.15)}, ${alpha(tertiaryMain, 0.05)})`,
+                  borderRadius: '40% 60% 70% 30% / 40% 40% 60% 60%',
+                  transform: 'rotate(-12deg)',
+                  filter: 'blur(60px)',
+                }} />
               {/* Technical Grid Overlay */}
               <Box sx={{
                 position: 'absolute',
@@ -414,7 +442,9 @@ export default function JobPostingsPage() {
               scrollSnapAlign: 'start',
               scrollSnapStop: 'always',
               position: 'relative',
-              bgcolor: 'background.default'
+              bgcolor: 'background.default',
+              mb: { xs: 4, md: 0 },
+              background: `linear-gradient(180deg, ${bgColor} 0%, ${alpha(tertiaryMain, 0.02)} 15%, ${bgColor} 100%)`
             }}
           >
 
@@ -425,19 +455,40 @@ export default function JobPostingsPage() {
               inset: 0,
               zIndex: 0,
               pointerEvents: 'none',
+              overflow: 'hidden',
+              maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
             }}>
               {/* Massive Organic Shape (Yellow Gradient) */}
-              <Box sx={{
-                position: 'absolute',
-                top: '-25%',
-                left: '-15%',
-                width: { xs: '150%', md: '1200px' },
-                height: { xs: '100%', md: '1200px' },
-                background: `linear-gradient(135deg, ${alpha(tertiaryMain, 0.18)}, ${alpha(primaryMain, 0.05)})`,
-                borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
-                transform: 'rotate(20deg)',
-                filter: 'blur(80px)',
-              }} />
+              <Box
+                component={motion.div}
+                animate={{
+                  borderRadius: [
+                    '40% 60% 30% 70% / 60% 30% 70% 40%',
+                    '60% 40% 70% 30% / 30% 70% 40% 60%',
+                    '40% 60% 30% 70% / 60% 30% 70% 40%'
+                  ],
+                  scale: [1, 1.08, 0.95, 1],
+                  rotate: [20, 25, 15, 20],
+                  x: [0, -20, 20, 0],
+                  y: [0, 30, -30, 0]
+                }}
+                transition={{
+                  duration: 30 + Math.random() * 10,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                sx={{
+                  position: 'absolute',
+                  top: '-25%',
+                  left: '-15%',
+                  width: { xs: '150%', md: '1200px' },
+                  height: { xs: '100%', md: '1200px' },
+                  background: `linear-gradient(135deg, ${alpha(tertiaryMain, 0.18)}, ${alpha(primaryMain, 0.05)})`,
+                  borderRadius: '40% 60% 30% 70% / 60% 30% 70% 40%',
+                  transform: 'rotate(20deg)',
+                  filter: 'blur(80px)',
+                }} />
               {/* Architectural Lines Overlay */}
               <Box sx={{
                 position: 'absolute',
@@ -619,12 +670,11 @@ export default function JobPostingsPage() {
                 scrollSnapAlign: 'start',
                 scrollSnapStop: 'always',
                 bgcolor: paperColor,
-                background: isDark
-                  ? `linear-gradient(180deg, ${alpha(secondaryDark, 0.96)} 0%, ${paperColor} 100%)`
-                  : `linear-gradient(180deg, ${alpha(primaryMain, 0.04)} 0%, ${paperColor} 56%, ${alpha(tertiaryMain, 0.03)} 100%)`,
-                py: { xs: 8, md: 10 },
+                background: `linear-gradient(180deg, ${bgColor} 0%, ${paperColor} 100%)`,
+                py: { xs: 10, md: 15 }, // Increased padding
+                pb: { xs: 12, md: 20 }, // Extra bottom margin/padding
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'visible', // Allow content to flow
                 isolation: 'isolate'
               }}
             >
@@ -635,6 +685,7 @@ export default function JobPostingsPage() {
                 inset: 0,
                 zIndex: 0,
                 pointerEvents: 'none',
+                overflow: 'hidden', // Contain background elements
                 mixBlendMode: 'multiply',
               }}>
                 {/* Gradient Glow */}
@@ -852,9 +903,38 @@ export default function JobPostingsPage() {
                           </TableRow>
                         ) : (
                           paginatedJobs.map((job) => (
-                            <TableRow key={job.id} hover sx={{ '&:hover': { bgcolor: alpha(primaryMain, 0.02) } }}>
+                            <TableRow
+                              key={job.id}
+                              hover
+                              sx={{
+                                ...(job.featured && {
+                                  bgcolor: alpha(tertiaryMain, 0.08),
+                                  '& td': { borderColor: alpha(tertiaryDark, 0.22) }
+                                }),
+                                '&:hover': {
+                                  bgcolor: job.featured ? alpha(tertiaryMain, 0.16) : alpha(primaryMain, 0.02)
+                                }
+                              }}
+                            >
                               <TableCell>
                                 <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.primary' }}>{job.title}</Typography>
+                                {job.featured && (
+                                  <Chip
+                                    icon={<Sparkles size={12} />}
+                                    label="Featured"
+                                    size="small"
+                                    sx={{
+                                      mt: 0.5,
+                                      mb: 0.5,
+                                      height: 20,
+                                      fontWeight: 700,
+                                      bgcolor: tertiaryMain,
+                                      color: secondaryDark,
+                                      border: `1px solid ${alpha(secondaryDark, 0.2)}`,
+                                      '& .MuiChip-icon': { color: secondaryDark }
+                                    }}
+                                  />
+                                )}
                                 <Typography variant="caption" sx={{ color: primaryMain, fontWeight: 700 }}>{job.salary}</Typography>
                               </TableCell>
                               <TableCell>
@@ -912,10 +992,38 @@ export default function JobPostingsPage() {
                   {/* Mobile Card View */}
                   <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2, bgcolor: alpha(paperColor, 0.9), backdropFilter: 'blur(10px)' }}>
                     {paginatedJobs.map((job) => (
-                      <Card key={job.id} sx={{ mb: 2, border: `1px solid ${alpha(theme.palette.divider, 0.1)}`, position: 'relative', borderRadius: 2 }}>
+                      <Card
+                        key={job.id}
+                        sx={{
+                          mb: 2,
+                          border: `1px solid ${job.featured ? alpha(tertiaryDark, 0.35) : alpha(theme.palette.divider, 0.1)}`,
+                          position: 'relative',
+                          borderRadius: 2,
+                          ...(job.featured && {
+                            bgcolor: alpha(tertiaryMain, 0.07),
+                            boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.2)}`
+                          })
+                        }}
+                      >
                         <CornerBrackets color={tertiaryMain} radius={16} size={16} hideTopLeft={true} />
                         <CardContent sx={{ p: 2.5 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5, color: primaryMain }}>{job.title}</Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.75, color: primaryMain }}>{job.title}</Typography>
+                          {job.featured && (
+                            <Chip
+                              icon={<Sparkles size={12} />}
+                              label="Featured"
+                              size="small"
+                              sx={{
+                                mb: 1.5,
+                                height: 20,
+                                fontWeight: 700,
+                                bgcolor: tertiaryMain,
+                                color: secondaryDark,
+                                border: `1px solid ${alpha(secondaryDark, 0.2)}`,
+                                '& .MuiChip-icon': { color: secondaryDark }
+                              }}
+                            />
+                          )}
                           <Stack spacing={1.5} sx={{ mb: 3 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                               <Briefcase size={16} color={primaryMain} />
@@ -953,11 +1061,6 @@ export default function JobPostingsPage() {
             </Box>
           )}</>
       )}
-
-
-      <Box sx={{ scrollSnapAlign: 'start' }}>
-        <Footer />
-      </Box>
     </Box>
   );
 }

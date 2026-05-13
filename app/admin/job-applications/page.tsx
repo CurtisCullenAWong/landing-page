@@ -113,6 +113,12 @@ export default function JobApplicationsPage() {
     return url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('.pdf');
   };
 
+  const formatLinkPreview = (url: string) => {
+    const cleanUrl = url.replace(/^https?:\/\//i, '');
+    const maxLength = 52;
+    return cleanUrl.length > maxLength ? `${cleanUrl.slice(0, maxLength)}...` : cleanUrl;
+  };
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, applicant: JobApplicant) => {
     setMenuAnchor(event.currentTarget);
     setSelectedApplicant(applicant);
@@ -861,17 +867,24 @@ export default function JobApplicationsPage() {
                                           Portfolio / Links
                                         </Typography>
                                         {applicant.portfolio_url ? (
-                                          <Button
-                                            variant="outlined"
-                                            size="small"
+                                          <Typography
+                                            variant="body2"
+                                            component="a"
                                             href={applicant.portfolio_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            startIcon={<FileText size={16} />}
-                                            fullWidth
+                                            title={applicant.portfolio_url}
+                                            sx={{
+                                              display: 'block',
+                                              textDecoration: 'none',
+                                              color: 'primary.main',
+                                              fontWeight: 500,
+                                              wordBreak: 'break-all',
+                                              '&:hover': { textDecoration: 'underline' },
+                                            }}
                                           >
-                                            View Portfolio
-                                          </Button>
+                                            {formatLinkPreview(applicant.portfolio_url)}
+                                          </Typography>
                                         ) : (
                                           <Typography variant="body2" color="text.secondary">No portfolio link provided.</Typography>
                                         )}
@@ -999,16 +1012,23 @@ export default function JobApplicationsPage() {
                               <Typography variant="body2" color="text.secondary" sx={{ minWidth: 90, fontWeight: 500 }}>
                                 Portfolio:
                               </Typography>
-                              <Button
-                                size="small"
-                                variant="text"
+                              <Typography
+                                variant="body2"
+                                component="a"
                                 href={applicant.portfolio_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                sx={{ p: 0, minWidth: 0, textTransform: 'none' }}
+                                title={applicant.portfolio_url}
+                                sx={{
+                                  color: 'primary.main',
+                                  textDecoration: 'none',
+                                  fontWeight: 500,
+                                  wordBreak: 'break-all',
+                                  '&:hover': { textDecoration: 'underline' },
+                                }}
                               >
-                                View Link
-                              </Button>
+                                {formatLinkPreview(applicant.portfolio_url)}
+                              </Typography>
                             </Box>
                           )}
                           {applicant.cover_letter && (
