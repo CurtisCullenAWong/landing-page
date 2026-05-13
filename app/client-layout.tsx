@@ -33,18 +33,24 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const isSequencePage = ['/', '/home', '/about-us', '/why-us', '/history', '/partnerships', '/careers'].includes(pathname);
+  const showGlobalFooter = pathname !== '/careers';
 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [gender, setGender] = useState<'male' | 'female'>('female');
   const [mounted, setMounted] = useState(false);
 
-  if (typeof window !== 'undefined') {
+  useEffect(() => {
     const _warn = console.warn.bind(console);
     console.warn = (...args: unknown[]) => {
       if (typeof args[0] === 'string' && args[0].includes('THREE.Clock')) return;
       _warn(...args);
     };
-  }
+
+    return () => {
+      console.warn = _warn;
+    };
+  }, []);
+
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
     setMounted(true);
@@ -97,9 +103,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 {children}
               </MainContainer>
             </Suspense>
-            <Suspense fallback={null}>
-              <Footer />
-            </Suspense>
+            {showGlobalFooter && (
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
+            )}
           </Box>
 
           {mounted && isSequencePage && isDesktop && (

@@ -38,7 +38,6 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { JobListingsSkeleton } from '@/components/loading';
-import { Footer } from '@/components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 import { motion } from 'framer-motion';
@@ -243,15 +242,6 @@ export default function JobPostingsPage() {
     setFilterLocation('all');
     setPage(0);
   };
-
-  useEffect(() => {
-    // Hide global footer to use local one in snap sequence
-    const globalFooter = document.querySelector('footer');
-    if (globalFooter) globalFooter.style.display = 'none';
-    return () => {
-      if (globalFooter) globalFooter.style.display = 'block';
-    };
-  }, []);
 
   return (
     <Box sx={{
