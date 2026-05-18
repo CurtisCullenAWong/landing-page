@@ -279,32 +279,25 @@ export default function WhyBossCargo() {
         <Box
           sx={{
             position: 'absolute',
-            top: '15dvh',
-            bottom: '25dvh',
-            right: { xs: 'auto', md: '5%' },
+            top: { xs: '15dvh', md: '5dvh' },
+            bottom: { xs: '25dvh', md: '5dvh' },
+            right: { xs: 'auto', md: '3%' },
             left: { xs: '0', md: 'auto' },
-            width: { xs: '100%', md: '45%' },
+            width: { xs: '100%', md: '55%' },
             opacity: { xs: 0.3, md: 1 },
             pointerEvents: 'none',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 4
+            zIndex: 4,
           }}
         >
           <Box
-            component={motion.div}
-            animate={{
-              y: [0, -20, 0],
-              scale: [0.95, 1.0, 0.95],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
             sx={{
               width: '100%',
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '100%',
               aspectRatio: '1/1',
               position: 'relative',
               display: 'flex',
@@ -316,7 +309,6 @@ export default function WhyBossCargo() {
               component={motion.div}
               animate={{
                 backgroundColor: [primaryMain, tertiaryMain, primaryMain],
-                rotate: [0, 1, -1, 0],
                 filter: isDark
                   ? [`drop-shadow(0 0 40px ${primaryMain}44)`, `drop-shadow(0 0 60px ${tertiaryMain}44)`, `drop-shadow(0 0 40px ${primaryMain}44)`]
                   : ['drop-shadow(0 20px 40px rgba(0,0,0,0.1))', 'drop-shadow(0 30px 50px rgba(0,0,0,0.15))', 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))']
