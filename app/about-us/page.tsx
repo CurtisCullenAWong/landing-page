@@ -73,6 +73,16 @@ export default function AboutPage() {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [baseSpacing, setBaseSpacing] = useState(260);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setBaseSpacing(window.innerWidth < 1000 ? 150 : 260);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -527,7 +537,6 @@ export default function AboutPage() {
 
                     // Transformation values - Compact and non-linear spread for 7 cards
                     // Pulling the 3rd level cards slightly closer horizontally
-                    const baseSpacing = (typeof window !== 'undefined' && window.innerWidth < 1000 ? 150 : 260);
                     const xOffset = relIndex * baseSpacing * (absRel === 3 ? 0.85 : 1);
                     const yOffset = absRel * absRel * 22;
                     const rotateZ = relIndex * 9;

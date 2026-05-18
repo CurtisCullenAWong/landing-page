@@ -329,6 +329,7 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
 
             <motion.path
               initial={false}
+              d={blobPath}
               animate={{ d: blobPath, fill: 'url(#squiggly-gradient)' }}
               transition={{
                 d: { duration: 1.2, ease: [0.22, 1, 0.36, 1] },

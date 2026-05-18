@@ -57,7 +57,7 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
       <path
         fill={color}
-        d={BLOB_PATHS[variant % BLOB_PATHS.length]}
+        d={BLOB_PATHS[(variant || 0) % BLOB_PATHS.length] || BLOB_PATHS[0]}
         transform="translate(100 100)"
       />
     </svg>

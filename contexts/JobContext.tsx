@@ -142,7 +142,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
     // Set up realtime subscription for jobs and departments
     const supabase = createClient();
-    
+
     const jobsChannel = supabase
       .channel('jobs-realtime')
       .on(
@@ -154,12 +154,12 @@ export function JobProvider({ children }: { children: ReactNode }) {
         },
         (payload: any) => {
           console.log('Jobs Realtime event:', payload.eventType, payload);
-          
+
           if (payload.eventType === 'INSERT') {
             const newJob = mapDatabaseJobToJob(payload.new as DatabaseJob);
             setJobs((prevJobs) => {
               if (prevJobs.find(job => job.id === newJob.id)) return prevJobs;
-              return [newJob, ...prevJobs].sort((a, b) => 
+              return [newJob, ...prevJobs].sort((a, b) =>
                 new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime()
               );
             });
@@ -173,9 +173,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
           }
         }
       )
-      .subscribe((status: string) => {
-        console.log('Jobs Realtime Status:', status);
-      });
+      .subscribe();
 
     const departmentsChannel = supabase
       .channel('departments-realtime')
@@ -195,9 +193,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
           }
         }
       )
-      .subscribe((status: string) => {
-        console.log('Departments Realtime Status:', status);
-      });
+      .subscribe();
 
     // Cleanup subscription on unmount
     return () => {
@@ -210,7 +206,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
     try {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
-      
+
       if (!url || !key) {
         console.error('Error loading jobs: Supabase environment variables are missing');
         setJobs([]);
@@ -325,7 +321,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
       const supabase = createClient();
       const now = new Date().toISOString();
-      
+
       const jobsData = jobsToAdd.map(job => ({
         title: job.title,
         department: job.department,
@@ -379,7 +375,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
     try {
       const supabase = createClient();
       const updateData: Partial<DatabaseJob> = {};
-      
+
       if (updatedJob.title !== undefined) updateData.title = updatedJob.title;
       if (updatedJob.department !== undefined) updateData.department = updatedJob.department;
       if (updatedJob.location !== undefined) updateData.location = updatedJob.location;

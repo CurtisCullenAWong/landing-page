@@ -84,6 +84,7 @@ export const FilledAbstractShape = ({ color, size = 400, delay = 0, opacity = 0.
       {...props}
     >
       <motion.path
+        initial={{ d: paths[0] }}
         d={paths[0]}
         fill={alpha(color, opacity)}
         animate={{
@@ -107,7 +108,7 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
   const paths = [
     "M-100,250 C-100,50 300,-50 500,100 C700,250 1100,50 1100,250 L1100,600 L-100,600 Z",
     "M-200,300 C0,0 500,0 700,300 C900,600 1200,300 1400,500 L1400,1000 L-200,1000 Z",
-    "M100,100 C400,-100 900,-100 1200,200 C1500,500 1000,900 500,800 C0,700 -200,400 100,100 Z"
+    "M0,200 C200,0 600,0 800,200 C1000,400 1300,200 1500,400 L1500,800 L0,800 Z"
   ];
 
   return (
@@ -141,6 +142,7 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
       {...props}
     >
       <motion.path
+        initial={{ d: paths[0] }}
         d={paths[0]}
         fill={alpha(color, opacity)}
         animate={{

@@ -9,6 +9,11 @@ export function useTrackPageView() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Disable visit tracking for local development environments
+    if (process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))) {
+      return;
+    }
+
     // Retrieve session ID
     let sessionId = localStorage.getItem('analytics_session_id');
     if (!sessionId) {

@@ -62,7 +62,7 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
       <path
         fill={color}
-        d={BLOB_PATHS[variant % BLOB_PATHS.length]}
+        d={BLOB_PATHS[(variant || 0) % BLOB_PATHS.length] || BLOB_PATHS[0]}
         transform="translate(100 100)"
       />
     </svg>
@@ -119,6 +119,16 @@ export default function PartnershipsPage() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const [activeIndex, setActiveIndex] = useState(0);
+  const [baseSpacing, setBaseSpacing] = useState(320);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setBaseSpacing(window.innerWidth < 1000 ? 160 : 320);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const primaryMain = theme.palette.primary.main;
   const secondaryMain = theme.palette.secondary.main;
@@ -527,7 +537,6 @@ export default function PartnershipsPage() {
                   // Visibility check - show up to 5 cards for memberships
                   if (absRel > 2) return null;
 
-                  const baseSpacing = (typeof window !== 'undefined' && window.innerWidth < 1000 ? 160 : 320);
                   const xOffset = relIndex * baseSpacing;
                   const yOffset = absRel * absRel * 20;
                   const rotateZ = relIndex * 8;
