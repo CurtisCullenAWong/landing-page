@@ -47,9 +47,7 @@ export const ChatWidget = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Hello! I'm your Boss Cargo Express assistant. How can I help you today?" }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreloading, setIsPreloading] = useState(false);
   const theme = useTheme();
@@ -58,9 +56,32 @@ export const ChatWidget = ({
 
   // Speech State
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [isSpeechLoading, setIsSpeechLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ttsAbortControllerRef = useRef<AbortController | null>(null);
+  const lastSpokenRef = useRef<{ text: string; voice: string } | null>(null);
 
   const [isServiceOnline, setIsServiceOnline] = useState<boolean | null>(null);
+
+  const cancelSpeech = (keepCache = false) => {
+    if (ttsAbortControllerRef.current) {
+      ttsAbortControllerRef.current.abort();
+      ttsAbortControllerRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      if (!keepCache) {
+        audioRef.current.src = '';
+        audioRef.current = null;
+        lastSpokenRef.current = null;
+      }
+    } else {
+      if (!keepCache) {
+        lastSpokenRef.current = null;
+      }
+    }
+    setIsSpeechLoading(false);
+  };
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -80,33 +101,18 @@ export const ChatWidget = ({
         speak(lastAssistantMessage.content);
       }
     } else if (!isSpeechEnabled) {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
     }
   }, [isSpeechEnabled, gender, isOpen]);
 
-
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          setAvailableVoices(voices);
-        }
-      };
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      cancelSpeech();
     };
   }, []);
 
 
-  const speak = (
+  const speak = async (
     text: string,
     forceGender?: 'male' | 'female',
     forceEnabled?: boolean
@@ -114,19 +120,9 @@ export const ChatWidget = ({
     const activeEnabled = forceEnabled !== undefined ? forceEnabled : isSpeechEnabled;
     const activeGender = forceGender !== undefined ? forceGender : gender;
 
+    if (!activeEnabled || typeof window === 'undefined') return;
 
-    if (!activeEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
-
-    // 1. Always get the freshest voice list directly from the API
-    const freshVoices = window.speechSynthesis.getVoices();
-    const voicePool = freshVoices.length > 0 ? freshVoices : availableVoices;
-
-    // Sync state if needed
-    if (freshVoices.length > 0 && availableVoices.length === 0) {
-      setAvailableVoices(freshVoices);
-    }
-
-    // 2. Thorough text clean
+    // 1. Thorough text clean
     const cleanText = text
       .replace(/[#*`_~]/g, '')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -134,95 +130,83 @@ export const ChatWidget = ({
       .replace(/https?:\/\/\S+/g, 'link')
       .trim();
 
-    // 3. Language detection
-    let detectedLang = 'en';
-    const tlWords = ['mga', 'ang', 'ng', 'sa', 'ay', 'para', 'na', 'may', 'ni', 'po', 'opo', 'kumusta', 'salamat', 'kayo', 'ikaw', 'tayo', 'kami'];
-    const lowerText = cleanText.toLowerCase();
-    const tlMatchCount = tlWords.filter(w => new RegExp(`\\b${w}\\b`).test(lowerText)).length;
-    const hasStrongIndicator = /\b(po|opo|kumusta|salamat|mga)\b/i.test(lowerText);
+    if (!cleanText) return;
 
-    if (tlMatchCount >= 2 || (tlMatchCount >= 1 && (hasStrongIndicator || cleanText.length < 40))) {
-      detectedLang = 'fil';
+    const voice = activeGender === 'male' ? 'bm_daniel' : 'bf_emma';
+
+    // Avoid redundant POST methods: check if this is the exact same text and voice already loaded
+    if (lastSpokenRef.current?.text === cleanText && lastSpokenRef.current?.voice === voice) {
+      if (audioRef.current) {
+        if (!audioRef.current.paused) {
+          // Already playing this exact voice track, ignore redundant trigger
+          return;
+        }
+        try {
+          audioRef.current.currentTime = 0;
+          await audioRef.current.play();
+          return;
+        } catch (e) {
+          console.error("Failed to replay cached audio, refetching...", e);
+        }
+      }
     }
 
-    window.speechSynthesis.cancel();
+    // 2. Cancel any other active speech or ongoing fetch request
+    cancelSpeech();
 
-    // 4. Sentence splitting
-    const sentences = cleanText.split(/(?<=[.!?])\s+/);
+    // Create a new AbortController for this fetch
+    const controller = new AbortController();
+    ttsAbortControllerRef.current = controller;
+    setIsSpeechLoading(true);
 
-    // 5. Voice selection (Language + Gender priority)
-    let targetVoice: SpeechSynthesisVoice | undefined;
+    try {
+      const speechUrl = process.env.NEXT_PUBLIC_KOKORO_TTS_SPEECH_URL || 'http://localhost:8880/v1/audio/speech';
+      const response = await fetch(speechUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input: cleanText,
+          voice: voice,
+          response_format: 'mp3',
+          speed: 1.0,
+        }),
+        signal: controller.signal,
+      });
 
-    if (detectedLang === 'fil') {
-      // Priority 1: Native Filipino voices
-      targetVoice = voicePool.find(v =>
-        v.lang.startsWith('fil') || v.lang.startsWith('tl')
-      ) ||
-        // Priority 2: Spanish voices (Spanish phonetics are much closer to Filipino than English)
-        voicePool.find(v => v.lang.startsWith('es'));
-    }
+      if (!response.ok) {
+        throw new Error(`TTS request failed with status ${response.status}`);
+      }
 
+      const blob = await response.blob();
+      if (controller.signal.aborted) return;
 
-    if (!targetVoice) {
-      const isAmericanEnglish = (v: SpeechSynthesisVoice) =>
-        v.lang === 'en-US' || v.lang === 'en_US';
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      lastSpokenRef.current = { text: cleanText, voice };
 
-      // Female voice name keywords (American neural/natural voices)
-      const femaleKeywords = ['aria', 'jenny', 'ana', 'zira', 'samantha', 'emma', 'michelle',
-        'monica', 'ava', 'allison', 'susan', 'victoria', 'female'];
-
-      // Male voice name keywords (American neural/natural voices)
-      const maleKeywords = ['guy', 'davis', 'david', 'daniel', 'brian', 'andrew', 'ryan',
-        'jason', 'mark', 'eric', 'james', 'male', 'stefan'];
-
-      const genderKeywords = activeGender === 'female' ? femaleKeywords : maleKeywords;
-
-      const genderMatch = (v: SpeechSynthesisVoice) => {
-        const n = v.name.toLowerCase();
-        return genderKeywords.some(k => n.includes(k));
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        if (audioRef.current === audio) {
+          audioRef.current = null;
+        }
       };
 
-      const isNeural = (v: SpeechSynthesisVoice) => {
-        const n = v.name.toLowerCase();
-        return n.includes('google') || n.includes('natural') ||
-          n.includes('neural') || n.includes('online');
-      };
-
-      const usVoices = voicePool.filter(isAmericanEnglish);
-      const googleUSVoices = usVoices.filter(v => v.name.toLowerCase().includes('google'));
-      const neuralUSVoices = usVoices.filter(isNeural);
-      const anyEnglish = voicePool.filter(v => v.lang.startsWith('en'));
-
-      // Priority order: Google US + gender → Google US any → Neural US + gender →
-      //                 Neural US any → US + gender → US any → English any
-      targetVoice =
-        googleUSVoices.find(genderMatch) ||
-        googleUSVoices[0] ||
-        neuralUSVoices.find(genderMatch) ||
-        neuralUSVoices[0] ||
-        usVoices.find(genderMatch) ||
-        usVoices[0] ||
-        anyEnglish.find(genderMatch) ||
-        anyEnglish[0] ||
-        voicePool[0];
+      await audio.play();
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('TTS playback/fetch aborted');
+      } else {
+        console.error('Error in Kokoro TTS:', error);
+      }
+    } finally {
+      if (ttsAbortControllerRef.current === controller) {
+        ttsAbortControllerRef.current = null;
+        setIsSpeechLoading(false);
+      }
     }
-
-    // 6. Sequential playback with natural prosody
-    sentences.forEach((sentence) => {
-      if (!sentence.trim()) return;
-
-      const utterance = new SpeechSynthesisUtterance(sentence);
-      if (targetVoice) utterance.voice = targetVoice;
-
-      utterance.lang = targetVoice?.lang || (detectedLang === 'fil' ? 'fil-PH' : 'en-US');
-
-      // Slightly varied rate/pitch per sentence for more natural delivery
-      utterance.rate = 0.90 + (Math.random() * 0.08);
-      utterance.pitch = (activeGender === 'female' ? 1.05 : 0.92) + (Math.random() * 0.06);
-      utterance.volume = 1.0;
-
-      window.speechSynthesis.speak(utterance);
-    });
   };
 
 
@@ -241,14 +225,12 @@ export const ChatWidget = ({
     if (isOpen) {
       onToggle(false);
       setIsExpanded(false);
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      cancelSpeech();
       return;
     }
 
-    // If it's the first time and we only have the default placeholder message
-    if (messages.length === 1 && messages[0].role === 'assistant' && messages[0].content.includes("Hello! I'm your Boss Cargo Express assistant")) {
+    // If it's the first time and we don't have any messages yet
+    if (messages.length === 0) {
       setIsPreloading(true);
 
       const controller = new AbortController();
@@ -354,9 +336,7 @@ export const ChatWidget = ({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    cancelSpeech();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -443,7 +423,7 @@ export const ChatWidget = ({
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Tooltip title={isSpeechEnabled ? "Turn Off Voice" : "Turn On Voice"} arrow placement="top">
+              <Tooltip title={isSpeechLoading ? "Loading Voice..." : isSpeechEnabled ? "Turn Off Voice" : "Turn On Voice"} arrow placement="top">
                 <span>
                   <IconButton
                     size="small"
@@ -455,8 +435,7 @@ export const ChatWidget = ({
                         const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
                         if (lastMsg) speak(lastMsg.content, gender, true);
                       } else {
-
-                        window.speechSynthesis.cancel();
+                        cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
                       }
                     }}
                     sx={{
@@ -465,7 +444,13 @@ export const ChatWidget = ({
                       transition: 'all 0.2s'
                     }}
                   >
-                    {isSpeechEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                    {isSpeechLoading ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : isSpeechEnabled ? (
+                      <Volume2 size={18} />
+                    ) : (
+                      <VolumeX size={18} />
+                    )}
                   </IconButton>
                 </span>
               </Tooltip>

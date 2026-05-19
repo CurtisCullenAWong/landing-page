@@ -5,23 +5,20 @@ import { Box, useTheme } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useGLTF, Float, PerspectiveCamera, Stage, Center, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei';
+import { useGLTF, Float, PerspectiveCamera, Stage, Center, AdaptiveEvents } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 
 // ─── Random Blob Generator ───────────────────────────────────────────────────
 // Generates a smooth, completely random SVG path every time it is called.
-// It maintains a consistent structure (1 Move, 7 Cubics, 1 Close) so Framer Motion 
+// It maintains a consistent structure (1 Move, 7 Cubics, 1 Close) so Framer Motion
 // can seamlessly morph between the generated shapes.
 const generateRandomBlob = () => {
   const numPoints = 7;
   const angleStep = (Math.PI * 2) / numPoints;
   const points = [];
 
-  // 1. Generate random anchor points around a circle
   for (let i = 0; i < numPoints; i++) {
-    // Start at -90deg (-PI/2) to keep orientation similar to original shapes
     const angle = i * angleStep - (Math.PI / 2);
-    // Randomize the radius between 90 and 150 for an organic, shifting feel
     const radius = 90 + Math.random() * 60;
     points.push({
       x: Math.cos(angle) * radius,
@@ -29,7 +26,6 @@ const generateRandomBlob = () => {
     });
   }
 
-  // 2. Calculate control points for a smooth closed loop using tension
   const tension = 0.3;
   let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
 
@@ -39,11 +35,8 @@ const generateRandomBlob = () => {
     const p2 = points[(i + 1) % numPoints];
     const p3 = points[(i + 2) % numPoints];
 
-    // Control point 1
     const cp1x = p1.x + (p2.x - p0.x) * tension;
     const cp1y = p1.y + (p2.y - p0.y) * tension;
-
-    // Control point 2
     const cp2x = p2.x - (p3.x - p1.x) * tension;
     const cp2y = p2.y - (p3.y - p1.y) * tension;
 
@@ -57,11 +50,10 @@ const generateRandomBlob = () => {
 useGLTF.preload('/models/avatar.glb');
 
 // ─── AvatarModel ─────────────────────────────────────────────────────────────
-const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'male' | 'female' }) => {
+const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'male' | 'female' }) => {
   const group = useRef<THREE.Group>(null);
   const { scene: originalScene, animations } = useGLTF('/models/avatar.glb');
 
-  // Refs for audio and state
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const oscIntervalRef = useRef<number | null>(null);
 
@@ -81,7 +73,6 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
 
     if (pool.length === 0) return;
 
-    // 1. Determine target clip
     let idx = manualIndex % pool.length;
     if (manualIndex === 0) {
       const idleIdx = pool.findIndex(a => a.name.toLowerCase().includes('idle'));
@@ -91,7 +82,6 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
     const clip = pool[idx];
     const nextAction = mixer.clipAction(clip);
 
-    // 2. Smooth Crossfade Transition
     if (currentActionRef.current !== nextAction) {
       const prevAction = currentActionRef.current;
 
@@ -101,7 +91,6 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
       nextAction.play();
 
       if (prevAction) {
-        // Crossfade over 0.5 seconds
         nextAction.crossFadeFrom(prevAction, 0.5, true);
       } else {
         nextAction.fadeIn(0.5);
@@ -110,14 +99,12 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
       currentActionRef.current = nextAction;
     }
 
-    // 3. Audio logic with cleanup for rapid clicks
     const audioTimeout = setTimeout(() => {
       const clipName = clip.name.toLowerCase();
       let targetAudioSrc: string | null = null;
       if (clipName.includes('dance')) targetAudioSrc = '/audio/dance.mp3';
       if (clipName.includes('sprint')) targetAudioSrc = '/audio/dance1.mp3';
 
-      // Halt current audio if target changed
       if (!targetAudioSrc || (audioRef.current && !audioRef.current.src.endsWith(targetAudioSrc))) {
         if (audioRef.current) {
           audioRef.current.pause();
@@ -135,7 +122,7 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
           audioRef.current.loop = true;
           audioRef.current.volume = 0.6;
         }
-        audioRef.current.play().catch(() => {/* WebAudio Fallback logic here */ });
+        audioRef.current.play().catch(() => {/* WebAudio Fallback */ });
       }
     }, 100);
 
@@ -152,40 +139,32 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number, gender: 'ma
 };
 
 // ─── AvatarOverlay ────────────────────────────────────────────────────────────
-export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | 'female', isVisible?: boolean }) => {
+export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | 'female'; isVisible?: boolean }) => {
   const theme = useTheme();
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
 
-  // Dynamic absolute random path state
   const [blobPath, setBlobPath] = useState(generateRandomBlob);
 
   const [blobColorIndex1, setBlobColorIndex1] = useState(0);
   const [blobColorIndex2, setBlobColorIndex2] = useState(1);
 
-  const [currentPos, setCurrentPos] = useState<{ x: string; y: string }>({
-    x: '30px',
-    y: 'calc(50vh - 160px)',
+  // FIX 1: Lazy useState initializer — position is computed once, synchronously,
+  // before the first render. Eliminates the mount-then-jump caused by useEffect.
+  const [currentPos] = useState<{ x: string; y: string }>(() => {
+    const randomY = Math.floor(Math.random() * 40) + 25;
+    const randomX = Math.floor(Math.random() * 30) + 30;
+    return { x: `${randomX}px`, y: `calc(${randomY}vh - 160px)` };
   });
 
   const constraintsRef = useRef<HTMLDivElement>(null);
 
-  // Initial position only — ensuring it stays within viewport
+  // Randomize blob colors once on mount (safe — not position-related)
   useEffect(() => {
-    // Randomize vertical position (25vh to 65vh) to stay safely in viewport
-    const randomY = Math.floor(Math.random() * 40) + 25;
-    // Vary x slightly (30px to 60px) for an organic feel
-    const randomX = Math.floor(Math.random() * 30) + 30;
-
-    const newPos = { x: `${randomX}px`, y: `calc(${randomY}vh - 160px)` };
-    setCurrentPos(newPos);
-
-    // Set initial random colors on mount (avoids hydration mismatches if colors array length varies)
     setBlobColorIndex1(Math.floor(Math.random() * 5));
     setBlobColorIndex2(Math.floor(Math.random() * 5));
   }, []);
 
-  // Stable color array derived from theme
   const colors = useMemo(
     () => [
       theme.palette.primary?.main ?? '#00A39D',
@@ -197,18 +176,12 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
     [theme]
   );
 
-  // Interaction handler to randomize the blob and advance the 3D model animation
   const handleInteraction = () => {
-    // Advance 3D animation index
     setActiveSectionIndex((prev) => prev + 1);
-
-    // Generate an entirely new, random mathematical blob shape
     setBlobPath(generateRandomBlob());
 
-    // Pick two new random colors for the gradient
     const nextColor1 = Math.floor(Math.random() * colors.length);
     let nextColor2 = Math.floor(Math.random() * colors.length);
-    // Ensure the two colors are distinct to keep the gradient visible
     if (nextColor1 === nextColor2) {
       nextColor2 = (nextColor2 + 1) % colors.length;
     }
@@ -218,6 +191,13 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
 
   const currentColor = colors[blobColorIndex1 % colors.length];
   const nextColor = colors[blobColorIndex2 % colors.length];
+
+  // FIX 3: Stable dpr value — computed once, not re-evaluated by AdaptiveDpr
+  // which was deferring the first canvas paint until after a reflow.
+  const dpr = useMemo(
+    () => (typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1),
+    []
+  );
 
   return (
     <>
@@ -229,7 +209,7 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
           inset: 0,
           pointerEvents: 'none',
           zIndex: 11999,
-          visibility: 'hidden'
+          visibility: 'hidden',
         }}
       />
 
@@ -237,14 +217,12 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
         drag
         dragConstraints={constraintsRef}
         dragMomentum={false}
-        onDragEnd={(e, info) => {
-          // Only trigger if they actually moved the avatar slightly
+        onDragEnd={(_e, info) => {
           if (Math.abs(info.offset.x) > 5 || Math.abs(info.offset.y) > 5) {
             handleInteraction();
           }
         }}
         onTap={() => {
-          // If it was just a tap (no drag offset), trigger
           handleInteraction();
         }}
         animate={{
@@ -252,7 +230,7 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
           scale: isVisible ? 1 : 0.8,
         }}
         initial={{ opacity: 0, scale: 0.8 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
         style={{
           position: 'fixed',
           top: currentPos.y,
@@ -277,16 +255,14 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
             alignItems: 'center',
             justifyContent: 'center',
             overflow: 'visible',
-            pointerEvents: 'none', // Critical: Let drag events pass to the motion.div
+            pointerEvents: 'none',
           }}
         >
-          {/* Ambient glow — breathing pulse */}
+          {/* Ambient glow */}
           <motion.div
-            animate={{
-              opacity: isVisible ? 1 : 0,
-            }}
+            animate={{ opacity: isVisible ? 1 : 0 }}
             initial={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
             style={{
               position: 'absolute',
               inset: 10,
@@ -338,7 +314,6 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
               style={{ opacity: 0.95, stroke: 'none', willChange: 'd' }}
             />
 
-            {/* Fallback circle so avatar is never unmasked if blob morphs narrow */}
             <motion.circle
               cx={0}
               cy={0}
@@ -362,17 +337,18 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              pointerEvents: 'none', // Critical: Let drag events pass to the motion.div
+              pointerEvents: 'none',
               zIndex: 5,
-              overflow: 'visible',
-              clipPath: 'circle(48%)',
+              overflow: 'hidden',      // FIX 2a: overflow:hidden replaces clipPath
+              borderRadius: '50%',     // FIX 2b: stable geometry — never recalculates on scroll
             }}
           >
             <Canvas
               shadows={{ type: THREE.PCFShadowMap }}
-              dpr={[1, 2]}
+              // FIX 3a: Static dpr instead of AdaptiveDpr — prevents deferred first paint
+              dpr={dpr}
               camera={{ fov: 35, near: 0.1, far: 1000 }}
-              style={{ pointerEvents: 'none' }} // Critical: Let drag events pass to the motion.div
+              style={{ pointerEvents: 'none' }}
               gl={{
                 antialias: true,
                 powerPreference: 'high-performance',
@@ -381,8 +357,17 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
                 depth: true,
               }}
               frameloop="always"
+              // FIX 3b: Force canvas dimensions immediately on creation so the
+              // WebGL context knows its size before the first frame — no scroll
+              // or resize needed to trigger the correct layout.
+              onCreated={({ gl }) => {
+                gl.setSize(320, 320);
+                gl.setPixelRatio(dpr);
+              }}
             >
-              <AdaptiveDpr pixelated />
+              {/* FIX 3c: AdaptiveDpr removed — it was deferring the first render
+                  tick until after a browser reflow, which only happened on scroll.
+                  AdaptiveEvents kept — it's harmless and improves pointer perf. */}
               <AdaptiveEvents />
               <PerspectiveCamera makeDefault position={[0, 0, 5.5]} fov={30} />
 
@@ -396,7 +381,8 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
                   <Center position={[0.4, -0.3, 1]}>
                     <AvatarModel
                       gender={gender}
-                      manualIndex={activeSectionIndex} />
+                      manualIndex={activeSectionIndex}
+                    />
                   </Center>
                 </Stage>
               </React.Suspense>
