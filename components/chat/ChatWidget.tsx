@@ -31,7 +31,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Volume2, VolumeX, UserCircle, UserCircle2 } from 'lucide-react';
 
-
 export const ChatWidget = ({
   isOpen,
   onToggle,
@@ -61,7 +60,7 @@ export const ChatWidget = ({
   const ttsAbortControllerRef = useRef<AbortController | null>(null);
   const lastSpokenRef = useRef<{ text: string; voice: string } | null>(null);
 
-  const [isServiceOnline, setIsServiceOnline] = useState<boolean | null>(null);
+  const [serviceMode, setServiceMode] = useState<'local' | 'cloud' | 'offline' | 'checking'>('checking');
 
   const cancelSpeech = (keepCache = false) => {
     if (ttsAbortControllerRef.current) {
@@ -85,13 +84,52 @@ export const ChatWidget = ({
 
   useEffect(() => {
     const checkStatus = async () => {
-      const online = await ollamaService.checkStatus();
-      setIsServiceOnline(online);
+      const mode = await ollamaService.checkStatus();
+      setServiceMode(mode as 'local' | 'cloud' | 'offline');
     };
     checkStatus();
     const timer = setInterval(checkStatus, 30000);
     return () => clearInterval(timer);
   }, []);
+
+  // Fetch initial greeting on mount if we don't have messages yet
+  useEffect(() => {
+    if (isOpen && messages.length === 0 && !isPreloading) {
+      const fetchGreeting = async () => {
+        setIsPreloading(true);
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        try {
+          const response = await ollamaService.generate({
+            prompt: "Generate a short, professional greeting for a customer visiting the Boss Cargo Express website. Keep it under 20 words. Do not double quote the content of your response in the greeting."
+          }, controller.signal);
+
+          if (response && (response.response || response.content || response.message?.content)) {
+            const greeting = response.response || response.content || response.message?.content;
+            setMessages([{ role: 'assistant', content: greeting }]);
+            if (isSpeechEnabled) speak(greeting);
+          }
+        } catch (error: any) {
+          console.error('Greeting error:', error);
+          const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
+          if (isFetchError) {
+            const errorMsg = "**Connection Error**: I'm unable to reach my AI service. Please try again later.";
+            setMessages([{
+              role: 'assistant',
+              content: errorMsg
+            }]);
+            if (isSpeechEnabled) speak(errorMsg);
+          }
+        } finally {
+          setIsPreloading(false);
+          abortControllerRef.current = null;
+        }
+      };
+
+      fetchGreeting();
+    }
+  }, [isOpen]);
 
   // Dictate latest message if speech is enabled or toggled on/changed
   useEffect(() => {
@@ -220,51 +258,12 @@ export const ChatWidget = ({
     }
   }, [messages, isOpen]);
 
-  const toggleChat = async (e?: React.MouseEvent) => {
+  const toggleChat = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (isOpen) {
       onToggle(false);
       setIsExpanded(false);
       cancelSpeech();
-      return;
-    }
-
-    // If it's the first time and we don't have any messages yet
-    if (messages.length === 0) {
-      setIsPreloading(true);
-
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      try {
-        const response = await ollamaService.generate({
-          prompt: "Generate a short, professional greeting for a customer visiting the Boss Cargo Express website. Keep it under 20 words. Do not double quote the content of your response in the greeting."
-        }, controller.signal);
-
-        if (response && (response.response || response.content || response.message?.content)) {
-          const greeting = response.response || response.content || response.message?.content;
-          setMessages([{ role: 'assistant', content: greeting }]);
-          if (isSpeechEnabled) speak(greeting);
-        }
-
-        onToggle(true);
-      } catch (error: any) {
-        console.error('Greeting error:', error);
-        const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
-        if (isFetchError) {
-          const errorMsg = "**Connection Error**: I'm unable to reach my AI service. Please try again later.";
-          setMessages([{
-            role: 'assistant',
-            content: errorMsg
-          }]);
-          if (isSpeechEnabled) speak(errorMsg);
-        }
-
-        onToggle(true);
-      } finally {
-        setIsPreloading(false);
-        abortControllerRef.current = null;
-      }
     } else {
       onToggle(true);
     }
@@ -287,9 +286,30 @@ export const ChatWidget = ({
     abortControllerRef.current = controller;
 
     try {
+      // Sanitize messages to ensure strictly alternating user/assistant starting with user
+      // This is required by certain strict cloud APIs
+      const apiMessages = [...messages, userMessage].reduce((acc: Message[], curr) => {
+        if (acc.length === 0) {
+          if (curr.role === 'assistant') {
+            // Prepend dummy user message if first message is assistant
+            acc.push({ role: 'user', content: 'Hello' });
+          }
+          acc.push({ ...curr });
+        } else {
+          const last = acc[acc.length - 1];
+          if (last.role === curr.role) {
+            // Merge consecutive messages of the same role
+            last.content += '\n\n' + curr.content;
+          } else {
+            acc.push({ ...curr });
+          }
+        }
+        return acc;
+      }, []);
+
       const response = await ollamaService.chat({
         prompt: userMessage.content,
-        messages: [...messages, userMessage]
+        messages: apiMessages
       }, controller.signal);
 
       if (response && response.message) {
@@ -346,6 +366,21 @@ export const ChatWidget = ({
     }
   };
 
+  const getStatusDisplay = () => {
+    switch (serviceMode) {
+      case 'local':
+        return { text: 'Server Online', color: '#4caf50' };
+      case 'cloud':
+        return { text: 'Cloud Server', color: '#2196f3' };
+      case 'offline':
+        return { text: 'Server Offline', color: '#f44336' };
+      default:
+        return { text: 'Checking status...', color: '#ff9800' };
+    }
+  };
+
+  const currentStatus = getStatusDisplay();
+
   return (
     <Box
       sx={{
@@ -364,8 +399,8 @@ export const ChatWidget = ({
         <Paper
           elevation={6}
           sx={{
-            width: isExpanded ? { xs: 'calc(100vw - 48px)', sm: 500, md: 700 } : 400,
-            height: isExpanded ? '700px' : '600px',
+            width: isExpanded ? { xs: 'calc(100vw - 48px)', sm: 500, md: 700 } : { xs: 'calc(100vw - 48px)', sm: 400 },
+            height: isExpanded ? { xs: 'calc(100vh - 120px)', sm: '700px' } : { xs: '500px', sm: '600px' },
             maxHeight: 'calc(100vh - 120px)',
             display: 'flex',
             flexDirection: 'column',
@@ -414,11 +449,11 @@ export const ChatWidget = ({
                       width: 6,
                       height: 6,
                       borderRadius: '50%',
-                      bgcolor: isServiceOnline === true ? '#4caf50' : (isServiceOnline === false ? '#f44336' : '#ff9800'),
-                      boxShadow: isServiceOnline === true ? '0 0 4px #4caf50' : 'none',
+                      bgcolor: currentStatus.color,
+                      boxShadow: serviceMode !== 'offline' && serviceMode !== 'checking' ? `0 0 4px ${currentStatus.color}` : 'none',
                     }}
                   />
-                  {isServiceOnline === true ? 'Always active' : (isServiceOnline === false ? 'Service offline' : 'Checking status...')}
+                  {currentStatus.text}
                 </Typography>
               </Box>
             </Box>
@@ -612,11 +647,11 @@ export const ChatWidget = ({
                 </Box>
               </Fade>
             ))}
-            {isLoading && (
+            {(isLoading || isPreloading) && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1 }}>
                 <CircularProgress size={16} color="primary" />
                 <Typography variant="caption" color="text.secondary">
-                  Thinking...
+                  {isPreloading ? "Connecting..." : "Thinking..."}
                 </Typography>
               </Box>
             )}

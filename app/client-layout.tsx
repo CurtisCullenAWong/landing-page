@@ -9,7 +9,8 @@ import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
 import { HeaderSkeleton } from "@/components/loading";
 import { SplashScreen } from "@/components/splash-screen";
 import dynamic from "next/dynamic";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { Box, useMediaQuery, useTheme, Fab, Tooltip } from "@mui/material";
+import { MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTrackPageView } from "@/hooks/use-track-page-view";
@@ -23,12 +24,6 @@ const AvatarOverlay = dynamic(() => import("@/components/chat/AvatarOverlay").th
   ssr: false,
 });
 
-// Pre-loading triggers for background loading
-const preloadChatComponents = () => {
-  import("@/components/chat/ChatWidget");
-  import("@/components/chat/AvatarOverlay");
-};
-
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const theme = useTheme();
@@ -37,8 +32,16 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const showGlobalFooter = pathname !== '/careers';
 
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [hasOpenedChat, setHasOpenedChat] = useState(false);
   const [gender, setGender] = useState<'male' | 'female'>('female');
   const [mounted, setMounted] = useState(false);
+
+  // Set hasOpenedChat to true once isChatOpen becomes true
+  useEffect(() => {
+    if (isChatOpen) {
+      setHasOpenedChat(true);
+    }
+  }, [isChatOpen]);
 
   // Track page views for analytics
   useTrackPageView();
@@ -58,15 +61,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   // Handle scroll-lock-active class on html tag
   useEffect(() => {
     setMounted(true);
-
-    // Background pre-load chat components after initial mount
-    // This fetches the chunks in the background without blocking the main render
-    if (typeof window !== 'undefined') {
-      const idleCallback = (window as any).requestIdleCallback || ((cb: any) => setTimeout(cb, 1000));
-      idleCallback(() => {
-        preloadChatComponents();
-      });
-    }
 
     if (isSequencePage) {
       document.documentElement.classList.add('scroll-lock-active');
@@ -114,18 +108,84 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             )}
           </Box>
 
-          {mounted && isSequencePage && isDesktop && (
+          {mounted && isSequencePage && (
             <>
-              <ChatWidget
-                isOpen={isChatOpen}
-                onToggle={setIsChatOpen}
-                gender={gender}
-                onGenderToggle={() => setGender(prev => prev === 'female' ? 'male' : 'female')}
-              />
-              <AvatarOverlay
-                gender={gender}
-                isVisible={isChatOpen && isSequencePage}
-              />
+              {hasOpenedChat ? (
+                <>
+                  <ChatWidget
+                    isOpen={isChatOpen}
+                    onToggle={setIsChatOpen}
+                    gender={gender}
+                    onGenderToggle={() => setGender(prev => prev === 'male' ? 'male' : 'female')}
+                  />
+                  <AvatarOverlay
+                    gender={gender}
+                    isVisible={isChatOpen && isSequencePage}
+                  />
+                </>
+              ) : (
+                <Box
+                  sx={{
+                    position: 'fixed',
+                    bottom: 20,
+                    right: 20,
+                    zIndex: 11000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    gap: 1.5,
+                  }}
+                >
+                  <Tooltip title="Chat with Boss AI" placement="left">
+                    <span>
+                      <Fab
+                        color="primary"
+                        aria-label="chat"
+                        onClick={() => setIsChatOpen(true)}
+                        sx={{
+                          width: 56,
+                          height: 56,
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            transform: 'scale(1.1) rotate(5deg)',
+                          },
+                        }}
+                      >
+                        <MessageCircle />
+                      </Fab>
+                    </span>
+                  </Tooltip>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      bgcolor: 'primary.main',
+                      opacity: 0.4,
+                      zIndex: -1,
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%': {
+                          transform: 'scale(1)',
+                          opacity: 0.4,
+                        },
+                        '70%': {
+                          transform: 'scale(1.5)',
+                          opacity: 0,
+                        },
+                        '100%': {
+                          transform: 'scale(1.5)',
+                          opacity: 0,
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              )}
             </>
           )}
 

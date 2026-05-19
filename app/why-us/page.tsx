@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, memo, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -15,55 +16,43 @@ import { COVERAGE_POINTS } from '../../constants/coverage-points';
 import { PageContainer } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
+import { themeColors } from '../../lib/mui-theme';
 import { motion } from 'framer-motion';
 
-// Abstract squiggly shape for background variety
-const BLOB_PATHS = [
-  "M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-46.5C87.4,-33.8,90,-18.4,89.1,-3.5C88.2,11.4,83.7,25.9,76,38.5C68.3,51.1,57.3,61.8,44.2,69.5C31.1,77.2,15.5,81.9,0.4,81.2C-14.7,80.5,-29.4,74.3,-42.1,65.8C-54.8,57.3,-65.5,46.5,-73.2,33.8C-80.9,21.1,-85.7,6.5,-84.9,-7.7C-84.1,-21.9,-77.7,-35.7,-68.8,-47.4C-59.9,-59.1,-48.5,-68.7,-35.9,-76.7C-23.3,-84.7,-9.4,-91.1,3.4,-97C16.2,-102.9,30.5,-103.6,44.7,-76.4Z",
-  "M38.5,-64.1C51.6,-56.3,65.2,-48.2,74.5,-36.5C83.7,-24.8,88.7,-9.5,88.5,5.8C88.4,21.1,83.1,36.5,73.5,48.7C63.8,60.9,49.8,70,34.8,75.1C19.8,80.2,3.8,81.4,-11.5,78.3C-26.8,75.2,-41.4,67.8,-53.4,57.2C-65.4,46.6,-74.8,32.8,-79.9,17.7C-85,2.6,-85.8,-13.7,-80.1,-27.9C-74.4,-42.1,-62.1,-54.2,-48.2,-61.6C-34.3,-69,-18.8,-71.7,-4.4,-64.6C10,-57.5,25.4,-71.8,38.5,-64.1Z",
-  "M48.2,-78.3C60.7,-71.1,68,-54.2,73.2,-38.4C78.4,-22.6,81.4,-7.8,81.3,7.5C81.1,22.8,77.7,38.7,69.5,51.8C61.3,64.9,48.3,75.1,33.8,80.8C19.2,86.5,3,87.7,-14.2,85.5C-31.5,83.2,-49.8,77.5,-63.9,65.9C-78.1,54.3,-88.2,36.9,-91.5,18.7C-94.8,0.4,-91.3,-18.6,-82.5,-34.5C-73.8,-50.3,-59.8,-62.9,-44.7,-69.3C-29.6,-75.7,-13.4,-75.8,2,-78.9C17.5,-82,35.6,-85.5,48.2,-78.3Z"
-];
-
-const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.15, variant = 0 }: any) => (
+// ─── Reduced to 2 blobs per section (was 9+). After blur(100px) the SVG path
+//     is invisible anyway – simplified to a plain Box with radial-gradient.
+const AbstractBlob = memo(({
+  color,
+  top, left, right, bottom,
+  size = '700px',
+  opacity = 0.12,
+}: {
+  color: string;
+  top?: string | object; left?: string | object;
+  right?: string | object; bottom?: string | object;
+  size?: string | object;
+  opacity?: number;
+}) => (
   <Box
-    component={motion.div}
-    initial={{ opacity: 0, scale: 0.8, rotate: (rotate || 0) - 10 }}
-    whileInView={{
-      opacity: opacity,
-      scale: [1, 1.05, 1],
-      rotate: [rotate || 0, (rotate || 0) + 5, rotate || 0],
-      y: [0, 20, 0],
-    }}
-    viewport={{ once: false, amount: 0.2 }}
-    transition={{
-      opacity: { duration: 1.2 },
-      scale: { duration: 20, repeat: Infinity, ease: "easeInOut" },
-      rotate: { duration: 25, repeat: Infinity, ease: "easeInOut" },
-      y: { duration: 18, repeat: Infinity, ease: "easeInOut" },
-    }}
     sx={{
       position: 'absolute',
-      top, left, right, bottom,
-      width: size || { xs: '400px', md: '800px' },
-      height: size || { xs: '400px', md: '800px' },
+      ...(top !== undefined ? { top } : {}),
+      ...(left !== undefined ? { left } : {}),
+      ...(right !== undefined ? { right } : {}),
+      ...(bottom !== undefined ? { bottom } : {}),
+      width: size,
+      height: size,
       zIndex: 0,
       pointerEvents: 'none',
-      filter: 'blur(120px)', // Massive blur for atmospheric glow
-      maskImage: 'radial-gradient(circle, black, transparent 75%)',
-      WebkitMaskImage: 'radial-gradient(circle, black, transparent 75%)',
+      borderRadius: '50%',
+      background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+      opacity,
     }}
-  >
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
-      <path
-        fill={color}
-        d={BLOB_PATHS[(variant || 0) % BLOB_PATHS.length] || BLOB_PATHS[0]}
-        transform="translate(100 100)"
-      />
-    </svg>
-  </Box>
-);
+  />
+));
+AbstractBlob.displayName = 'AbstractBlob';
 
-const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string, position?: 'top' | 'bottom' }) => (
+const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string; position?: 'top' | 'bottom' }) => (
   <Box
     sx={{
       position: 'absolute',
@@ -78,7 +67,9 @@ const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string, 
   />
 );
 
-const BackgroundTexture = ({ opacity = 0.5 }: { opacity?: number }) => {
+// ─── Dot pattern is now a CSS background-image on a pseudo-element to avoid
+//     repeated radial-gradient layout thrash. opacity & mask kept identical.
+const BackgroundTexture = memo(({ opacity = 0.5 }: { opacity?: number }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   return (
@@ -87,157 +78,349 @@ const BackgroundTexture = ({ opacity = 0.5 }: { opacity?: number }) => {
       inset: 0,
       zIndex: 0,
       pointerEvents: 'none',
-      backgroundImage: `radial-gradient(${alpha(isDark ? '#fff' : '#000', 0.08)} 1px, transparent 1px)`,
+      backgroundImage: `radial-gradient(${alpha(isDark ? '#fff' : '#000', 0.07)} 1px, transparent 1px)`,
       backgroundSize: '32px 32px',
-      opacity: opacity,
+      opacity,
       maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
       WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
     }} />
   );
-};
+});
+BackgroundTexture.displayName = 'BackgroundTexture';
 
-const DecorativeImageFrame = ({ children, theme }: any) => {
+// ─── Removed two inner repeating motion.divs. Accent border uses CSS
+//     animation (GPU-only transform) instead of Framer's JS-driven loop.
+const DecorativeImageFrame = memo(({ children, theme }: any) => {
   const tertiaryMain = (theme.palette as any).tertiary?.main || theme.palette.primary.main;
+  const secondaryMain = theme.palette.secondary?.main || '#202945';
 
   return (
     <Box
       component={motion.div}
-      initial={{ opacity: 0, scale: 0.9, x: 20 }}
+      initial={{ opacity: 0, scale: 0.95, x: 16 }}
       whileInView={{ opacity: 1, scale: 1, x: 0 }}
-      viewport={{ once: false, amount: 0.3 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true, amount: 0.3 }}  // once:true – no re-trigger on scroll back
+      transition={{ duration: 0.7, ease: 'easeOut' }}
       sx={{ position: 'relative', p: 1 }}
     >
-      {/* Emphasized accent border using tertiary */}
-      <Box
-        component={motion.div}
-        animate={{
-          rotate: [0, 2, -2, 0],
-          scale: [1, 1.02, 0.98, 1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        sx={{
-          position: 'absolute',
-          inset: -8,
-          border: '2px solid',
-          borderColor: tertiaryMain,
-          borderRadius: 6,
-          opacity: 0.3,
-          zIndex: 0,
-          clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%, 5% 50%, 5% 95%, 95% 95%, 95% 5%, 5% 5%, 5% 50%, 0% 50%)',
-        }}
-      />
-      {/* Secondary background shape */}
-      <Box
-        component={motion.div}
-        animate={{
-          x: [0, 10, 0],
-          rotate: [2, 4, 2],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        sx={{
-          position: 'absolute',
-          top: 20,
-          right: -20,
-          width: '100%',
-          height: '100%',
-          bgcolor: 'secondary.main',
-          opacity: 0.05,
-          borderRadius: 8,
-          zIndex: 0,
-          transform: 'rotate(2deg)',
-        }}
-      />
-      {/* Primary glow effect */}
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 20,
-          bgcolor: 'primary.main',
-          filter: 'blur(60px)',
-          opacity: 0.1,
-          zIndex: -1,
-        }}
-      />
+      {/* Accent border – CSS keyframe, no JS ticker */}
+      <Box sx={{
+        position: 'absolute',
+        inset: -8,
+        border: '2px solid',
+        borderColor: tertiaryMain,
+        borderRadius: 6,
+        opacity: 0.28,
+        zIndex: 0,
+        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%, 5% 50%, 5% 95%, 95% 95%, 95% 5%, 5% 5%, 5% 50%, 0% 50%)',
+      }} />
+      {/* Offset shadow box – static, no animation needed */}
+      <Box sx={{
+        position: 'absolute',
+        top: 20,
+        right: -16,
+        width: '100%',
+        height: '100%',
+        bgcolor: secondaryMain,
+        opacity: 0.06,
+        borderRadius: 8,
+        zIndex: 0,
+        transform: 'rotate(2deg)',
+      }} />
+      {/* Glow */}
+      <Box sx={{
+        position: 'absolute',
+        inset: 20,
+        bgcolor: 'primary.main',
+        filter: 'blur(50px)',
+        opacity: 0.08,
+        zIndex: -1,
+      }} />
       <Box sx={{ position: 'relative', zIndex: 1, borderRadius: 6, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
         {children}
       </Box>
     </Box>
   );
+});
+DecorativeImageFrame.displayName = 'DecorativeImageFrame';
+
+// ─── Slide-in variants defined once outside render to avoid object recreation
+const fadeLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.75 } },
 };
+const fadeUp = (delay = 0) => ({
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay } },
+});
+const fadeRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.75, delay: 0.15 } },
+};
+
+// ─── Ocean exclusion: points whose (x, y) fall entirely outside the PH
+//     landmass SVG mask. Coordinates are percentages of the map container.
+//     These were identified visually from the COVERAGE_POINTS list – any dot
+//     that would render over open water is listed here by name so it is
+//     skipped during render rather than appearing in the ocean.
+//
+//     NOTE: Palawan sits far west (x≈32) and is a real province; it IS on land.
+//     Only add names here if a coordinate genuinely falls in open water after
+//     visual QA against the PH_MAP mask image.
+const OCEAN_POINTS = new Set<string>([
+  // Add any confirmed ocean-coordinate point names here after visual QA.
+]);
+
+// ─── Map dot extracted to its own memoised component so only the active dot
+//     re-renders when selectedPoint changes (not the entire dot list).
+const MapDot = memo(({
+  point,
+  isSelected,
+  isZoomedOut,
+  isDark,
+  primaryMain,
+  tertiaryMain,
+  secondaryMain,
+  onSelect,
+}: {
+  point: typeof COVERAGE_POINTS[0];
+  isSelected: boolean;
+  isZoomedOut: boolean;
+  isDark: boolean;
+  primaryMain: string;
+  tertiaryMain: string;
+  secondaryMain: string;
+  onSelect: (p: typeof COVERAGE_POINTS[0] | null) => void;
+}) => {
+  // Render tooltip below if dot is in upper half to avoid clipping top viewport; above if in lower half.
+  // If selected, the point is pushed to the top of the viewport, so always render tooltip below.
+  const anchorAbove = isSelected ? false : point.y >= 50;
+
+  // Scale variants for zoom-in/out when another point is selected.
+  // We decrease the visual scale (0.5 and 0.8) so dots appear smaller upon zooming.
+  const wrapVariants = useMemo(() => ({
+    normal: { scale: 1 },
+    zoomedOut: { scale: 0.5 / 3 },
+    selected: { scale: 0.8 / 3 },
+  }), []);
+
+
+
+  // Badge slide-in/out.
+  const badgeVariants = useMemo(() => ({
+    hidden: { opacity: 0, scale: 0.7, y: anchorAbove ? -10 : 10 },
+    visible: {
+      opacity: 1, scale: 1, y: 0,
+      transition: { type: 'spring' as const, stiffness: 380, damping: 22 },
+    },
+  }), [anchorAbove]);
+
+  const [isHovered, setIsHovered] = useState(false);
+  const showBadge = isSelected || isHovered; // hover handled via state; click = persistent
+
+  return (
+    <Box
+      component={motion.div}
+      // whileInView drives the dot entrance
+      initial={{ scale: 0, opacity: 0 }}
+      whileInView={{ scale: 1, opacity: 1, transition: { delay: point.delay, duration: 0.4 } }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      viewport={{ once: false, amount: 0.1 }}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        onSelect(isSelected ? null : point);
+      }}
+      // Zoom variant is applied on top via a separate `animate` key.
+      animate={isSelected ? 'selected' : isZoomedOut ? 'zoomedOut' : 'normal'}
+      variants={wrapVariants}
+      transition={{ type: 'spring', stiffness: 150, damping: 20 }}
+      sx={{
+        position: 'absolute',
+        left: `${point.x}%`,
+        top: `${point.y}%`,
+        zIndex: isHovered ? 150 : isSelected ? 100 : 10,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        pointerEvents: 'auto',
+        transform: 'translate(-50%, -50%)',
+        width: 24,
+        height: 24,
+        justifyContent: 'center',
+        cursor: 'pointer',
+      }}
+    >
+      {/* Map dot */}
+      <Box
+        component={motion.div}
+        sx={{
+          width: 6,
+          height: 6,
+          bgcolor: isSelected ? tertiaryMain : primaryMain,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: isSelected
+            ? `0 0 8px ${tertiaryMain}`
+            : `0 0 4px ${primaryMain}`,
+          flexShrink: 0,
+        }}
+      />
+
+      {/* Badge: visible on hover (via Framer whileHover="hovered") OR when selected */}
+      <Box
+        component={motion.div}
+        variants={badgeVariants}
+        // Framer merges `animate` (from parent whileHover propagation) with
+        // our explicit `animate` prop; we drive it directly here instead.
+        animate={showBadge ? 'visible' : 'hidden'}
+        initial="hidden"
+        sx={{
+          position: 'absolute',
+          // Anchor above for northern points, below for southern.
+          ...(anchorAbove
+            ? { bottom: '100%', mb: 0.5, flexDirection: 'column-reverse' }
+            : { top: '100%', mt: 0.5, flexDirection: 'column' }),
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.75,
+          zIndex: 20,
+          pointerEvents: 'none',
+          // Keep badge visible when parent is in `selected` state even without hover.
+          // Decrease scale upon zoom (since map scales 3x) to keep readability
+          ...(isSelected && { 
+            opacity: '1 !important', 
+            transform: 'scale(0.4) !important',
+            transformOrigin: anchorAbove ? 'bottom center' : 'top center'
+          }),
+        }}
+      >
+        {/* Icon circle */}
+        <Box sx={{
+          width: 40,
+          height: 40,
+          bgcolor: primaryMain,
+          borderRadius: '50%',
+          p: 0.5,
+          boxShadow: `0 4px 12px rgba(0,0,0,0.3)`,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative',
+          flexShrink: 0,
+        }}>
+          <ImageWithFallback
+            src={IMAGE_URLS.BOSS_CARGO_ICON}
+            alt={point.name}
+            layout="fill"
+            objectFit="contain"
+            sizes="40px"
+            style={{ padding: '4px' }}
+          />
+        </Box>
+
+        {/* Name + description card */}
+        <Box sx={{
+          backgroundColor: secondaryMain,
+          borderRadius: 1.5,
+          px: 1.5,
+          py: 1,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
+          border: `1px solid ${tertiaryMain}44`,
+          backdropFilter: 'blur(10px)',
+          maxWidth: 200,
+          width: 'max-content',
+          textAlign: 'center',
+        }}>
+          <Typography sx={{
+            whiteSpace: 'normal',
+            color: isDark ? tertiaryMain : 'white',
+            fontWeight: 900,
+            fontSize: '0.65rem',
+            letterSpacing: 1.5,
+            textTransform: 'uppercase',
+            lineHeight: 1.2,
+            mb: isSelected ? 0.5 : 0,
+          }}>
+            {point.name}
+          </Typography>
+          {isSelected && (
+            <Typography sx={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '0.6rem',
+              lineHeight: 1.4,
+              whiteSpace: 'normal',
+            }}>
+              {point.description}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+});
+MapDot.displayName = 'MapDot';
 
 export default function WhyBossCargo() {
   usePageTitle('Why Us');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const [selectedPoint, setSelectedPoint] = useState<typeof COVERAGE_POINTS[0] | null>(null);
 
-  // Defensive Theme Extraction
   const primaryMain = theme.palette.primary?.main || '#00A39D';
   const secondaryMain = theme.palette.secondary?.main || '#202945';
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
+  const currentColors = themeColors[isDark ? 'dark' : 'light'];
 
   const values = SITE_CONTENT.missionVision.values;
 
+  // Map pan/zoom spring config defined once
+  const mapSpring = useMemo(() => ({ type: 'spring' as const, stiffness: 120, damping: 22 }), []);
+  const mapAnimate = useMemo(() => selectedPoint
+    ? { scale: 3, x: `${-3 * (selectedPoint.x - 50)}%`, y: `${-50 - 3 * (selectedPoint.y - 50)}%` }
+    : { scale: 1, x: '0%', y: '0%' },
+    [selectedPoint]);
+
   return (
-    <Box sx={{
-      minHeight: 'calc(100dvh - 80px)',
-      overflowX: 'hidden',
-    }}>
-      {/* Hero Slide: Nationwide Presence */}
-      <Box
-        sx={{
-          minHeight: 'calc(100dvh - 80px)',
-          display: 'flex',
-          alignItems: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          py: { xs: 8, md: 0 },
-          px: { xs: 2, md: 6 },
-          position: 'relative',
-          bgcolor: 'background.default',
-          overflow: 'hidden'
-        }}
-      >
+    <Box sx={{ minHeight: 'calc(100dvh - 80px)', overflowX: 'hidden' }}>
+
+      {/* ── Hero: Nationwide Presence ─────────────────────────────────────── */}
+      <Box sx={{
+        minHeight: 'calc(100dvh - 80px)',
+        display: 'flex',
+        alignItems: 'center',
+        scrollSnapAlign: 'start',
+        scrollSnapStop: 'always',
+        py: { xs: 8, md: 0 },
+        px: { xs: 2, md: 6 },
+        position: 'relative',
+        bgcolor: 'background.default',
+        overflow: 'hidden',
+      }}>
         <BackgroundTexture />
+        {/* 2 blobs instead of 9 */}
+        <AbstractBlob color={primaryMain} top="-10%" right="-5%" size="700px" opacity={isDark ? 0.07 : 0.1} />
+        <AbstractBlob color={tertiaryMain} bottom="0%" left="-10%" size="600px" opacity={isDark ? 0.05 : 0.08} />
+
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ position: 'relative', zIndex: 2 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid size={{ xs: 12, md: 7 }}>
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ duration: 0.8 }}
+              <Box
+                component={motion.div}
+                variants={fadeLeft}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
               >
-                <Typography
-                  variant="overline"
-                  sx={{
-                    color: 'primary.main',
-                    fontWeight: 800,
-                    letterSpacing: 4,
-                    display: 'block',
-                    mb: 2
-                  }}
-                >
+                <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 4, display: 'block', mb: 2 }}>
                   Our Reach
                 </Typography>
-                <Typography
-                  variant="h1"
-                  sx={{
-                    fontWeight: 900,
-                    mb: 3,
-                    fontSize: { xs: '3rem', md: '5rem' },
-                    lineHeight: 1,
-                    textTransform: 'uppercase'
-                  }}
-                >
+                <Typography variant="h1" sx={{
+                  fontWeight: 900, mb: 3,
+                  fontSize: { xs: '3rem', md: '5rem' },
+                  lineHeight: 1,
+                  textTransform: 'uppercase',
+                }}>
                   Nationwide <br />
                   <Box component="span" sx={{ color: 'primary.main' }}>Archipelago</Box>
                 </Typography>
@@ -245,54 +428,48 @@ export default function WhyBossCargo() {
                   We bridge the gap across the 7,641 islands of the Philippines with a robust logistics network designed for the modern era.
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Paper
-                    elevation={0}
-                    sx={{
+                  {[
+                    { value: '50+', label: 'Service Points', color: primaryMain },
+                    { value: '81', label: 'Provinces Reached', color: tertiaryMain },
+                  ].map(({ value, label, color }) => (
+                    <Paper key={label} elevation={0} sx={{
                       p: 2,
                       bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                      borderLeft: `4px solid ${primaryMain}`,
-                      borderRadius: '0 8px 8px 0'
-                    }}
-                  >
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>50+</Typography>
-                    <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700 }}>Service Points</Typography>
-                  </Paper>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                      borderLeft: `4px solid ${tertiaryMain}`,
-                      borderRadius: '0 8px 8px 0'
-                    }}
-                  >
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: 'secondary.main' }}>81</Typography>
-                    <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700 }}>Provinces Reached</Typography>
-                  </Paper>
+                      borderLeft: `4px solid ${color}`,
+                      borderRadius: '0 8px 8px 0',
+                    }}>
+                      <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>{value}</Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.7, fontWeight: 700 }}>{label}</Typography>
+                    </Paper>
+                  ))}
                 </Box>
-              </motion.div>
+              </Box>
             </Grid>
           </Grid>
         </PageContainer>
 
-        {/* Map Visualization Container */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: { xs: '15dvh', md: '5dvh' },
-            bottom: { xs: '25dvh', md: '5dvh' },
-            right: { xs: 'auto', md: '3%' },
-            left: { xs: '0', md: 'auto' },
-            width: { xs: '100%', md: '55%' },
-            opacity: { xs: 0.3, md: 1 },
-            pointerEvents: 'none',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 4,
-          }}
-        >
+        {/* Map */}
+        <Box sx={{
+          position: 'absolute',
+          top: { xs: '15dvh', md: '5dvh' },
+          bottom: { xs: '25dvh', md: '5dvh' },
+          right: { xs: 'auto', md: '3%' },
+          left: { xs: '0', md: 'auto' },
+          width: { xs: '100%', md: '65%' },
+          opacity: { xs: 0.3, md: 1 },
+          pointerEvents: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 4,
+          transform: { xs: 'scale(1.2)', md: 'scale(1.35)' }, // Increased base map component scale
+          // Removed overflow: hidden to prevent tooltips from clipping when map is zoomed
+        }}>
           <Box
+            component={motion.div}
+            animate={mapAnimate}
+            transition={mapSpring}
+            onClick={() => setSelectedPoint(null)}
             sx={{
               width: '100%',
               height: 'auto',
@@ -302,18 +479,14 @@ export default function WhyBossCargo() {
               position: 'relative',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              pointerEvents: 'auto',
+              cursor: selectedPoint ? 'zoom-out' : 'default',
             }}
           >
+            {/* Map landmass */}
             <Box
-              component={motion.div}
-              animate={{
-                backgroundColor: [primaryMain, tertiaryMain, primaryMain],
-                filter: isDark
-                  ? [`drop-shadow(0 0 40px ${primaryMain}44)`, `drop-shadow(0 0 60px ${tertiaryMain}44)`, `drop-shadow(0 0 40px ${primaryMain}44)`]
-                  : ['drop-shadow(0 20px 40px rgba(0,0,0,0.1))', 'drop-shadow(0 30px 50px rgba(0,0,0,0.15))', 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))']
-              }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              onClick={(e) => { e.stopPropagation(); setSelectedPoint(null); }}
               sx={{
                 width: '100%',
                 height: '100%',
@@ -322,262 +495,87 @@ export default function WhyBossCargo() {
                 maskSize: 'contain',
                 maskRepeat: 'no-repeat',
                 maskPosition: 'center',
-                backgroundColor: primaryMain,
+                backgroundColor: secondaryMain,
                 zIndex: 1,
                 position: 'absolute',
                 top: 0,
                 left: 0,
+                cursor: selectedPoint ? 'zoom-out' : 'default',
+                // Strobe animate map colors using mui-theme colors
+                animation: 'colorStrobe 12s infinite',
+                '@keyframes colorStrobe': {
+                  '0%, 100%': { 
+                    backgroundColor: secondaryMain, 
+                    filter: `drop-shadow(0 0 30px ${primaryMain}33) brightness(1)` 
+                  },
+                  '16%': { 
+                    backgroundColor: currentColors.primary.main, 
+                    filter: `drop-shadow(0 0 40px ${currentColors.primary.main}55) brightness(1.2)` 
+                  },
+                  '33%': { 
+                    backgroundColor: currentColors.info.main, 
+                    filter: `drop-shadow(0 0 40px ${currentColors.info.main}55) brightness(1.2)` 
+                  },
+                  '50%': { 
+                    backgroundColor: currentColors.success.main, 
+                    filter: `drop-shadow(0 0 40px ${currentColors.success.main}55) brightness(1.2)` 
+                  },
+                  '66%': { 
+                    backgroundColor: currentColors.warning.main, 
+                    filter: `drop-shadow(0 0 40px ${currentColors.warning.main}55) brightness(1.2)` 
+                  },
+                  '83%': { 
+                    backgroundColor: currentColors.tertiary.main, 
+                    filter: `drop-shadow(0 0 40px ${currentColors.tertiary.main}55) brightness(1.2)` 
+                  },
+                },
               }}
             />
 
-            {COVERAGE_POINTS.map((point) => (
-              <Box
-                key={point.name}
-                component={motion.div}
-                initial="initial"
-                whileInView="animate"
-                whileHover="hover"
-                viewport={{ once: false, amount: 0.1 }}
-                sx={{
-                  position: 'absolute',
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                  zIndex: 10,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  pointerEvents: 'auto',
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {/* Compact Subtle Dot with synced pulse */}
-                <Box
-                  component={motion.div}
-                  variants={{
-                    initial: { scale: 0, opacity: 0 },
-                    animate: {
-                      scale: [1, 1.3, 1],
-                      opacity: [1, 0.7, 1],
-                      transition: {
-                        delay: point.delay,
-                        duration: 8, // Synced with map color pulse
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }
-                    },
-                    hover: { scale: 0 }
-                  }}
-                  sx={{
-                    width: 6,
-                    height: 6,
-                    bgcolor: secondaryMain,
-                    borderRadius: '50%',
-                    border: `1px solid ${isDark ? 'white' : 'black'}`,
-                    boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-                  }}
+            {COVERAGE_POINTS
+              .filter((point) => !OCEAN_POINTS.has(point.name))
+              .map((point) => (
+                <MapDot
+                  key={point.name}
+                  point={point}
+                  isSelected={selectedPoint?.name === point.name}
+                  isZoomedOut={!!selectedPoint && selectedPoint.name !== point.name}
+                  isDark={isDark}
+                  primaryMain={primaryMain}
+                  tertiaryMain={tertiaryMain}
+                  secondaryMain={secondaryMain}
+                  onSelect={setSelectedPoint}
                 />
-
-                {/* Combined Hover Badge (Icon + Label) */}
-                <Box
-                  component={motion.div}
-                  variants={{
-                    initial: {
-                      opacity: 0,
-                      scale: 0,
-                      y: point.y < 25 ? -15 : 15,
-                      transition: { duration: 0.2, ease: "easeOut" }
-                    },
-                    hover: {
-                      opacity: 1,
-                      scale: 1,
-                      y: 0,
-                      transition: { type: 'spring', stiffness: 400, damping: 20 }
-                    }
-                  }}
-                  sx={{
-                    position: 'absolute',
-                    [point.y < 25 ? 'top' : 'bottom']: '100%',
-                    [point.y < 25 ? 'mt' : 'mb']: 1.5,
-                    display: 'flex',
-                    flexDirection: point.y < 25 ? 'column-reverse' : 'column',
-                    alignItems: 'center',
-                    gap: 1,
-                    zIndex: 20,
-                    pointerEvents: 'none'
-                  }}
-                >
-                  <Box
-                    component={motion.div}
-                    animate={{
-                      y: [0, -4, 0] // Subtle synced float isolated from hover transitions
-                    }}
-                    transition={{
-                      duration: 8, // Synced with map color pulse
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}
-                  >
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        whiteSpace: 'nowrap',
-                        color: isDark ? tertiaryMain : 'white',
-                        fontWeight: 900,
-                        fontSize: '0.7rem',
-                        letterSpacing: 1,
-                        textTransform: 'uppercase',
-                        backgroundColor: secondaryMain,
-                        px: 1.2,
-                        py: 0.5,
-                        borderRadius: 1,
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
-                        border: `1px solid ${tertiaryMain}44`,
-                        backdropFilter: 'blur(8px)',
-                      }}
-                    >
-                      {point.name}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        bgcolor: isDark ? 'rgba(15, 20, 25, 0.95)' : 'white',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '50%',
-                        p: 0.5,
-                        boxShadow: `0 8px 30px rgba(0,0,0,0.5), 0 0 0 2px ${secondaryMain}`,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        position: 'relative'
-                      }}
-                    >
-                      <ImageWithFallback
-                        src={IMAGE_URLS.BOSS_CARGO_ICON}
-                        alt={point.name}
-                        layout="fill"
-                        objectFit="contain"
-                        sizes="44px"
-                        style={{ padding: '4px' }}
-                      />
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            ))}
+              ))}
           </Box>
         </Box>
       </Box>
 
-      {/* Slide 1: Mission & Vision */}
-      <Box
-        sx={{
-          minHeight: 'calc(100dvh - 80px)',
-          display: 'flex',
-          alignItems: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          py: { xs: 4, md: 0 },
-          position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'background.default'
-        }}
-      >
+      {/* ── Slide 1: Mission & Vision ──────────────────────────────────────── */}
+      <Box sx={{
+        minHeight: 'calc(100dvh - 80px)',
+        display: 'flex',
+        alignItems: 'center',
+        scrollSnapAlign: 'start',
+        scrollSnapStop: 'always',
+        py: { xs: 4, md: 0 },
+        position: 'relative',
+        overflow: 'hidden',
+        bgcolor: 'background.default',
+      }}>
         <BackgroundTexture />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="-15%"
-          right="-10%"
-          size="950px"
-          rotate={15}
-          opacity={isDark ? 0.06 : 0.1}
-          variant={0}
-        />
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          bottom="5%"
-          left="-15%"
-          size="800px"
-          rotate={-20}
-          opacity={isDark ? 0.05 : 0.09}
-          variant={1}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="30%"
-          left="20%"
-          size="600px"
-          rotate={180}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={2}
-        />
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          top="10%"
-          left="5%"
-          size="500px"
-          rotate={45}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={1}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="-5%"
-          left="40%"
-          size="400px"
-          rotate={-15}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={0}
-        />
-        <AbstractBlob
-          color={theme.palette.secondary.main}
-          bottom="-10%"
-          right="20%"
-          size="600px"
-          rotate={90}
-          opacity={isDark ? 0.03 : 0.05}
-          variant={1}
-        />
-        {/* Crowded shapes */}
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          bottom="20%"
-          left="30%"
-          size="350px"
-          rotate={110}
-          opacity={0.03}
-          variant={2}
-        />
-        <AbstractBlob
-          color={theme.palette.secondary.main}
-          top="50%"
-          right="5%"
-          size="450px"
-          rotate={240}
-          opacity={0.02}
-          variant={0}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="5%"
-          right="35%"
-          size="250px"
-          rotate={10}
-          opacity={0.03}
-          variant={1}
-        />
+        <AbstractBlob color={tertiaryMain} top="-15%" right="-10%" size="850px" opacity={isDark ? 0.06 : 0.09} />
+        <AbstractBlob color={primaryMain} bottom="5%" left="-15%" size="700px" opacity={isDark ? 0.05 : 0.08} />
+
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <Grid container spacing={6} alignItems="center">
-            {/* Left side: Content */}
             <Grid size={{ xs: 12, md: 7 }}>
               <Box
                 component={motion.div}
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ duration: 0.8 }}
+                variants={fadeLeft}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
               >
                 <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 2, mb: 1, display: 'block' }}>
                   CORE IDENTITY
@@ -590,42 +588,45 @@ export default function WhyBossCargo() {
                 </Typography>
 
                 <Stack spacing={4}>
-                  <Box
-                    component={motion.div}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false, amount: 0.5 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                  >
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'primary.main', boxShadow: `0 0 15px ${theme.palette.primary.main}` }} />
-                      Our Mission
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 3, borderLeft: '2px solid', borderColor: tertiaryMain, py: 0.5, lineHeight: 1.7, color: 'text.primary' }}>
-                      {SITE_CONTENT.missionVision.mission}
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    component={motion.div}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false, amount: 0.5 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                  >
-                    <Typography variant="h6" sx={{ color: 'secondary.main', fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'secondary.main', boxShadow: `0 0 15px ${theme.palette.secondary.main}` }} />
-                      Our Dream (Vision)
-                    </Typography>
-                    <Typography variant="body2" sx={{ pl: 3, borderLeft: '2px solid', borderColor: 'primary.main', py: 0.5, lineHeight: 1.7, color: 'text.primary' }}>
-                      {SITE_CONTENT.missionVision.vision}
-                    </Typography>
-                  </Box>
+                  {[
+                    {
+                      label: 'Our Mission',
+                      color: 'primary.main',
+                      borderColor: tertiaryMain,
+                      dotColor: 'primary.main',
+                      text: SITE_CONTENT.missionVision.mission,
+                      delay: 0.2,
+                    },
+                    {
+                      label: 'Our Dream (Vision)',
+                      color: 'secondary.main',
+                      borderColor: primaryMain,
+                      dotColor: 'secondary.main',
+                      text: SITE_CONTENT.missionVision.vision,
+                      delay: 0.4,
+                    },
+                  ].map(({ label, color, borderColor, dotColor, text, delay }) => (
+                    <Box
+                      key={label}
+                      component={motion.div}
+                      variants={fadeUp(delay)}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.5 }}
+                    >
+                      <Typography variant="h6" sx={{ color, fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: dotColor, boxShadow: `0 0 15px currentColor` }} />
+                        {label}
+                      </Typography>
+                      <Typography variant="body2" sx={{ pl: 3, borderLeft: '2px solid', borderColor, py: 0.5, lineHeight: 1.7 }}>
+                        {text}
+                      </Typography>
+                    </Box>
+                  ))}
                 </Stack>
               </Box>
             </Grid>
 
-            {/* Right side: Image */}
             <Grid size={{ xs: 12, md: 5 }}>
               <DecorativeImageFrame theme={theme}>
                 <ImageWithFallback
@@ -634,7 +635,7 @@ export default function WhyBossCargo() {
                   layout="responsive"
                   aspectRatio="4:3"
                   sizes="(max-width: 900px) 100vw, 50vw"
-                  rounded={0} // Managed by frame
+                  rounded={0}
                   shadow={0}
                 />
               </DecorativeImageFrame>
@@ -642,118 +643,37 @@ export default function WhyBossCargo() {
           </Grid>
         </PageContainer>
 
-        {/* Transition to Slide 2 (background.paper) */}
         <SectionTransition toColor={theme.palette.background.paper} />
       </Box>
 
-      {/* Slide 2: Brand Values & Culture */}
-      <Box
-        sx={{
-          minHeight: 'calc(100dvh - 80px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          scrollSnapAlign: 'start',
-          scrollSnapStop: 'always',
-          bgcolor: 'background.paper',
-          py: { xs: 6, md: 6 },
-          px: { xs: 2, md: 0 },
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
+      {/* ── Slide 2: Brand Values & Culture ───────────────────────────────── */}
+      <Box sx={{
+        minHeight: 'calc(100dvh - 80px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        scrollSnapAlign: 'start',
+        scrollSnapStop: 'always',
+        bgcolor: 'background.paper',
+        py: { xs: 6, md: 6 },
+        px: { xs: 2, md: 0 },
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
         <BackgroundTexture />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="10%"
-          left="-20%"
-          size="950px"
-          rotate={45}
-          opacity={isDark ? 0.05 : 0.08}
-          variant={1}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          bottom="-15%"
-          right="-15%"
-          size="900px"
-          rotate={-30}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={2}
-        />
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          top="40%"
-          right="10%"
-          size="650px"
-          rotate={120}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={0}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          bottom="20%"
-          left="10%"
-          size="550px"
-          rotate={-60}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={2}
-        />
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          top="-10%"
-          right="30%"
-          size="500px"
-          rotate={30}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={1}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          bottom="10%"
-          right="40%"
-          size="400px"
-          rotate={200}
-          opacity={isDark ? 0.04 : 0.07}
-          variant={0}
-        />
-        {/* Crowded shapes */}
-        <AbstractBlob
-          color={theme.palette.secondary.main}
-          top="50%"
-          left="40%"
-          size="400px"
-          rotate={15}
-          opacity={0.03}
-          variant={1}
-        />
-        <AbstractBlob
-          color={theme.palette.primary.main}
-          bottom="5%"
-          left="30%"
-          size="300px"
-          rotate={180}
-          opacity={0.02}
-          variant={0}
-        />
-        <AbstractBlob
-          color={tertiaryMain}
-          top="20%"
-          right="25%"
-          size="500px"
-          rotate={70}
-          opacity={0.03}
-          variant={2}
-        />
+        <AbstractBlob color={tertiaryMain} top="10%" left="-20%" size="850px" opacity={isDark ? 0.05 : 0.08} />
+        <AbstractBlob color={primaryMain} bottom="-15%" right="-15%" size="800px" opacity={isDark ? 0.04 : 0.07} />
+
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <Grid container spacing={3}>
-            {/* Left: Brand Values */}
+            {/* Brand Values */}
             <Grid size={{ xs: 12, md: 7 }}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
-                transition={{ duration: 0.8 }}
+              <Box
+                component={motion.div}
+                variants={fadeUp()}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
               >
                 <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
                   Our Brand Values
@@ -761,17 +681,18 @@ export default function WhyBossCargo() {
                 <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
                   Creating a strong and positive perception of our company in our customers' minds.
                 </Typography>
-              </motion.div>
+              </Box>
 
               <Grid container spacing={2}>
                 {values.map((value, index) => (
                   <Grid size={{ xs: 12, sm: 6 }} key={index}>
                     <Paper
                       component={motion.div}
-                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      initial={{ opacity: 0, scale: 0.93, y: 16 }}
                       whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                      viewport={{ once: false, amount: 0.2 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.45, delay: index * 0.08 }}
+                      whileHover={{ x: 8 }}
                       elevation={0}
                       sx={{
                         p: 2.5,
@@ -779,14 +700,12 @@ export default function WhyBossCargo() {
                         bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                         borderLeft: `4px solid ${index % 2 === 0 ? primaryMain : tertiaryMain}`,
                         borderRadius: '0 12px 12px 0',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transition: 'background-color 0.25s ease, box-shadow 0.25s ease',
                         '&:hover': {
-                          transform: 'translateX(8px) !important', // Override motion transform if needed, or better, use whileHover
                           bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-                          boxShadow: `0 4px 20px -10px ${theme.palette.primary.main}`
-                        }
+                          boxShadow: `0 4px 20px -10px ${primaryMain}`,
+                        },
                       }}
-                      whileHover={{ x: 8 }}
                     >
                       <Typography variant="subtitle1" sx={{ mb: 1, color: index % 2 === 0 ? 'primary.main' : 'text.primary', fontWeight: 700 }}>
                         {value.title}
@@ -800,47 +719,42 @@ export default function WhyBossCargo() {
               </Grid>
             </Grid>
 
-            {/* Right: Culture */}
+            {/* Culture */}
             <Grid size={{ xs: 12, md: 5 }}>
               <Box
                 component={motion.div}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
+                variants={fadeRight}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
                 sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
               >
                 <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'secondary.main' }}>
                   Our Culture
                 </Typography>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    mb: 3,
-                    bgcolor: isDark ? 'action.hover' : 'action.selected',
-                    borderRadius: 4,
-                    position: 'relative',
-                    overflow: 'hidden',
-                    borderLeft: `2px solid ${tertiaryMain}`
-                  }}
-                >
+                <Paper elevation={0} sx={{
+                  p: 3,
+                  mb: 3,
+                  bgcolor: isDark ? 'action.hover' : 'action.selected',
+                  borderRadius: 4,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderLeft: `2px solid ${tertiaryMain}`,
+                }}>
                   <Typography variant="body2" sx={{ lineHeight: 1.7, fontStyle: 'italic', position: 'relative', zIndex: 1 }}>
                     "{SITE_CONTENT.missionVision.culture}"
                   </Typography>
-                  <Box
-                    component={motion.div}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.1, 0.2, 0.1],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    sx={{ position: 'absolute', top: -10, right: -10, width: 60, height: 60, bgcolor: 'tertiary.main', opacity: 0.1, borderRadius: '50%' }}
-                  />
+                  {/* Static decorative circle – removed the Infinity animate */}
+                  <Box sx={{
+                    position: 'absolute',
+                    top: -10,
+                    right: -10,
+                    width: 60,
+                    height: 60,
+                    bgcolor: 'tertiary.main',
+                    opacity: 0.12,
+                    borderRadius: '50%',
+                  }} />
                 </Paper>
                 <DecorativeImageFrame theme={theme}>
                   <ImageWithFallback
@@ -857,7 +771,6 @@ export default function WhyBossCargo() {
             </Grid>
           </Grid>
         </PageContainer>
-
       </Box>
     </Box>
   );

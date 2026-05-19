@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -141,6 +141,7 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'ma
 // ─── AvatarOverlay ────────────────────────────────────────────────────────────
 export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | 'female'; isVisible?: boolean }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
 
@@ -227,9 +228,9 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
         }}
         animate={{
           opacity: isVisible ? 1 : 0,
-          scale: isVisible ? 1 : 0.8,
+          scale: isVisible ? (isMobile ? 0.7 : 1) : (isMobile ? 0.5 : 0.8),
         }}
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: isMobile ? 0.5 : 0.8 }}
         transition={{ duration: 1.2, ease: 'easeOut' }}
         style={{
           position: 'fixed',

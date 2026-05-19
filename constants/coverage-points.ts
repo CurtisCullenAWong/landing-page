@@ -1,60 +1,65 @@
 export const COVERAGE_POINTS = [
-  // North Luzon
-  { name: 'Abra', x: 45.5, y: 23.5 },
-  { name: 'Aparri', x: 52.5, y: 20.5 },
-  { name: 'Baguio', x: 45.2, y: 29.5 },
-  { name: 'Ilocos Sur', x: 42.5, y: 25.5 },
-  { name: 'Ilocos Norte', x: 44.0, y: 21.0 },
-  { name: 'Cauayan', x: 52.0, y: 27.0 },
-  { name: 'Isabela', x: 52.5, y: 28.5 },
-  { name: 'La Union', x: 43.5, y: 28.0 },
-  { name: 'Solano NV', x: 49.5, y: 31.5 },
-  { name: 'Tuguegarao', x: 51.8, y: 23.2 },
-  { name: 'Vigan', x: 42.2, y: 23.8 },
-  // Central Luzon
-  { name: 'Bataan', x: 43.5, y: 40.5 },
-  { name: 'Bulacan', x: 46.5, y: 39.0 },
-  { name: 'Zambales', x: 42.0, y: 36.0 },
-  { name: 'Nueva Ecija', x: 48.5, y: 35.0 },
-  { name: 'Olongapo', x: 42.8, y: 38.5 },
-  { name: 'Pampanga', x: 45.0, y: 38.0 },
-  { name: 'Pangasinan', x: 44.5, y: 32.0 },
-  { name: 'Santiago', x: 51.5, y: 29.0 },
-  { name: 'Tarlac', x: 45.5, y: 35.5 },
-  { name: 'Aurora', x: 51.5, y: 34.5 },
-  // Metro Manila
-  { name: 'Parañaque Hub', x: 46.1, y: 41.5 },
-  { name: 'Taytay Hub', x: 46.8, y: 41.1 },
-  { name: 'Las Piñas', x: 45.9, y: 41.8 },
+  // North Luzon (Pulled inward to the right)
+  { name: 'Abra', x: 47.0, y: 23.5, description: 'Rugged landlocked province with agricultural valleys.' },
+  { name: 'Aparri', x: 49.0, y: 20.0, description: 'Coastal town at the mouth of the Cagayan River.' },
+  { name: 'Baguio', x: 46.5, y: 28.5, description: 'Cool-climate mountain city and summer capital.' },
+  { name: 'Ilocos Sur', x: 45.0, y: 26.5, description: 'Historic province with heritage sites and farms.' },
+  { name: 'Ilocos Norte', x: 46.5, y: 22.0, description: 'Coastal province known for wind farms and agriculture.' },
+  { name: 'Cauayan', x: 50.5, y: 27.0, description: 'Fast-growing commercial city in Isabela.' },
+  { name: 'Isabela', x: 51.0, y: 28.5, description: 'Major agricultural province in Cagayan Valley.' },
+  { name: 'La Union', x: 45.5, y: 29.0, description: 'Coastal province known for surf and tourism.' },
+  { name: 'Solano NV', x: 48.5, y: 31.5, description: 'Commercial hub of Nueva Vizcaya.' },
+  { name: 'Tuguegarao', x: 49.5, y: 23.5, description: 'Main city and trade hub of Cagayan Valley.' },
+  { name: 'Vigan', x: 45.0, y: 24.5, description: 'Spanish-era heritage city in Ilocos Sur.' },
+
+  // Central Luzon (Western edge pulled inward to the right)
+  { name: 'Bataan', x: 46.0, y: 40.5, description: 'Historic peninsula with ports and industry.' },
+  { name: 'Bulacan', x: 48.0, y: 39.0, description: 'Highly urbanized province near Metro Manila.' },
+  { name: 'Zambales', x: 45.0, y: 36.0, description: 'Coastal province with Subic Bay Freeport.' },
+  { name: 'Nueva Ecija', x: 49.0, y: 35.0, description: 'Rice-producing agricultural heartland.' },
+  { name: 'Olongapo', x: 45.5, y: 38.5, description: 'Port city near Subic Bay.' },
+  { name: 'Pampanga', x: 47.0, y: 38.0, description: 'Economic hub known for cuisine and Clark.' },
+  { name: 'Pangasinan', x: 46.0, y: 33.0, description: 'Coastal province known for islands and aquaculture.' },
+  { name: 'Santiago', x: 50.0, y: 29.5, description: 'Key commercial city in Isabela.' },
+  { name: 'Tarlac', x: 47.0, y: 35.5, description: 'Agricultural plains and sugar lands.' },
+  { name: 'Aurora', x: 51.0, y: 34.5, description: 'Surfing and mountainous coastal province.' },
+
+  // Metro Manila (Anchors)
+  { name: 'Parañaque Hub', x: 48.0, y: 41.5, description: 'Logistics hub near major airports.' },
+  { name: 'Taytay Hub', x: 49.0, y: 41.1, description: 'Commercial garment and trading center.' },
+  { name: 'Las Piñas', x: 48.0, y: 42.0, description: 'Residential city with growing business zones.' },
+
   // South Luzon
-  { name: 'Camarines Norte', x: 55.0, y: 45.5 },
-  { name: 'Camarines Sur', x: 57.5, y: 47.0 },
-  { name: 'Legaspi', x: 59.5, y: 48.5 },
-  { name: 'Lucena', x: 50.0, y: 44.5 },
-  { name: 'Masbate', x: 58.5, y: 52.5 },
-  { name: 'Naga', x: 57.0, y: 46.5 },
-  { name: 'Palawan', x: 32.1, y: 69.3 },
-  { name: 'Quezon Province', x: 51.5, y: 45.0 },
-  { name: 'San Jose Occidental Mindoro', x: 44.5, y: 51.5 },
-  { name: 'Calapan Oriental Mindoro', x: 46.2, y: 48.0 },
-  // Visayas
-  { name: 'Bacolod', x: 56.5, y: 61.0 },
-  { name: 'Cebu', x: 61.2, y: 63.8 },
-  { name: 'Dumaguete', x: 58.0, y: 65.5 },
-  { name: 'Iloilo', x: 53.5, y: 60.2 },
-  { name: 'Kalibo', x: 53.0, y: 56.8 },
-  { name: 'Tacloban', x: 67.7, y: 55.2 },
-  { name: 'Tagbilaran', x: 63.5, y: 65.2 },
-  { name: 'Roxas', x: 54.8, y: 57.5 },
-  // Mindanao
-  { name: 'Butuan', x: 71.1, y: 73.8 },
-  { name: 'Cagayan de Oro', x: 67.0, y: 76.4 },
-  { name: 'Cotabato', x: 65.0, y: 81.5 },
-  { name: 'Davao', x: 73.5, y: 79.9 },
-  { name: 'Dipolog', x: 57.5, y: 75.0 },
-  { name: 'General Santos', x: 69.0, y: 85.0 },
-  { name: 'Ozamis', x: 62.5, y: 76.8 },
-  { name: 'Surigao', x: 71.8, y: 70.5 },
-  { name: 'Zamboanga', x: 51.5, y: 82.5 },
-  { name: 'Pagadian', x: 57.8, y: 77.3 },
+  { name: 'Camarines Norte', x: 53.0, y: 45.5, description: 'Gateway to Bicol with mining and farms.' },
+  { name: 'Camarines Sur', x: 55.0, y: 47.0, description: 'Largest Bicol province and eco-tourism hub.' },
+  { name: 'Legaspi', x: 56.5, y: 48.5, description: 'Albay capital near Mayon Volcano.' },
+  { name: 'Lucena', x: 50.0, y: 44.5, description: 'Commercial capital of Quezon Province.' },
+  { name: 'Masbate', x: 55.5, y: 52.5, description: 'Island province known for cattle ranching.' },
+  { name: 'Naga', x: 54.5, y: 46.5, description: 'Cultural and business center of Bicol.' },
+  { name: 'Palawan', x: 39.0, y: 66.0, description: 'World-famous eco-tourism and nature province.' }, // Pulled significantly right
+  { name: 'Quezon Province', x: 51.0, y: 45.0, description: 'Large coconut-producing province.' },
+  { name: 'San Jose Occidental Mindoro', x: 47.0, y: 51.5, description: 'Main commercial hub of Occidental Mindoro.' },
+  { name: 'Calapan Oriental Mindoro', x: 48.5, y: 48.0, description: 'Primary port and city of Oriental Mindoro.' },
+
+  // Visayas (Eastern edge pulled inward to the left)
+  { name: 'Bacolod', x: 54.0, y: 61.0, description: 'Sugar capital and urban center.' },
+  { name: 'Cebu', x: 58.0, y: 63.5, description: 'Major business hub of the Visayas.' },
+  { name: 'Dumaguete', x: 56.0, y: 66.0, description: 'University and coastal city.' },
+  { name: 'Iloilo', x: 52.0, y: 60.5, description: 'Growing economic center with heritage sites.' },
+  { name: 'Kalibo', x: 51.5, y: 57.0, description: 'Gateway to Boracay.' },
+  { name: 'Tacloban', x: 61.5, y: 56.0, description: 'Eastern Visayas regional center.' }, // Pulled left
+  { name: 'Tagbilaran', x: 58.5, y: 65.5, description: 'Main gateway to Bohol.' },
+  { name: 'Roxas', x: 53.5, y: 58.0, description: 'Seafood capital of Capiz.' },
+
+  // Mindanao (Eastern and Southern edges pulled inward)
+  { name: 'Butuan', x: 63.0, y: 72.0, description: 'Caraga regional commercial hub.' }, // Pulled left
+  { name: 'Cagayan de Oro', x: 60.5, y: 74.0, description: 'Northern Mindanao logistics hub.' },
+  { name: 'Cotabato', x: 59.5, y: 79.5, description: 'Central Mindanao trade center.' },
+  { name: 'Davao', x: 62.5, y: 79.0, description: 'Largest city in Mindanao.' }, // Pulled left
+  { name: 'Dipolog', x: 55.0, y: 74.5, description: 'Sardine capital of Zamboanga del Norte.' },
+  { name: 'General Santos', x: 60.5, y: 83.5, description: 'Tuna capital of the Philippines.' }, // Pulled left and slightly up
+  { name: 'Ozamis', x: 57.5, y: 76.0, description: 'Key port city in Misamis Occidental.' },
+  { name: 'Surigao', x: 63.5, y: 69.5, description: 'Gateway to northeastern Mindanao.' }, // Pulled left
+  { name: 'Zamboanga', x: 53.0, y: 81.0, description: 'Major trade center in the peninsula.' }, // Pulled right
+  { name: 'Pagadian', x: 56.0, y: 77.0, description: 'Regional center with rolling terrain.' },
 ].map((p, i) => ({ ...p, delay: (i % 30) * 0.03 }));
