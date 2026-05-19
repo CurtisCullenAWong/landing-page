@@ -18,13 +18,13 @@ function makeNoopClient() {
       on: () => ({ subscribe: () => ({}) }),
       subscribe: () => ({}),
     }),
-    removeChannel: () => {},
+    removeChannel: () => { },
   } as any;
 }
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
     // Supabase not configured — return a safe no-op client to avoid runtime errors

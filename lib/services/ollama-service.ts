@@ -23,11 +23,7 @@ export interface GenerateRequest {
 // ==========================================
 
 // Determine appropriate base URL for calling Next.js API routes.
-// Defaults to '/api' to ensure reliable relative fetching regardless of domain/environment.
-let clientBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
-if (clientBaseUrl.includes('ollama.com') || (!clientBaseUrl.startsWith('http') && !clientBaseUrl.startsWith('/'))) {
-  clientBaseUrl = '/api';
-}
+const clientBaseUrl = '/api';
 
 export const ollamaService = {
   /**
@@ -43,7 +39,11 @@ export const ollamaService = {
       body: JSON.stringify(request),
       signal,
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error || `HTTP error ${response.status}`);
+    }
+    return data;
   },
 
   /**
@@ -59,7 +59,11 @@ export const ollamaService = {
       body: JSON.stringify(request),
       signal,
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error || `HTTP error ${response.status}`);
+    }
+    return data;
   },
 
   /**
@@ -84,23 +88,19 @@ export const ollamaService = {
 // ==========================================
 
 export class OllamaService {
-  private baseUrl: string;
-  private model: string;
-  private headers: Record<string, string>;
+  private localBaseUrl: string;
+  private localModel: string;
+  private cloudBaseUrl: string;
+  private cloudModel: string;
+  private cloudApiKey: string;
+  private systemPrompt?: string;
 
   constructor() {
-    // Dynamic configuration replacing hardcoded values
-    this.baseUrl = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || process.env.OLLAMA_HOST || 'http://localhost:11434';
-    this.model = process.env.OLLAMA_MODEL || 'llama3.2:3b';
-
-    this.headers = {
-      'Content-Type': 'application/json',
-    };
-
-    const apiKey = process.env.NEXT_PUBLIC_OLLAMA_CLOUD_API_KEY || process.env.OLLAMA_API_KEY;
-    if (apiKey) {
-      this.headers['Authorization'] = `Bearer ${apiKey}`;
-    }
+    this.localBaseUrl = process.env.NEXT_PUBLIC_OLLAMA_BASE_URL!;
+    this.localModel = process.env.NEXT_PUBLIC_OLLAMA_CLOUD_MODEL!;
+    this.cloudBaseUrl = process.env.NEXT_PUBLIC_OLLAMA_CLOUD_BASE_URL!;
+    this.cloudModel = process.env.NEXT_PUBLIC_OLLAMA_CLOUD_MODEL!;
+    this.cloudApiKey = process.env.NEXT_PUBLIC_OLLAMA_CLOUD_API_KEY!;
   }
 
   async chat(req: { messages?: Message[], prompt?: string } | Message[]) {
@@ -115,21 +115,59 @@ export class OllamaService {
       throw new Error('Invalid request: messages array or prompt is required');
     }
 
-    const response = await fetch(`${this.baseUrl}/api/chat`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        model: this.model,
-        messages,
-        stream: false,
-      }),
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.localModel,
+          messages,
+          stream: false,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline or failed, falling back to Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      let response = await fetch(`${this.cloudBaseUrl}/api/chat`, {
+        method: 'POST',
+        headers: cloudHeaders,
+        body: JSON.stringify({
+          model: this.cloudModel,
+          messages,
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn(`Ollama Cloud custom model '${this.cloudModel}' failed (${response.status}), attempting fallback to standard cloud model 'deepseek-r1t2-chimera'...`);
+        response = await fetch(`${this.cloudBaseUrl}/api/chat`, {
+          method: 'POST',
+          headers: cloudHeaders,
+          body: JSON.stringify({
+            model: 'deepseek-r1t2-chimera',
+            messages,
+            stream: false,
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Ollama Cloud API error (${response.status}): ${errText || response.statusText}`);
+      }
+
+      return await response.json();
     }
-
-    return response.json();
   }
 
   async generate(req: { prompt: string } | string) {
@@ -138,51 +176,131 @@ export class OllamaService {
       throw new Error('Invalid request: prompt is required');
     }
 
-    const response = await fetch(`${this.baseUrl}/api/generate`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        model: this.model,
-        prompt,
-        stream: false,
-      }),
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.localModel,
+          prompt,
+          stream: false,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline or failed, falling back to Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      let response = await fetch(`${this.cloudBaseUrl}/api/generate`, {
+        method: 'POST',
+        headers: cloudHeaders,
+        body: JSON.stringify({
+          model: this.cloudModel,
+          prompt,
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        console.warn(`Ollama Cloud custom model '${this.cloudModel}' failed (${response.status}), attempting fallback to standard cloud model 'curtiscullenagustinwong/company-chatbot'...`);
+        response = await fetch(`${this.cloudBaseUrl}/api/generate`, {
+          method: 'POST',
+          headers: cloudHeaders,
+          body: JSON.stringify({
+            model: 'curtiscullenagustinwong/company-chatbot',
+            prompt,
+            stream: false,
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Ollama Cloud API error (${response.status}): ${errText || response.statusText}`);
+      }
+
+      return await response.json();
     }
-
-    return response.json();
   }
 
   async status() {
-    const response = await fetch(`${this.baseUrl}/api/version`, {
-      headers: this.headers,
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/version`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          ok: true,
+          status: 'online',
+          mode: 'localhost',
+          ...data,
+        };
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline for status check, checking Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      const response = await fetch(`${this.cloudBaseUrl}/api/version`, {
+        headers: cloudHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama Cloud API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return {
+        ok: true,
+        status: 'online',
+        mode: 'cloud',
+        ...data,
+      };
     }
-
-    const data = await response.json();
-
-    return {
-      ok: true,
-      status: 'online',
-      ...data,
-    };
   }
 
   async models() {
-    const response = await fetch(`${this.baseUrl}/api/tags`, {
-      headers: this.headers,
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/tags`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline for models check, checking Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      const response = await fetch(`${this.cloudBaseUrl}/api/tags`, {
+        headers: cloudHeaders,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama Cloud API error: ${response.statusText}`);
+      }
+
+      return await response.json();
     }
-
-    return response.json();
   }
 
   async pull(req: { name: string } | string) {
@@ -191,17 +309,37 @@ export class OllamaService {
       throw new Error('Invalid request: name is required');
     }
 
-    const response = await fetch(`${this.baseUrl}/api/pull`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({ name, stream: false }),
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/pull`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, stream: false }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline for pull, attempting Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      const response = await fetch(`${this.cloudBaseUrl}/api/pull`, {
+        method: 'POST',
+        headers: cloudHeaders,
+        body: JSON.stringify({ name, stream: false }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama Cloud API error: ${response.statusText}`);
+      }
+
+      return await response.json();
     }
-
-    return response.json();
   }
 
   async train(req: { name: string; base_model: string } | string, baseModelParam?: string) {
@@ -212,24 +350,42 @@ export class OllamaService {
       throw new Error('Invalid request: name and base_model are required');
     }
 
-    const systemPrompt = process.env.OLLAMA_SYSTEM_PROMPT || 'You are the Boss Cargo Express company assistant. Answer using accurate information about Boss Cargo Express, its services, careers, and contact details.';
-
     const modelfile = [
       `FROM ${baseModel}`,
-      `SYSTEM """${systemPrompt}"""`,
-    ].join('\n');
+      this.systemPrompt ? `SYSTEM """${this.systemPrompt}"""` : '',
+    ].filter(Boolean).join('\n');
 
-    const response = await fetch(`${this.baseUrl}/api/create`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({ name, modelfile, stream: false }),
-    });
+    try {
+      const response = await fetch(`${this.localBaseUrl}/api/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, modelfile, stream: false }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Local Ollama API error: ${response.statusText}`);
+    } catch (localError: any) {
+      console.warn('Local Ollama instance offline for train, attempting Ollama Cloud:', localError.message);
+
+      const cloudHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.cloudApiKey}`,
+      };
+
+      const response = await fetch(`${this.cloudBaseUrl}/api/create`, {
+        method: 'POST',
+        headers: cloudHeaders,
+        body: JSON.stringify({ name, modelfile, stream: false }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama Cloud API error: ${response.statusText}`);
+      }
+
+      return await response.json();
     }
-
-    return response.json();
   }
 }
 

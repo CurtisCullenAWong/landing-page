@@ -205,7 +205,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
   const loadJobs = async () => {
     try {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
       if (!url || !key) {
         console.error('Error loading jobs: Supabase environment variables are missing');

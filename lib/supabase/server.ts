@@ -19,7 +19,7 @@ function makeNoopClient() {
       on: () => ({ subscribe: () => ({}) }),
       subscribe: () => ({}),
     }),
-    removeChannel: () => {},
+    removeChannel: () => { },
   } as any;
 }
 
@@ -31,7 +31,7 @@ function makeNoopClient() {
 export async function createClient() {
   const cookieStore = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
     return makeNoopClient();
