@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OllamaController } from '../../../../../backend/app/Controllers/OllamaController';
+import { OllamaController } from '@/lib/services/ollama-service';
 
 const controller = new OllamaController();
 

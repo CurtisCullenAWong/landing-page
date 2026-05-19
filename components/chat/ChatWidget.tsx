@@ -270,7 +270,7 @@ export const ChatWidget = ({
         console.error('Greeting error:', error);
         const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
         if (isFetchError) {
-          const errorMsg = "⚠️ **Connection Error**: I'm unable to reach my AI service. Please try again later.";
+          const errorMsg = "**Connection Error**: I'm unable to reach my AI service. Please try again later.";
           setMessages([{
             role: 'assistant',
             content: errorMsg
@@ -333,7 +333,7 @@ export const ChatWidget = ({
         console.error('Chat error:', error);
         const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
         const errorMsg = isFetchError
-          ? "⚠️ **Connection Error**: I'm unable to reach my AI service. Please ensure the server is running and accessible, then try again."
+          ? "**Connection Error**: I'm unable to reach my AI service. Please ensure the server is running and accessible, then try again."
           : "I'm sorry, I encountered an unexpected error. Please try again in a moment.";
 
         setMessages(prev => [...prev, {
@@ -561,8 +561,9 @@ export const ChatWidget = ({
                       overflowX: 'auto',
                       '& p': { m: 0 },
                       '& p + p': { mt: 1 },
-                      '& ul, & ol': { mt: 1, mb: 1, pl: 2.5 },
-                      '& li': { mb: 0.5 },
+                      '& ul': { mt: 1, mb: 1, pl: 2.5, listStyleType: 'disc', '& ul': { listStyleType: 'circle', '& ul': { listStyleType: 'square' } } },
+                      '& ol': { mt: 1, mb: 1, pl: 2.5, listStyleType: 'decimal' },
+                      '& li': { mb: 0.5, display: 'list-item' },
                       '& code': {
                         fontFamily: 'monospace',
                         fontSize: '0.85rem',
