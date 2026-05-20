@@ -67,7 +67,7 @@ export function AuthButton() {
 
   return user ? (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      <span style={{ color: 'white' }}>Hey, {user.email}!</span>
+      <span style={{ color: 'white' }}>Hey, {user.user_metadata?.full_name || user.email}!</span>
       <LogoutButton />
     </Box>
   ) : (

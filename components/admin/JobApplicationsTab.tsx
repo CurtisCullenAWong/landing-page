@@ -4,6 +4,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+
+// ── Edge function helper ─────────────────────────────────────────────────────
+async function invokeRecruitmentFunction(action: string, params?: Record<string, unknown>) {
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke('manage-recruitment', {
+    body: { action, params },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
 import {
   Box,
   Typography,
@@ -166,36 +177,16 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
 
     setIsDeleting(true);
     try {
-      const supabase = createClient();
+      await invokeRecruitmentFunction('delete-applicant', {
+        id: applicantToDelete.id,
+        resume_url: applicantToDelete.resume_url,
+      });
 
-      // Delete file from storage if it's a storage path
-      if (applicantToDelete.resume_url?.startsWith('applicant-files:')) {
-        const filePath = applicantToDelete.resume_url.replace('applicant-files:', '');
-        const { error: storageError } = await supabase.storage
-          .from('applicant-files')
-          .remove([filePath]);
-
-        if (storageError) {
-          console.error('Error deleting file from storage:', storageError);
-        }
-      }
-
-      // Delete application record
-      const { error } = await supabase
-        .from('job_applicants')
-        .delete()
-        .eq('id', applicantToDelete.id);
-
-      if (error) {
-        console.error('Error deleting application:', error);
-        alert('Failed to delete application. Please try again.');
-      } else {
-        setDeleteDialogOpen(false);
-        setApplicantToDelete(null);
-      }
+      setDeleteDialogOpen(false);
+      setApplicantToDelete(null);
     } catch (error) {
       console.error('Error deleting application:', error);
-      alert('An error occurred while deleting the application.');
+      alert('Failed to delete application. Please try again.');
     } finally {
       setIsDeleting(false);
     }
@@ -399,37 +390,12 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
     if (!editingApplicant) return;
 
     try {
-      const supabase = createClient();
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const result = await invokeRecruitmentFunction('update-applicant', {
+        id: editingApplicant.id,
+        status: newStatus,
+      });
 
-      if (userError || !user) {
-        console.error('Error getting current user:', userError);
-        alert('Failed to get current user information. Please try again.');
-        return;
-      }
-
-      let updatedBy: string | null = user.email || user.id;
-
-      const { data, error } = await supabase
-        .from('job_applicants')
-        .update({
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-          updated_by: updatedBy,
-        })
-        .eq('id', editingApplicant.id)
-        .select();
-
-      if (error) {
-        console.error('Error updating status:', error);
-        alert(`Failed to update status: ${error.message || 'Unknown error'}`);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        setStatusDialogOpen(false);
-        setEditingApplicant(null);
-      } else {
+      if (result.applicant) {
         setStatusDialogOpen(false);
         setEditingApplicant(null);
       }

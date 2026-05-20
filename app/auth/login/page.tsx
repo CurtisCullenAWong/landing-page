@@ -20,6 +20,7 @@ import { usePageTitle } from "@/lib/usePageTitle";
 import { Container, useTheme, Alert, Stack } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { INPUT_LIMITS } from "@/lib/input-utils";
+import { AccountCircleOutlined } from "@mui/icons-material";
 
 
 // Shared "Corner Brackets" component for architectural emphasis
@@ -53,7 +54,7 @@ const CornerBrackets = ({ color, size = 24, radius = 16 }: { color: string, size
 
 export default function Page() {
   usePageTitle('Login');
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,9 @@ export default function Page() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/admin';
 
+  // Determine if input looks like an email
+  const isEmail = identifier.includes('@');
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
@@ -69,8 +73,25 @@ export default function Page() {
     setError(null);
 
     try {
+      let loginEmail = identifier.trim();
+
+      // If input has no '@', treat it as a username and look up the email
+      if (!loginEmail.includes('@')) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('email')
+          .ilike('full_name', loginEmail)
+          .maybeSingle();
+
+        if (profileError) throw new Error('Error looking up username.');
+        if (!profileData?.email) {
+          throw new Error('No account found with that username.');
+        }
+        loginEmail = profileData.email;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       });
       if (error) throw error;
@@ -137,19 +158,21 @@ export default function Page() {
             <form onSubmit={handleLogin}>
               <Stack spacing={4}>
                 <TextField
-                  label="Email Address"
-                  type="email"
-                  placeholder="admin@bosscargo.com"
+                  label={isEmail ? "Email Address" : "Email or Username"}
+                  type="text"
+                  placeholder="admin@bosscargo.com or your username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   fullWidth
                   variant="outlined"
                   inputProps={{ maxLength: INPUT_LIMITS.EMAIL }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <EmailOutlined sx={{ color: primaryMain }} />
+                        {isEmail
+                          ? <EmailOutlined sx={{ color: primaryMain }} />
+                          : <AccountCircleOutlined sx={{ color: primaryMain }} />}
                       </InputAdornment>
                     ),
                     sx: { borderRadius: 3 }

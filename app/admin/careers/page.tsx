@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { useJobs, Job } from '../../../contexts/JobContext';
 import { Plus, Edit2, Trash2, Save, X, Search, ArrowUpDown, ChevronDown, ChevronUp, ArrowLeft, Briefcase, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -111,6 +112,41 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState(0); // 0: Job Postings, 1: Job Applications
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  // Verify admin access via edge function on mount (same pattern as User Management)
+  useEffect(() => {
+    const checkAccess = async () => {
+      setIsAuthChecking(true);
+      try {
+        const supabase = createClient();
+        const { data, error: funcError } = await supabase.functions.invoke('manage-recruitment', {
+          body: { action: 'list-jobs' },
+        });
+        if (funcError) {
+          let reason: string = funcError.message || 'Unknown error';
+          // Try to extract the JSON error body from the response
+          if (funcError.context && typeof funcError.context.clone === 'function') {
+            try {
+              const body = await funcError.context.clone().json();
+              if (body?.error) reason = body.error;
+            } catch (_) {}
+          }
+          if (funcError.status === 403) reason = 'Access denied: Your account does not have the admin role required to access Recruitment.';
+          else if (funcError.status === 401) reason = 'Unauthorized: Missing or invalid authentication token. Try logging out and back in.';
+          setAuthError(reason);
+        } else if (data?.error) {
+          setAuthError(data.error);
+        }
+      } catch (err: any) {
+        setAuthError(err.message || 'Failed to verify access.');
+      } finally {
+        setIsAuthChecking(false);
+      }
+    };
+    checkAccess();
+  }, []);
 
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -276,7 +312,7 @@ export default function AdminPage() {
     setPage(0);
   };
 
-  if (isLoading) {
+  if (isAuthChecking || isLoading) {
     return <AdminTableSkeleton />;
   }
 
@@ -481,6 +517,30 @@ export default function AdminPage() {
 
   return (
     <Box>
+      {/* Access Denied Alert — shown instead of content when not admin */}
+      {authError && (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 4,
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+          }}
+        >
+          <Stack spacing={1}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+              Access Denied
+            </Typography>
+            <Typography variant="body2">
+              {authError}
+            </Typography>
+          </Stack>
+        </Alert>
+      )}
+
+      {/* Only render the page content if access was granted */}
+      {!authError && (
+      <>
       {/* Header */}
       <Box sx={{
         mb: 4,
@@ -1346,6 +1406,8 @@ export default function AdminPage() {
         </>
       ) : (
         <JobApplicationsTab jobs={jobs} />
+      )}
+      </>
       )}
     </Box>
   );

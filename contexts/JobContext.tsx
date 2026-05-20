@@ -3,6 +3,17 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+// ── Edge function helper ─────────────────────────────────────────────────────
+async function invokeRecruitmentFunction(action: string, params?: Record<string, unknown>) {
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke('manage-recruitment', {
+    body: { action, params },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export interface Job {
   id: string;
   title: string;
@@ -251,43 +262,10 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
   const addJob = async (job: Omit<Job, 'id' | 'postedDate'>) => {
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('jobs')
-        .insert({
-          title: job.title,
-          department: job.department,
-          location: job.location,
-          type: job.type,
-          description: job.description,
-          responsibilities: job.responsibilities,
-          requirements: job.requirements,
-          benefits: job.benefits || [],
-          salary: job.salary,
-          salary_min: job.salary_min || null,
-          salary_max: job.salary_max || null,
-          salary_frequency: job.salary_frequency || null,
-          status: job.status || 'active',
-          posted_date: new Date().toISOString(),
-          employment_type: job.employment_type || null,
-          work_setup: job.work_setup || null,
-          job_level: job.job_level || null,
-          schedule: job.schedule || null,
-          views_count: job.views_count || 0,
-          applications_count: job.applications_count || 0,
-          featured: job.featured || false,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding job:', error);
-        throw error;
-      }
-
-      if (data) {
-        const newJob = mapDatabaseJobToJob(data);
-        setJobs([...jobs, newJob]);
+      const result = await invokeRecruitmentFunction('create-job', { jobs: [job] });
+      if (result.jobs && result.jobs.length > 0) {
+        const newJob = mapDatabaseJobToJob(result.jobs[0] as DatabaseJob);
+        setJobs(prev => [newJob, ...prev]);
       }
     } catch (error) {
       console.error('Error adding job:', error);
@@ -299,46 +277,10 @@ export function JobProvider({ children }: { children: ReactNode }) {
     try {
       if (jobsToAdd.length === 0) return;
 
-      const supabase = createClient();
-      const now = new Date().toISOString();
-
-      const jobsData = jobsToAdd.map(job => ({
-        title: job.title,
-        department: job.department,
-        location: job.location,
-        type: job.type,
-        description: job.description,
-        responsibilities: job.responsibilities,
-        requirements: job.requirements,
-        benefits: job.benefits || [],
-        salary: job.salary,
-        salary_min: job.salary_min || null,
-        salary_max: job.salary_max || null,
-        salary_frequency: job.salary_frequency || null,
-        status: job.status || 'active',
-        posted_date: now,
-        employment_type: job.employment_type || null,
-        work_setup: job.work_setup || null,
-        job_level: job.job_level || null,
-        schedule: job.schedule || null,
-        views_count: job.views_count || 0,
-        applications_count: job.applications_count || 0,
-        featured: job.featured || false,
-      }));
-
-      const { data, error } = await supabase
-        .from('jobs')
-        .insert(jobsData)
-        .select();
-
-      if (error) {
-        console.error('Error adding jobs:', error);
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        const newJobs = data.map(mapDatabaseJobToJob);
-        setJobs([...jobs, ...newJobs]);
+      const result = await invokeRecruitmentFunction('create-job', { jobs: jobsToAdd });
+      if (result.jobs && result.jobs.length > 0) {
+        const newJobs = (result.jobs as DatabaseJob[]).map(mapDatabaseJobToJob);
+        setJobs(prev => [...newJobs, ...prev]);
       }
     } catch (error) {
       console.error('Error adding jobs:', error);
@@ -348,45 +290,9 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
   const updateJob = async (id: string, updatedJob: Partial<Job>) => {
     try {
-      const supabase = createClient();
-      const updateData: Partial<DatabaseJob> = {};
-
-      if (updatedJob.title !== undefined) updateData.title = updatedJob.title;
-      if (updatedJob.department !== undefined) updateData.department = updatedJob.department;
-      if (updatedJob.location !== undefined) updateData.location = updatedJob.location;
-      if (updatedJob.type !== undefined) updateData.type = updatedJob.type;
-      if (updatedJob.description !== undefined) updateData.description = updatedJob.description;
-      if (updatedJob.responsibilities !== undefined) updateData.responsibilities = updatedJob.responsibilities;
-      if (updatedJob.requirements !== undefined) updateData.requirements = updatedJob.requirements;
-      if (updatedJob.benefits !== undefined) updateData.benefits = updatedJob.benefits;
-      if (updatedJob.salary !== undefined) updateData.salary = updatedJob.salary;
-      if (updatedJob.salary_min !== undefined) updateData.salary_min = updatedJob.salary_min;
-      if (updatedJob.salary_max !== undefined) updateData.salary_max = updatedJob.salary_max;
-      if (updatedJob.salary_frequency !== undefined) updateData.salary_frequency = updatedJob.salary_frequency;
-      if (updatedJob.status !== undefined) updateData.status = updatedJob.status;
-      if (updatedJob.postedDate !== undefined) updateData.posted_date = updatedJob.postedDate;
-      if (updatedJob.employment_type !== undefined) updateData.employment_type = updatedJob.employment_type || null;
-      if (updatedJob.work_setup !== undefined) updateData.work_setup = updatedJob.work_setup || null;
-      if (updatedJob.job_level !== undefined) updateData.job_level = updatedJob.job_level || null;
-      if (updatedJob.schedule !== undefined) updateData.schedule = updatedJob.schedule || null;
-      if (updatedJob.views_count !== undefined) updateData.views_count = updatedJob.views_count;
-      if (updatedJob.applications_count !== undefined) updateData.applications_count = updatedJob.applications_count;
-      if (updatedJob.featured !== undefined) updateData.featured = updatedJob.featured;
-
-      const { data, error } = await supabase
-        .from('jobs')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating job:', error);
-        throw error;
-      }
-
-      if (data) {
-        const updated = mapDatabaseJobToJob(data);
+      const result = await invokeRecruitmentFunction('update-job', { id, ...updatedJob });
+      if (result.job) {
+        const updated = mapDatabaseJobToJob(result.job as DatabaseJob);
         setJobs(prevJobs => prevJobs.map(job => job.id === id ? updated : job));
       }
     } catch (error) {
@@ -397,17 +303,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
 
   const deleteJob = async (id: string) => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('jobs')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting job:', error);
-        throw error;
-      }
-
+      await invokeRecruitmentFunction('delete-job', { id });
       setJobs(prevJobs => prevJobs.filter((job) => job.id !== id));
     } catch (error) {
       console.error('Error deleting job:', error);

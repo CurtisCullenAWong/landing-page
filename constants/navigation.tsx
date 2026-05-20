@@ -17,6 +17,7 @@ export const ADMIN_NAV_LINKS = [
   { name: 'Dashboard', href: '/admin' },
   { name: 'Content Manager', href: '/admin/content-manager' },
   { name: 'Recruitment', href: '/admin/careers' },
+  { name: 'Users', href: '/admin/users' },
 ];
 
 export const CONTACT_INFO = {
