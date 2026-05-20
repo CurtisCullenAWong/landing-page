@@ -1,334 +1,175 @@
-# Boss Cargo Express
+# Boss Cargo Express Landing Page
 
-A modern, full-featured web application for Boss Cargo Express, a leading logistics and freight forwarding company in the Philippines. This platform provides company information, careers, application management, and administrative tools.
+## Ownership and Copyright Notice
 
-## 🚀 Features
+This project and its entire source code, design assets, database structures, documentation, and operational configurations are rightfully, legally, and consensually owned by Curtis Cullen A. Wong ("SHOULD BE CONSENSUALLY MINE").
 
-### Public Features
-- **Company Information**
-  - Home page with company overview and mission
-  - About Us page with company history and background
-  - Why Us page showcasing mission, vision, and values
-  - Company history timeline
-  - Partnerships information
+All rights are reserved. No portion of this software, code, or assets may be copied, reproduced, distributed, modified, mirrored, or transmitted in any form or by any means, including copying, recording, or other electronic or mechanical methods, without the prior, explicit, and consensual written consent of Curtis Cullen A. Wong. Any unauthorized access, utilization, or distribution of this proprietary property is strictly prohibited and will be prosecuted under applicable civil and criminal laws.
 
-- **Career Portal**
-  - Browse active careers with advanced filtering
-  - Search by title, department, location, or job type
-  - Sort by various criteria (title, department, location, type, posted date)
-  - View detailed job descriptions
-  - Apply for specific positions
-  - Submit general applications (no specific job)
-  - Track application status
+---
 
-- **Application Management**
-  - Upload resume (PDF) or provide resume URL
-  - Submit cover letters
-  - Link LinkedIn and portfolio profiles
-  - View application status and updates
-  - Receive application ID for tracking
+## Project Overview
 
-### Admin Features
-- **Careers Management**
-  - Create, edit, and manage careers
-  - Bulk create multiple careers
-  - Set job status (active/closed)
-  - Manage job details (title, department, location, type, salary, description, requirements)
+The Boss Cargo Express Landing Page is a premium, high-performance web application designed for a leading logistics and freight forwarding company in the Philippines. The platform provides a modern online presence featuring corporate branding, an interactive service coverage map, a content management publishing engine, and an integrated Applicant Tracking System (ATS) to manage career opportunities and applications.
 
-- **Application Management**
-  - View all job applications
-  - Filter by status (pending, reviewing, interviewing, offer, hired, rejected, withdrawn)
-  - Search applicants by name, email, phone, or job title
-  - Update application status
-  - View applicant resumes (PDF viewer)
-  - Delete applications
-  - Real-time updates via Supabase subscriptions
+---
 
-- **Authentication**
-  - Secure admin login
-  - Password reset functionality
-  - Session management
+## Features for Normal Users and Visitors
 
-## 🛠️ Tech Stack
+### Corporate Profile and History
+Visitors can learn about the company history, mission, vision, and core corporate values. An interactive timeline charts the development of Boss Cargo Express from its founding in Puerto Princesa City, Palawan in 2014, through its expansion phases, to its current technology-driven logistics operations.
 
-### Frontend
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **UI Library**: [Material-UI (MUI)](https://mui.com/) v7
-- **Styling**: 
-  - Tailwind CSS
-  - Emotion (CSS-in-JS)
-- **Icons**: 
-  - Lucide React
-  - Material-UI Icons
-- **File Upload**: React Dropzone
-- **Theme**: next-themes (dark/light mode support)
+### Interactive Coverage Map
+An interactive map of the Philippines visualizes branches and service coverage points. Users can hover over and click on markers across major regions (North Luzon, Central Luzon, Metro Manila, South Luzon, Visayas, and Mindanao) to view descriptions and location summaries.
 
-### Backend & Database
-- **Backend**: [Supabase](https://supabase.com/)
-- **Database**: PostgreSQL (via Supabase)
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage (for resume files)
-- **Real-time**: Supabase Realtime subscriptions
+### Careers Portal
+Job seekers can search and filter open positions by department, job level, work setup (onsite, remote, hybrid), and employment type (such as full-time or part-time). Detailed descriptions outline the responsibilities, requirements, and benefits of each opening.
 
-### Development Tools
-- **Linting**: ESLint
-- **Package Manager**: npm
-- **Type Checking**: TypeScript
+### Job Application and Tracking
+Candidates can submit applications directly on the website. The application form allows them to upload a PDF resume, provide links to their portfolio or LinkedIn profile, and submit a cover letter. Upon submission, they receive a unique Application Tracking ID which they can use to check their review status in real-time.
 
-## 📁 Project Structure
+### Company News and Content Hub
+Users can browse published news articles, announcements, event listings, and gallery updates of company milestones and activities.
+
+---
+
+## Features for Administrators and Recruiters
+
+### Candidate Application Management (ATS)
+A secure admin panel provides a comprehensive dashboard of all applicants. Administrators can search applications by applicant name, email, phone number, or target job, and filter candidates by hiring status. The interface includes a built-in PDF viewer so recruiters can review resumes directly on the page without needing to download files locally.
+
+### Vacancy Control and Posting
+Recruiters can create new job openings, edit existing descriptions, update job statuses (active or closed), and manage requirements. The portal supports bulk creation tools to publish multiple career opportunities at the same time.
+
+### News and Content Publishing
+Administrators can publish news, announcement, and gallery updates, complete with markdown rendering support and media uploads.
+
+### Real-Time Synchronization
+All changes to applications, candidates, and job postings sync in real-time. This ensures that any update made by one recruiter is immediately reflected on all active admin screens without requiring manual browser reloads.
+
+### Traffic and Site Analytics
+The admin panel includes page view analytics and session tracking metrics, helping the operations team monitor website traffic trends across different pages (excluding admin and private user routes).
+
+---
+
+## Technical Stack
+
+* **Frontend Framework**: Next.js 16 (utilizing App Router and React Server Components)
+* **Language**: TypeScript for static type-safety
+* **User Interface**: Material-UI (MUI) v7 components combined with Framer Motion for animations
+* **Styling**: Tailwind CSS and Emotion (CSS-in-JS)
+* **Theme Engine**: next-themes with support for system-matching light and dark mode toggles
+* **Backend Database**: PostgreSQL hosted on Supabase
+* **Authentication**: Supabase Auth for admin sessions
+* **File Storage**: Supabase Storage Buckets
+* **Real-time Sync**: Supabase Realtime logical replication subscriptions
+
+---
+
+## Project Directory Structure
 
 ```
 boss-cargo/
 ├── app/                          # Next.js App Router pages
-│   ├── about-us/                 # About Us page
-│   ├── admin/                    # Admin dashboard
-│   │   ├── job-applications/     # Application management
-│   │   └── careers/         # Job posting management
-│   ├── auth/                     # Authentication pages
-│   │   ├── login/
-│   │   ├── sign-up/
-│   │   ├── forgot-password/
-│   │   └── update-password/
-│   ├── home/                     # Home page
-│   ├── history/                  # Company history
-│   ├── careers/             # Career portal
-│   │   ├── apply/                # General application form
-│   │   └── job-details/[id]/     # Job detail pages
-│   │       └── apply/             # Job-specific application
-│   ├── my-application/[id]/      # View application status
-│   ├── partnerships/             # Partnerships page
-│   └── why-us/                   # Mission, Vision, Values
-├── components/                   # React components
-│   ├── layout/                   # Layout components (Header, Footer)
-│   ├── ui/                       # UI components
-│   └── ...
-├── contexts/                     # React contexts
-│   └── JobContext.tsx            # Job data context
-├── lib/                          # Utility libraries
-│   ├── supabase/                 # Supabase client/server setup
-│   └── utils.ts                  # Helper functions
-├── constants/                    # App constants
-│   ├── images.ts                 # Image URLs and metadata
-│   ├── layout.ts                 # Layout constants
-│   └── navigation.ts            # Navigation links
+│   ├── about-us/                 # About Us profile page
+│   ├── admin/                    # Administrative dashboard routes
+│   ├── auth/                     # Supabase Authentication routes
+│   ├── careers/                  # Public careers portal and application forms
+│   ├── history/                  # Interactive history timeline page
+│   ├── partnerships/             # Partners and memberships grid
+│   └── why-us/                   # Corporate values page
+├── components/                   # Reusable React components
+│   ├── layout/                   # Global header, footer, and navigation
+│   └── ui/                       # Shared design system elements
+├── contexts/                     # Global React state contexts
+├── docs/                         # SQL Schemas and technical documentation
 ├── hooks/                        # Custom React hooks
-└── assets/                       # Static assets (images, fonts)
+├── lib/                          # SDK initialization and helpers
+└── assets/                       # Static images, icons, and logos
 ```
-
-## 🚦 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- A Supabase account and project
-- Git
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd boss-cargo
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   
-   Create a `.env.local` file in the root directory:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   ```
-   
-   You can find these values in your [Supabase project settings](https://supabase.com/dashboard/project/_/settings/api).
-
-4. **Set up Supabase Database**
-   
-   You'll need to create the following tables in your Supabase database:
-   
-   - `jobs` - careers
-   - `job_applicants` - Job applications
-   - User authentication tables (handled by Supabase Auth)
-   
-   See the [Database Schema](#database-schema) section below for details.
-
-5. **Set up Supabase Storage**
-   
-   Create a storage bucket named `applicant-files` for storing resume files:
-   ```sql
-   -- In Supabase Dashboard > Storage, create a bucket:
-   -- Name: applicant-files
-   -- Public: false (private bucket)
-   ```
-
-6. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-7. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 📊 Database Schema
-
-### `jobs` Table
-```sql
-CREATE TABLE jobs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  department TEXT NOT NULL,
-  location TEXT NOT NULL,
-  type TEXT NOT NULL,
-  description TEXT NOT NULL,
-  responsibilities TEXT[],
-  requirements TEXT[],
-  salary TEXT,
-  posted_date DATE,
-  status TEXT CHECK (status IN ('active', 'closed')) DEFAULT 'active',
-  application_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-### `job_applicants` Table
-```sql
-CREATE TABLE job_applicants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  job_id UUID REFERENCES jobs(id) ON DELETE SET NULL,
-  first_name TEXT NOT NULL,
-  last_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  cover_letter TEXT,
-  resume_url TEXT NOT NULL,
-  portfolio_url TEXT,
-  status TEXT CHECK (status IN ('pending', 'reviewing', 'interviewing', 'offer', 'hired', 'rejected', 'withdrawn')) DEFAULT 'pending',
-  applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_by TEXT
-);
-
--- Index for faster queries
-CREATE INDEX idx_job_applicants_job_id ON job_applicants(job_id);
-CREATE INDEX idx_job_applicants_email ON job_applicants(email);
-CREATE INDEX idx_job_applicants_status ON job_applicants(status);
-```
-
-### Row Level Security (RLS) Policies
-
-Set up RLS policies in Supabase:
-
-```sql
--- Jobs table: Public read access
-ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Jobs are viewable by everyone" ON jobs
-  FOR SELECT USING (true);
-
--- Job applicants: Public insert, authenticated admin read/update/delete
-ALTER TABLE job_applicants ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anyone can submit applications" ON job_applicants
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Users can view their own applications" ON job_applicants
-  FOR SELECT USING (true);
-
--- Admin policies (adjust based on your auth setup)
-CREATE POLICY "Admins can manage all applications" ON job_applicants
-  FOR ALL USING (auth.role() = 'admin');
-```
-
-## 🔐 Authentication Setup
-
-The application uses Supabase Auth. To set up admin access:
-
-1. Create admin users through Supabase Dashboard or your auth flow
-2. Configure RLS policies to restrict admin routes
-3. Update admin route protection in `lib/middleware.ts` if needed
-
-## 📝 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## 🎨 Features in Detail
-
-### Dark Mode Support
-- Automatic theme detection based on system preferences
-- Manual theme toggle
-- Persistent theme selection
-- Smooth theme transitions
-
-### Responsive Design
-- Mobile-first approach
-- Responsive layouts for all screen sizes
-- Touch-friendly interfaces
-- Optimized for tablets and desktops
-
-### Real-time Updates
-- Live updates for careers
-- Real-time application status changes
-- Instant notifications for admins
-
-### File Upload
-- PDF resume uploads
-- File size validation (max 10MB)
-- Progress indicators
-- Alternative URL input option
-
-## 🚀 Deployment
-
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Import your repository in [Vercel](https://vercel.com)
-3. Add environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-4. Deploy!
-
-### Environment Variables for Production
-
-Make sure to set these in your deployment platform:
-- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Your Supabase anon/publishable key
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is proprietary and confidential. All rights reserved.
-
-## 📞 Contact
-
-For inquiries about Boss Cargo Express:
-- **General**: info@bosscargo.express
-- **Careers**: people@bosscargo.express
-- **Phone**: (02) 8805 2402
-
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [Material-UI](https://mui.com/)
-- Backend powered by [Supabase](https://supabase.com/)
-- Icons from [Lucide](https://lucide.dev/)
 
 ---
 
-**Boss Cargo Express** - Logistics Driven by People
+## Developer Setup and Configuration Guide
+
+This section guides developers through setting up the local development environment.
+
+### Prerequisites
+
+Verify that the following tools are installed:
+* **Node.js**: Version 18.0.0 or higher (Version 20.0.0+ is recommended)
+* **Package Manager**: npm
+* **Git**
+* A **Supabase** account and project
+
+### Step-by-Step Installation
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/CurtisCullenAWong/landing-page.git
+cd landing-page
+```
+
+#### 2. Install Dependencies
+Run the npm installer to load all required packages specified in [package.json](file:///d:/Apps%20and%20Tools/GitHub/landing-page/package.json):
+```bash
+npm install
+```
+
+#### 3. Set Up Environment Variables
+Create a file named `.env.local` in the root directory of the project and add your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
+```
+You can locate these keys in your Supabase Dashboard under Project Settings > API.
+
+#### 4. Configure the Database Schema
+* Open your project dashboard in Supabase and navigate to the **SQL Editor**.
+* Open the [supabase_full_schema.sql](file:///d:/Apps%20and%20Tools/GitHub/landing-page/docs/supabase_full_schema.sql) file in your editor.
+* Copy the SQL commands and run them in the Supabase SQL editor. This script is fully idempotent and configures:
+  * Database extensions (`pgcrypto`).
+  * Custom database ENUMs (`job_status`, `application_status`, `post_type`).
+  * Tables (`profiles`, `departments`, `jobs`, `job_applicants`, `posts`, `site_visits`, `partners`, `milestones`, `coverage_points`).
+  * Speed indexes.
+  * Row-Level Security (RLS) policies.
+  * Core seed data (default departments, partners, milestones, coverage points).
+  * Storage buckets (`applicant-files` and `posts`).
+
+#### 5. Verify Storage Bucket Configuration
+Check the **Storage** tab in your Supabase Dashboard to confirm that the buckets are correctly configured:
+* **`applicant-files`**:
+  * Public: Disabled (private bucket for candidate resumes)
+  * Allowed MIME Types: `application/pdf`
+  * Size Limit: `10485760` bytes (10MB)
+* **`posts`**:
+  * Public: Enabled (public bucket for news and events images)
+  * Allowed MIME Types: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
+  * Size Limit: `5242880` bytes (5MB)
+
+#### 6. Enable Logical Replication for Real-time Updates
+Ensure that logical replication publishes changes to the frontend client. The schema script sets up a publication named `supabase_realtime`. You can verify that logical replication is listening to the required tables by running this SQL query in Supabase:
+```sql
+SELECT schemaname, tablename FROM pg_publication_tables WHERE pubname = 'supabase_realtime';
+```
+The result must list: `jobs`, `job_applicants`, `posts`, `departments`, `milestones`, and `coverage_points`. More details can be found in [supabase-realtime.md](file:///d:/Apps%20and%20Tools/GitHub/landing-page/docs/supabase-realtime.md).
+
+#### 7. Set Up an Administrator Account
+Create your admin user under the **Authentication** > **Users** tab in your Supabase dashboard. Any authenticated user profile in the database is granted administrative privileges. The signup trigger will automatically create an entry in the `public.profiles` table.
+
+#### 8. Start the Local Server
+Run the development command to start the Next.js local server with Turbo Pack enabled:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your web browser.
+
+---
+
+## Available Development Scripts
+
+The following commands are configured in [package.json](file:///d:/Apps%20and%20Tools/GitHub/landing-page/package.json):
+* `npm run dev`: Runs the application in development mode.
+* `npm run build`: Compiles the application for production deployment.
+* `npm run start`: Starts the compiled production application.
+* `npm run lint`: Runs ESLint to verify codebase formatting and quality.
