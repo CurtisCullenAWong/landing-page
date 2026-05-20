@@ -16,25 +16,6 @@ export const SITE_CONTENT = {
     story: "Founded in 2014, Boss Cargo Express started its roots in Puerto Princesa City, Palawan. Since then, the company has grown and delivered the best cargo solutions to various clients across a wide range of industries across the Philippine archipelago. Our team consists of skilled professionals with years of solid experience in handling ground freight, sea freight, and air freight.",
     strategy: {
       overview: "Boss Cargo Express recognizes the potential changes in the macroenvironment of the wider transportation and storage sector. Management continuously prepares the firm amidst industry and customer trends.",
-      milestones: [
-        {
-          year: "2014",
-          title: "Company Founded",
-          description: "Started in Puerto Princesa City, Palawan, with a vision to deliver premium cargo solutions across the archipelago."
-        },
-        {
-          title: "Growth & Expansion",
-          description: "Expanded operations nationwide, building a team of experts in ground, sea, and air freight."
-        },
-        {
-          title: "Strategic Development",
-          description: "Established corporate directives to add value to clients and strengthened functional areas for high competitiveness."
-        },
-        {
-          title: "Technology & Sustainability",
-          description: "Focused on supply chain innovation, infrastructure growth, and strategic market expansion through efficient resource and financial management."
-        }
-      ]
     }
   },
 
@@ -109,46 +90,8 @@ export const SITE_CONTENT = {
     ]
   },
 
-  network: {
-    description: "Boss Cargo Express has an ever-growing network covering the entire Philippines:",
-    regions: [
-      {
-        name: "Metro Manila",
-        hubs: ["Parañaque Hub", "Taytay Hub", "Las Piñas (Headquarters)"]
-      },
-      {
-        name: "North Luzon",
-        locations: ["Abra", "Aparri", "Baguio", "Ilocos Sur", "Ilocos Norte", "Cauayan", "Isabela", "La Union", "Solano NV", "Tuguegarao", "Vigan"]
-      },
-      {
-        name: "Central Luzon",
-        locations: ["Bataan", "Bulacan", "Zambales", "Nueva Ecija", "Olongapo", "Pampanga", "Pangasinan", "Santiago", "Tarlac", "Aurora"]
-      },
-      {
-        name: "South Luzon",
-        locations: ["Camarines Norte", "Camarines Sur", "Legaspi", "Lucena", "Masbate", "Naga", "Palawan", "Quezon Province", "San Jose Occidental Mindoro", "Calapan Oriental Mindoro"]
-      },
-      {
-        name: "Visayas",
-        locations: ["Bacolod", "Cebu", "Dumaguete", "Iloilo", "Kalibo", "Tacloban", "Tagbilaran", "Roxas"]
-      },
-      {
-        name: "Mindanao",
-        locations: ["Butuan", "Cagayan de Oro (CDO)", "Cotabato", "Davao", "Dipolog", "General Santos (GenSan)", "Ozamis", "Surigao", "Zamboanga", "Pagadian"]
-      }
-    ]
-  },
-
   partnerships: {
     description: "Choosing the right partner is crucial, and BCE acts as an extension of the client's team with proven concepts, methodologies, and best practices.",
-    industries: [
-      { name: "Business Process Outsourcing (BPO)", description: "Logistics support for high-paced corporate environments." },
-      { name: "Fast-Moving Consumer Goods (FMCG)", description: "Rapid distribution for essential consumer products." },
-      { name: "Engineering Services", description: "Transport and logistics for technical equipment and materials." },
-      { name: "Food Services", description: "Specialized handling for temperature-sensitive and perishable goods." },
-      { name: "Financial Services", description: "Secure logistics for the banking and finance sector." },
-      { name: "Retail", description: "End-to-end supply chain solutions for the retail industry." }
-    ]
   },
 
   careers: {

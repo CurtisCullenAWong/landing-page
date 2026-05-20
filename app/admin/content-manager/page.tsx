@@ -35,6 +35,7 @@ import {
   Switch,
   Chip,
   InputAdornment,
+  Link as MuiLink,
 } from '@mui/material';
 import {
   Plus,
@@ -56,6 +57,7 @@ import {
   Upload,
   X,
   Loader2,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePageTitle } from '@/lib/usePageTitle';
@@ -70,6 +72,7 @@ interface Partner {
   id: string;
   name: string;
   description: string | null;
+  icon?: string | null;
   role?: string | null;
   type: 'industry' | 'membership';
   image_url: string | null;
@@ -134,6 +137,51 @@ export default function AdminContentManagerPage() {
 
   useEffect(() => {
     loadPosts();
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel('admin-content-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'posts',
+        },
+        () => {
+          loadPosts();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'partners',
+        },
+        () => {
+          loadPartners();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'milestones',
+        },
+        () => {
+          loadMilestones();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -212,7 +260,7 @@ export default function AdminContentManagerPage() {
   const [partnerFormData, setPartnerFormData] = useState({
     name: '',
     description: '',
-    role: '',
+    icon: '',
     type: 'industry' as 'industry' | 'membership',
     image_url: '',
     white_background: false,
@@ -341,7 +389,7 @@ export default function AdminContentManagerPage() {
       setPartnerFormData({
         name: partner.name,
         description: partner.description || '',
-        role: partner.role || '',
+        icon: partner.icon || '',
         type: partner.type,
         image_url: partner.image_url || '',
         white_background: partner.white_background,
@@ -353,7 +401,7 @@ export default function AdminContentManagerPage() {
       setPartnerFormData({
         name: '',
         description: '',
-        role: '',
+        icon: '',
         type: entityType,
         image_url: '',
         white_background: false,
@@ -373,10 +421,6 @@ export default function AdminContentManagerPage() {
     setPartnerFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePartnerSelectChange = (e: any) => {
-    setPartnerFormData((prev) => ({ ...prev, type: e.target.value }));
-  };
-
   const handlePartnerSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPartnerFormData((prev) => ({ ...prev, white_background: e.target.checked }));
   };
@@ -393,11 +437,15 @@ export default function AdminContentManagerPage() {
       const payload = {
         name: partnerFormData.name.trim(),
         description: partnerFormData.description.trim() || null,
-        role: partnerFormData.role.trim() || null,
+        icon: partnerFormData.type === 'industry' ? partnerFormData.icon.trim() || null : null,
         type: partnerFormData.type,
-        image_url: partnerFormData.image_url.trim() || null,
-        white_background: partnerFormData.white_background,
         display_order: Number(partnerFormData.display_order) || 0,
+        ...(partnerFormData.type === 'membership'
+          ? {
+              image_url: partnerFormData.image_url.trim() || null,
+              white_background: partnerFormData.white_background,
+            }
+          : {}),
       };
 
       if (activePartner) {
@@ -772,8 +820,8 @@ export default function AdminContentManagerPage() {
                     <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
                       <TableCell sx={{ fontWeight: 700, py: 2 }}>Display Order</TableCell>
                       <TableCell sx={{ fontWeight: 700, py: 2 }}>Industry Name</TableCell>
-                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Logo Key</TableCell>
-                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Options</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Icon Key</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Description</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -802,39 +850,26 @@ export default function AdminContentManagerPage() {
                               <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                                 {partner.name}
                               </Typography>
-                              {(partner.role && (
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                  {partner.role}
-                                </Typography>
-                              )) || (partner.description && (
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                  {partner.description}
-                                </Typography>
-                              ))}
                             </Box>
                           </TableCell>
                           <TableCell sx={{ py: 2 }}>
-                            {partner.image_url ? (
+                            {partner.icon ? (
                               <Chip
-                                label={partner.image_url}
+                                label={partner.icon}
                                 size="small"
                                 variant="outlined"
                                 sx={{ fontWeight: 600, fontSize: '0.75rem' }}
                               />
                             ) : (
                               <Typography variant="caption" color="text.disabled">
-                                None
+                                briefcase
                               </Typography>
                             )}
                           </TableCell>
-                          <TableCell sx={{ py: 2 }}>
-                            {partner.white_background ? (
-                              <Chip label="White Bg" size="small" color="info" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
-                            ) : (
-                              <Typography variant="caption" color="text.disabled">
-                                Default
-                              </Typography>
-                            )}
+                          <TableCell sx={{ maxWidth: 360, py: 2 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                              {partner.description || partner.role || 'None'}
+                            </Typography>
                           </TableCell>
                           <TableCell align="right" sx={{ py: 2 }}>
                             <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -903,7 +938,7 @@ export default function AdminContentManagerPage() {
                     <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
                       <TableCell sx={{ fontWeight: 700, py: 2 }}>Display Order</TableCell>
                       <TableCell sx={{ fontWeight: 700, py: 2 }}>Organization Name</TableCell>
-                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Logo Key</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Logo URL</TableCell>
                       <TableCell sx={{ fontWeight: 700, py: 2 }}>Options</TableCell>
                       <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>Actions</TableCell>
                     </TableRow>
@@ -942,12 +977,42 @@ export default function AdminContentManagerPage() {
                           </TableCell>
                           <TableCell sx={{ py: 2 }}>
                             {partner.image_url ? (
-                              <Chip
-                                label={partner.image_url}
-                                size="small"
-                                variant="outlined"
-                                sx={{ fontWeight: 600, fontSize: '0.75rem' }}
-                              />
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Box
+                                  component="img"
+                                  src={partner.image_url}
+                                  alt={partner.name}
+                                  sx={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 1,
+                                    objectFit: 'contain',
+                                    border: `1px solid ${theme.palette.divider}`,
+                                    p: partner.white_background ? 0.5 : 0,
+                                    bgcolor: partner.white_background ? 'white' : 'transparent',
+                                  }}
+                                />
+                                <MuiLink
+                                  href={partner.image_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  sx={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                    fontWeight: 600,
+                                    fontSize: '0.875rem',
+                                    color: 'primary.main',
+                                    textDecoration: 'none',
+                                    '&:hover': {
+                                      textDecoration: 'underline',
+                                    },
+                                  }}
+                                >
+                                  View Logo
+                                  <ExternalLink size={14} />
+                                </MuiLink>
+                              </Box>
                             ) : (
                               <Typography variant="caption" color="text.disabled">
                                 None
@@ -1073,13 +1138,19 @@ export default function AdminContentManagerPage() {
       <Dialog open={partnerDialogOpen} onClose={handleClosePartnerDialog} maxWidth="sm" fullWidth>
         <form onSubmit={handleSavePartner}>
           <DialogTitle sx={{ fontWeight: 800 }}>
-            {activePartner ? 'Edit Entity Details' : 'Add New Entity'}
+            {partnerFormData.type === 'industry'
+              ? activePartner
+                ? 'Edit Industry Served'
+                : 'Add Industry Served'
+              : activePartner
+                ? 'Edit Accreditation / Network'
+                : 'Add Accreditation / Network'}
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={3} sx={{ mt: 1 }}>
               <TextField
                 name="name"
-                label="Entity / Organization / Industry Name"
+                label={partnerFormData.type === 'industry' ? 'Industry Name' : 'Organization Name'}
                 fullWidth
                 required
                 value={partnerFormData.name}
@@ -1089,7 +1160,7 @@ export default function AdminContentManagerPage() {
 
               <TextField
                 name="description"
-                label="Description / Role"
+                label="Description"
                 fullWidth
                 multiline
                 rows={3}
@@ -1100,100 +1171,98 @@ export default function AdminContentManagerPage() {
 
               {partnerFormData.type === 'industry' && (
                 <TextField
-                  name="role"
-                  label="Role / Primary Function"
+                  name="icon"
+                  label="Icon Key"
                   fullWidth
-                  value={partnerFormData.role}
+                  value={partnerFormData.icon}
                   onChange={handlePartnerInputChange}
-                  inputProps={{ maxLength: 200 }}
+                  helperText={
+                    <>
+                      Use a Lucide icon key such as{' '}
+                      <Link href="https://lucide.dev/icons/" target="_blank" rel="noreferrer">
+                        briefcase, package, wrench, utensils-crossed, dollar-sign, or store
+                      </Link>
+                      .
+                    </>
+                  }
+                  inputProps={{ maxLength: 50 }}
                 />
               )}
 
-              <FormControl fullWidth>
-                <InputLabel id="partner-type-label">Entity Type</InputLabel>
-                <Select
-                  labelId="partner-type-label"
-                  value={partnerFormData.type}
-                  label="Entity Type"
-                  onChange={handlePartnerSelectChange}
-                >
-                  <MenuItem value="industry">Industry Served</MenuItem>
-                  <MenuItem value="membership">Membership & Accreditation</MenuItem>
-                </Select>
-              </FormControl>
+              {partnerFormData.type === 'membership' && (
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ImageIcon size={18} />
+                    Organization Logo
+                  </Typography>
 
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ImageIcon size={18} />
-                  Organization Logo
-                </Typography>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    ref={partnerFileInputRef}
+                    onChange={handlePartnerImageUpload}
+                  />
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  ref={partnerFileInputRef}
-                  onChange={handlePartnerImageUpload}
-                />
-
-                {partnerFormData.image_url ? (
-                  <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}`, width: '100%', height: 140, bgcolor: alpha(theme.palette.background.paper, 0.5), display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
-                    <img
-                      src={partnerFormData.image_url}
-                      alt="Logo Preview"
-                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    />
-                    <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-                      <IconButton
-                        size="small"
-                        onClick={handleRemovePartnerLogo}
-                        sx={{ bgcolor: theme.palette.error.main, color: 'white', '&:hover': { bgcolor: theme.palette.error.dark } }}
-                      >
-                        <X size={16} />
-                      </IconButton>
+                  {partnerFormData.image_url ? (
+                    <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}`, width: '100%', height: 140, bgcolor: alpha(theme.palette.background.paper, 0.5), display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
+                      <img
+                        src={partnerFormData.image_url}
+                        alt="Logo Preview"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                      />
+                      <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+                        <IconButton
+                          size="small"
+                          onClick={handleRemovePartnerLogo}
+                          sx={{ bgcolor: theme.palette.error.main, color: 'white', '&:hover': { bgcolor: theme.palette.error.dark } }}
+                        >
+                          <X size={16} />
+                        </IconButton>
+                      </Box>
                     </Box>
-                  </Box>
-                ) : (
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => partnerFileInputRef.current?.click()}
-                    disabled={isUploadingPartnerLogo}
-                    sx={{
-                      height: 100,
-                      borderStyle: 'dashed',
-                      borderRadius: 2,
-                      flexDirection: 'column',
-                      gap: 1,
-                      color: 'text.secondary'
-                    }}
-                  >
-                    {isUploadingPartnerLogo ? (
-                      <>
-                        <Loader2 size={24} className="animate-spin" />
-                        <Typography variant="body2">Uploading...</Typography>
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={20} />
-                        <Typography variant="body2">Click to upload logo image</Typography>
-                        <Typography variant="caption" sx={{ opacity: 0.7 }}>JPG, PNG or WEBP (Max 5MB)</Typography>
-                      </>
-                    )}
-                  </Button>
-                )}
+                  ) : (
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      onClick={() => partnerFileInputRef.current?.click()}
+                      disabled={isUploadingPartnerLogo}
+                      sx={{
+                        height: 100,
+                        borderStyle: 'dashed',
+                        borderRadius: 2,
+                        flexDirection: 'column',
+                        gap: 1,
+                        color: 'text.secondary'
+                      }}
+                    >
+                      {isUploadingPartnerLogo ? (
+                        <>
+                          <Loader2 size={24} className="animate-spin" />
+                          <Typography variant="body2">Uploading...</Typography>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={20} />
+                          <Typography variant="body2">Click to upload logo image</Typography>
+                          <Typography variant="caption" sx={{ opacity: 0.7 }}>JPG, PNG or WEBP (Max 5MB)</Typography>
+                        </>
+                      )}
+                    </Button>
+                  )}
 
-                <TextField
-                  name="image_url"
-                  label="Or enter logo URL manually"
-                  fullWidth
-                  size="small"
-                  sx={{ mt: 2 }}
-                  value={partnerFormData.image_url}
-                  onChange={handlePartnerInputChange}
-                  placeholder="https://example.com/logo.png"
-                />
-              </Box>
+                  <TextField
+                    name="image_url"
+                    label="Or enter logo URL manually"
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 2 }}
+                    value={partnerFormData.image_url}
+                    onChange={handlePartnerInputChange}
+                    placeholder="https://example.com/logo.png"
+                  />
+                </Box>
+              )}
 
               <TextField
                 name="display_order"
@@ -1205,16 +1274,18 @@ export default function AdminContentManagerPage() {
                 inputProps={{ min: 0 }}
               />
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={partnerFormData.white_background}
-                    onChange={handlePartnerSwitchChange}
-                    color="primary"
-                  />
-                }
-                label="Enforce White Background for Logo"
-              />
+              {partnerFormData.type === 'membership' && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={partnerFormData.white_background}
+                      onChange={handlePartnerSwitchChange}
+                      color="primary"
+                    />
+                  }
+                  label="Enforce White Background for Logo"
+                />
+              )}
             </Stack>
           </DialogContent>
           <DialogActions sx={{ p: 2.5 }}>
@@ -1222,7 +1293,7 @@ export default function AdminContentManagerPage() {
               Cancel
             </Button>
             <Button type="submit" variant="contained" sx={{ borderRadius: 2, px: 3 }}>
-              Save Entity
+              {partnerFormData.type === 'industry' ? 'Save Industry' : 'Save Entity'}
             </Button>
           </DialogActions>
         </form>

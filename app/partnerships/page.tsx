@@ -32,6 +32,15 @@ const BLOB_PATHS = [
   "M48.2,-78.3C60.7,-71.1,68,-54.2,73.2,-38.4C78.4,-22.6,81.4,-7.8,81.3,7.5C81.1,22.8,77.7,38.7,69.5,51.8C61.3,64.9,48.3,75.1,33.8,80.8C19.2,86.5,3,87.7,-14.2,85.5C-31.5,83.2,-49.8,77.5,-63.9,65.9C-78.1,54.3,-88.2,36.9,-91.5,18.7C-94.8,0.4,-91.3,-18.6,-82.5,-34.5C-73.8,-50.3,-59.8,-62.9,-44.7,-69.3C-29.6,-75.7,-13.4,-75.8,2,-78.9C17.5,-82,35.6,-85.5,48.2,-78.3Z"
 ];
 
+const INDUSTRY_ICON_MAP: Record<string, any> = {
+  briefcase: Briefcase,
+  package: Package,
+  wrench: Wrench,
+  'utensils-crossed': UtensilsCrossed,
+  'dollar-sign': DollarSign,
+  store: Store,
+};
+
 const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity = 0.08, variant = 0 }: any) => (
   <Box
     component={motion.div}
@@ -156,22 +165,38 @@ export default function PartnershipsPage() {
       }
     };
     fetchPartners();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel('partnerships-partners-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'partners',
+        },
+        () => {
+          fetchPartners();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const dbIndustries = partnerItems.filter(item => item.type === 'industry');
-  const displayIndustries = dbIndustries.length > 0 ? dbIndustries : SITE_CONTENT.partnerships.industries;
 
-  const industries = displayIndustries.map(industry => {
-    let icon = Briefcase;
-    if (industry.name.includes('Consumer Goods') || industry.name.includes('FMCG')) icon = Package;
-    if (industry.name.includes('Engineering')) icon = Wrench;
-    if (industry.name.includes('Food')) icon = UtensilsCrossed;
-    if (industry.name.includes('Financial')) icon = DollarSign;
-    if (industry.name.includes('Retail')) icon = Store;
+  const industries = dbIndustries.map((industry: any) => {
+    const iconKey = String(industry.icon || '').trim().toLowerCase();
+    const icon = INDUSTRY_ICON_MAP[iconKey] || Briefcase;
+
     return {
       name: industry.name,
-      description: (industry as any).role || industry.description || '',
-      icon
+      description: industry.description || industry.role || '',
+      icon,
     };
   });
 

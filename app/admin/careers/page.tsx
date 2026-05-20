@@ -597,15 +597,33 @@ export default function AdminPage() {
           <>
             {/* Job Form */}
         {isFormOpen && (
-          <Card elevation={0} sx={{ mb: 4, border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Dialog
+            open={isFormOpen}
+            onClose={resetForm}
+            fullWidth
+            maxWidth="xl"
+            scroll="paper"
+            PaperProps={{
+              sx: {
+                borderRadius: 3,
+                overflow: 'hidden',
+              },
+            }}
+          >
+            <DialogTitle
+              sx={{
+                fontWeight: 800,
+                bgcolor: alpha(theme.palette.primary.main, 0.05),
+                borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                py: 2,
+              }}
+            >
               <Box sx={{
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', sm: 'center' },
                 gap: { xs: 2, sm: 0 },
-                mb: 2
               }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
                   {editingJob ? 'Edit Job Posting' : `Create Job Postings (${jobEntries.length})`}
@@ -648,14 +666,17 @@ export default function AdminPage() {
                 </Box>
               </Box>
 
+            </DialogTitle>
+
+            <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
               {formError && (
                 <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
                   {formError}
                 </Alert>
               )}
 
-              <form onSubmit={handleSubmit}>
-                <Stack spacing={3} sx={{ mb: 3 }}>
+              <form id="job-form" onSubmit={handleSubmit}>
+                <Stack spacing={3}>
                   {jobEntries.map((entry, index) => (
                     <Card key={entry.id} variant="outlined" sx={{ borderRadius: 2, border: 1, borderColor: 'divider', overflow: 'hidden' }}>
                       <Box sx={{
@@ -705,7 +726,7 @@ export default function AdminPage() {
                       </Box>
 
                       <Collapse in={entry.expanded} timeout="auto" unmountOnExit>
-                        <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ p: 3 }}>
                           <Grid container spacing={3}>
                             {/* Basic Information Section */}
                             <Grid size={{ xs: 12 }}>
@@ -946,38 +967,43 @@ export default function AdminPage() {
                               </Grid>
                             </Grid>
                           </Grid>
-                        </CardContent>
+                        </Box>
                       </Collapse>
                     </Card>
                   ))}
                 </Stack>
-
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column-reverse', sm: 'row' },
-                  gap: 2,
-                  justifyContent: 'flex-end'
-                }}>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    onClick={resetForm}
-                    fullWidth={isMobile}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    startIcon={<Save size={20} />}
-                    fullWidth={isMobile}
-                  >
-                    {editingJob ? 'Update Job' : `Create ${jobEntries.length} Job${jobEntries.length > 1 ? 's' : ''}`}
-                  </Button>
-                </Box>
               </form>
-            </CardContent>
-          </Card>
+
+            </DialogContent>
+
+            <DialogActions
+              sx={{
+                p: 3,
+                borderTop: `1px solid ${theme.palette.divider}`,
+                bgcolor: 'background.paper',
+                flexDirection: { xs: 'column-reverse', sm: 'row' },
+                gap: 2,
+              }}
+            >
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={resetForm}
+                fullWidth={isMobile}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={<Save size={20} />}
+                fullWidth={isMobile}
+                form="job-form"
+              >
+                {editingJob ? 'Update Job' : `Create ${jobEntries.length} Job${jobEntries.length > 1 ? 's' : ''}`}
+              </Button>
+            </DialogActions>
+          </Dialog>
         )}
 
         {/* Jobs List */}

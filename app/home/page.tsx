@@ -802,6 +802,8 @@ export default function HomePage() {
             width: '1600px',
             height: '600px',
             bgcolor: alpha(tertiaryMain, 0.12),
+            mixBlendMode: 'multiply',
+            WebkitMixBlendMode: 'multiply',
             borderRadius: '50% 20% 50% 20% / 20% 50% 20% 50%',
             transform: 'rotate(15deg)',
           }}
@@ -832,6 +834,8 @@ export default function HomePage() {
             width: '900px',
             height: '900px',
             bgcolor: alpha(primaryMain, 0.15),
+            mixBlendMode: 'multiply',
+            WebkitMixBlendMode: 'multiply',
             borderRadius: '67% 33% 47% 53% / 37% 20% 80% 63%',
           }}
         />

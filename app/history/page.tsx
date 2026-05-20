@@ -173,6 +173,26 @@ export default function HistoryPage() {
       }
     };
     fetchMilestones();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel('history-milestones-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'milestones',
+        },
+        () => {
+          fetchMilestones();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const milestones = useMemo(() => {
