@@ -196,7 +196,7 @@ export default function HistoryPage() {
   }, []);
 
   const milestones = useMemo(() => {
-    const sourceList = dbMilestones.length > 0 ? dbMilestones : SITE_CONTENT.company.strategy.milestones;
+    const sourceList = dbMilestones;
     return sourceList.map((m, index) => {
       const colors = [primaryMain, secondaryMain, tertiaryMain];
       return {
