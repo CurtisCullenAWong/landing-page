@@ -1,10 +1,10 @@
 # Boss Cargo Express Landing Page
 
-## Ownership and Copyright Notice
+## Proprietary License and Intellectual Property Notice
 
-This project and its entire source code, design assets, database structures, documentation, and operational configurations are rightfully, legally, and consensually owned by Curtis Cullen A. Wong ("SHOULD BE CONSENSUALLY MINE").
+This application, including its source code, database architectures, system workflows, custom design assets, and documentation, is the proprietary property of Curtis Cullen A. Wong. 
 
-All rights are reserved. No portion of this software, code, or assets may be copied, reproduced, distributed, modified, mirrored, or transmitted in any form or by any means, including copying, recording, or other electronic or mechanical methods, without the prior, explicit, and consensual written consent of Curtis Cullen A. Wong. Any unauthorized access, utilization, or distribution of this proprietary property is strictly prohibited and will be prosecuted under applicable civil and criminal laws.
+All rights are reserved. Except for third-party media assets and corporate images provided within the application (which remain the property of their respective owners and licensing providers), all programming elements, software logic, and custom assets are developed and owned exclusively by Curtis Cullen A. Wong. No portion of this repository may be copied, reproduced, distributed, modified, or transmitted in any form or by any means without express written permission from the owner.
 
 ---
 
