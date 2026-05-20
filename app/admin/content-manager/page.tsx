@@ -70,6 +70,7 @@ interface Partner {
   id: string;
   name: string;
   description: string | null;
+  role?: string | null;
   type: 'industry' | 'membership';
   image_url: string | null;
   white_background: boolean;
@@ -211,6 +212,7 @@ export default function AdminContentManagerPage() {
   const [partnerFormData, setPartnerFormData] = useState({
     name: '',
     description: '',
+    role: '',
     type: 'industry' as 'industry' | 'membership',
     image_url: '',
     white_background: false,
@@ -316,7 +318,8 @@ export default function AdminContentManagerPage() {
       if (p.type !== 'industry') return false;
       return (
         p.name.toLowerCase().includes(partnerSearchTerm.toLowerCase()) ||
-        (p.description && p.description.toLowerCase().includes(partnerSearchTerm.toLowerCase()))
+        (p.description && p.description.toLowerCase().includes(partnerSearchTerm.toLowerCase())) ||
+        (p.role && p.role.toLowerCase().includes(partnerSearchTerm.toLowerCase()))
       );
     });
   }, [partners, partnerSearchTerm]);
@@ -338,6 +341,7 @@ export default function AdminContentManagerPage() {
       setPartnerFormData({
         name: partner.name,
         description: partner.description || '',
+        role: partner.role || '',
         type: partner.type,
         image_url: partner.image_url || '',
         white_background: partner.white_background,
@@ -349,6 +353,7 @@ export default function AdminContentManagerPage() {
       setPartnerFormData({
         name: '',
         description: '',
+        role: '',
         type: entityType,
         image_url: '',
         white_background: false,
@@ -388,6 +393,7 @@ export default function AdminContentManagerPage() {
       const payload = {
         name: partnerFormData.name.trim(),
         description: partnerFormData.description.trim() || null,
+        role: partnerFormData.role.trim() || null,
         type: partnerFormData.type,
         image_url: partnerFormData.image_url.trim() || null,
         white_background: partnerFormData.white_background,
@@ -796,11 +802,15 @@ export default function AdminContentManagerPage() {
                               <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                                 {partner.name}
                               </Typography>
-                              {partner.description && (
+                              {(partner.role && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                  {partner.role}
+                                </Typography>
+                              )) || (partner.description && (
                                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                                   {partner.description}
                                 </Typography>
-                              )}
+                              ))}
                             </Box>
                           </TableCell>
                           <TableCell sx={{ py: 2 }}>
@@ -1087,6 +1097,17 @@ export default function AdminContentManagerPage() {
                 onChange={handlePartnerInputChange}
                 inputProps={{ maxLength: 500 }}
               />
+
+              {partnerFormData.type === 'industry' && (
+                <TextField
+                  name="role"
+                  label="Role / Primary Function"
+                  fullWidth
+                  value={partnerFormData.role}
+                  onChange={handlePartnerInputChange}
+                  inputProps={{ maxLength: 200 }}
+                />
+              )}
 
               <FormControl fullWidth>
                 <InputLabel id="partner-type-label">Entity Type</InputLabel>

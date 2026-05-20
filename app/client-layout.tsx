@@ -14,6 +14,7 @@ import { MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTrackPageView } from "@/hooks/use-track-page-view";
+import { cleanupAllClients } from '@/lib/supabase/client';
 
 // Dynamic imports for heavy components
 const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget").then(mod => mod.ChatWidget), {
@@ -79,6 +80,21 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
     return () => clearTimeout(timer);
   }, [isSequencePage, pathname]);
+
+  // When leaving sequence pages, ensure any Supabase realtime channels are cleaned up.
+  useEffect(() => {
+    if (!isSequencePage) {
+      try {
+        cleanupAllClients();
+      } catch (e) {}
+    }
+    return () => {
+      // Also cleanup on unmount
+      try {
+        cleanupAllClients();
+      } catch (e) {}
+    };
+  }, [isSequencePage]);
 
   return (
     <NextThemeProvider

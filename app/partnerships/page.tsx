@@ -170,7 +170,7 @@ export default function PartnershipsPage() {
     if (industry.name.includes('Retail')) icon = Store;
     return {
       name: industry.name,
-      description: industry.description || (industry as any).role || '',
+      description: (industry as any).role || industry.description || '',
       icon
     };
   });

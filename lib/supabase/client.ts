@@ -12,14 +12,27 @@ function makeNoopClient() {
     eq: () => chainable(),
   });
 
-  return {
+  const noop: any = {
     from: () => chainable(),
-    channel: () => ({
-      on: () => ({ subscribe: () => ({}) }),
-      subscribe: () => ({}),
-    }),
+    channel: () => {
+      // simple channel builder that returns an object with on/subscribe
+      const sub = {
+        on: () => ({ subscribe: () => ({}) }),
+        subscribe: () => ({}),
+      };
+      return sub;
+    },
     removeChannel: () => { },
-  } as any;
+    _activeChannels: new Set(),
+  };
+
+  noop.cleanupChannels = () => {
+    try {
+      noop._activeChannels.clear();
+    } catch (e) {}
+  };
+
+  return noop as any;
 }
 
 export function createClient() {
@@ -31,5 +44,84 @@ export function createClient() {
     return makeNoopClient();
   }
 
-  return createBrowserClient(url, key);
+  const client: any = createBrowserClient(url, key);
+
+  // Register client instance on window so callers can cleanup all clients if needed
+  try {
+    if (typeof window !== 'undefined') {
+      (window as any).__supabase_clients = (window as any).__supabase_clients || new Set();
+      (window as any).__supabase_clients.add(client);
+    }
+  } catch (e) {}
+
+  // Track active channels so we can cleanup reliably (helps enforce unsubscriptions)
+  try {
+    if (!client._activeChannels) client._activeChannels = new Set();
+
+    const origChannel = client.channel.bind(client);
+    client.channel = (...args: any[]) => {
+      const ch = origChannel(...args);
+
+      // Wrap subscribe to register the returned subscription object
+      const chProxy = new Proxy(ch, {
+        get(target, prop) {
+          if (prop === 'subscribe') {
+            return (...sArgs: any[]) => {
+              const res = (target as any).subscribe(...sArgs);
+              try {
+                client._activeChannels.add(res);
+              } catch (e) {}
+              return res;
+            };
+          }
+
+          return (target as any)[prop];
+        },
+      });
+
+      return chProxy;
+    };
+
+    const origRemove = client.removeChannel?.bind(client);
+    client.removeChannel = (channel: any) => {
+      try {
+        if (client._activeChannels && client._activeChannels.has(channel)) {
+          client._activeChannels.delete(channel);
+        }
+      } catch (e) {}
+      if (origRemove) return origRemove(channel);
+    };
+
+    client.cleanupChannels = () => {
+      try {
+        if (client._activeChannels) {
+          for (const ch of Array.from(client._activeChannels)) {
+            try {
+              if (origRemove) origRemove(ch);
+            } catch (e) {}
+          }
+          client._activeChannels.clear();
+        }
+      } catch (e) {}
+    };
+  } catch (e) {
+    // Ignore proxy wrapping errors in constrained environments
+  }
+
+  return client;
+}
+
+// Cleanup helper to remove channels from all supabase client instances created by `createClient()`
+export function cleanupAllClients() {
+  try {
+    if (typeof window === 'undefined') return;
+    const set: Set<any> = (window as any).__supabase_clients;
+    if (!set) return;
+    for (const client of Array.from(set)) {
+      try {
+        client.cleanupChannels?.();
+      } catch (e) {}
+    }
+    set.clear();
+  } catch (e) {}
 }
