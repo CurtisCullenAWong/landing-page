@@ -28,6 +28,7 @@ import { Plus, Download, Filter, Newspaper, BarChart3, Eye, Users, TrendingUp, L
 import StatCards from '@/components/admin/StatCards';
 import ApplicantTable from '@/components/admin/ApplicantTable';
 import JobTable from '@/components/admin/JobTable';
+import AnalyticsCharts from '@/components/admin/AnalyticsCharts';
 import { fetchAnalyticsMetrics, type AnalyticsMetrics } from './actions';
 import Link from 'next/link';
 
@@ -222,59 +223,7 @@ export default function AdminDashboardPage() {
 
             {/* Collapsible details */}
             <Collapse in={showAnalyticsDetails}>
-              {analyticsMetrics.topPages.length > 0 && (
-                <Box sx={{ mb: 2, mt: 1, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden', bgcolor: 'background.paper' }}>
-                  <Box sx={{ px: 2, py: 1.25 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Top Pages</Typography>
-                  </Box>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ backgroundColor: analyticsHeaderBg }}>
-                          <TableCell sx={{ fontWeight: 700, color: analyticsHeaderText }}>Page</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 700, color: analyticsHeaderText }}>Visits</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {analyticsMetrics.topPages.map((page, idx) => (
-                          <TableRow key={idx} hover>
-                            <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <code style={{ fontSize: '0.85em' }}>{page.path}</code>
-                            </TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 500 }}>{page.visits}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
-
-              {analyticsMetrics.topReferrers.length > 0 && (
-                <Box sx={{ mb: 1, border: 1, borderColor: 'divider', borderRadius: 2, overflow: 'hidden', bgcolor: 'background.paper' }}>
-                  <Box sx={{ px: 2, py: 1.25 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Top Referrers</Typography>
-                  </Box>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ backgroundColor: analyticsHeaderBg }}>
-                          <TableCell sx={{ fontWeight: 700, color: analyticsHeaderText }}>Source</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 700, color: analyticsHeaderText }}>Visits</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {analyticsMetrics.topReferrers.map((ref, idx) => (
-                          <TableRow key={idx} hover>
-                            <TableCell><code style={{ fontSize: '0.85em' }}>{ref.referrer || 'Direct'}</code></TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 500 }}>{ref.visits}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
+              <AnalyticsCharts metrics={analyticsMetrics} />
             </Collapse>
           </CardContent>
         </Card>
@@ -282,7 +231,7 @@ export default function AdminDashboardPage() {
 
       <Grid container spacing={3}>
         {/* Recent Applicants */}
-        <Grid size={{ xs: 12, lg: 7 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <ApplicantTable
             applicants={jobApplicants}
             jobTitlesMap={jobTitlesMap}
@@ -292,7 +241,7 @@ export default function AdminDashboardPage() {
         </Grid>
 
         {/* Active Jobs Summary */}
-        <Grid size={{ xs: 12, lg: 5 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <JobTable
             jobs={jobs.slice(0, 5)}
             title="Active Job Postings"

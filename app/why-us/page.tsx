@@ -740,9 +740,9 @@ export default function WhyBossCargo() {
                 </Typography>
               </Box>
 
-              <Grid container spacing={2}>
+              <Grid container spacing={2} alignItems="stretch">
                 {values.map((value, index) => (
-                  <Grid size={{ xs: 12, sm: 6 }} key={index}>
+                  <Grid size={{ xs: 12, sm: 6 }} key={index} sx={{ display: 'flex' }}>
                     <Paper
                       component={motion.div}
                       initial={{ opacity: 0, scale: 0.93, y: 16 }}
@@ -754,6 +754,9 @@ export default function WhyBossCargo() {
                       sx={{
                         p: 2.5,
                         height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
                         bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                         borderLeft: `4px solid ${index % 2 === 0 ? primaryMain : tertiaryMain}`,
                         borderRadius: '0 12px 12px 0',

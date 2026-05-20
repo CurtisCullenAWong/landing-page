@@ -77,8 +77,8 @@ export function AdminHeader() {
         backdropFilter: 'blur(8px)',
       }}
     >
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', height: 80, alignItems: 'center', justifyContent: 'space-between' }}>
+      <Container maxWidth={false} disableGutters>
+        <Box sx={{ display: 'flex', height: 80, alignItems: 'center', justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
 
           {/* Brand Logo */}
           <Box

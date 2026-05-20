@@ -9,6 +9,14 @@ export interface AnalyticsMetrics {
   topPages: Array<{ path: string; visits: number }>;
   topReferrers: Array<{ referrer: string; visits: number }>;
   visitsOverTime: Array<{ date: string; visits: number }>;
+  recentVisits: Array<{
+    id: string;
+    page_path: string;
+    referrer: string | null;
+    user_agent: string | null;
+    ip_address: string | null;
+    created_at: string;
+  }>;
 }
 
 export async function fetchAnalyticsMetrics(
@@ -35,16 +43,7 @@ export async function fetchAnalyticsMetrics(
         topPages: [],
         topReferrers: [],
         visitsOverTime: [],
-      };
-    }
-
-    if (!visits || visits.length === 0) {
-      return {
-        totalVisits: 0,
-        uniqueVisitors: 0,
-        topPages: [],
-        topReferrers: [],
-        visitsOverTime: [],
+        recentVisits: [],
       };
     }
 
@@ -87,6 +86,15 @@ export async function fetchAnalyticsMetrics(
         (a, b) =>
           new Date(a.date).getTime() - new Date(b.date).getTime()
       );
+    // Recent visits
+    const recentVisits = visits.slice(0, 50).map((v: any) => ({
+      id: v.id,
+      page_path: v.page_path,
+      referrer: v.referrer,
+      user_agent: v.user_agent,
+      ip_address: v.ip_address,
+      created_at: v.created_at,
+    }));
 
     return {
       totalVisits,
@@ -94,6 +102,7 @@ export async function fetchAnalyticsMetrics(
       topPages,
       topReferrers,
       visitsOverTime,
+      recentVisits,
     };
   } catch (error) {
     console.error('Error fetching analytics metrics:', error);
@@ -103,6 +112,7 @@ export async function fetchAnalyticsMetrics(
       topPages: [],
       topReferrers: [],
       visitsOverTime: [],
+      recentVisits: [],
     };
   }
 }

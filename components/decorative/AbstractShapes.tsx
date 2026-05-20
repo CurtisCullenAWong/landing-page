@@ -51,6 +51,8 @@ export const AbstractBlob = ({ color, size = 400, opacity = 0.5, ...props }: any
         zIndex: -1,
         maskImage: 'radial-gradient(circle, black, transparent 80%)',
         WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
+        // Default nudge left to keep sharp edges offscreen; allow explicit overrides
+        transform: props.style?.transform ?? 'translateX(-80px)',
         ...props.style
       }}
       animate={{
@@ -124,6 +126,8 @@ export const FilledAbstractShape = ({ color, size = 400, delay = 0, opacity = 0.
         filter: 'blur(50px) drop-shadow(0 20px 40px rgba(0,0,0,0.15))',
         maskImage: 'radial-gradient(circle, black, transparent 80%)',
         WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
+        // Nudge left by default so the SVG bulk stays off the viewport edges
+        transform: props.style?.transform ?? 'translateX(-120px)',
         ...props.style
       }}
       animate={{
@@ -205,13 +209,16 @@ export const MassiveAbstractShape = ({ color, delay = 0, opacity = 0.65, ...prop
       style={{
         position: 'absolute',
         zIndex: -1,
-        left: '-80%',
-        width: '220%',
+        // Shift further left by default to hide sharp edges near header/footer
+        left: props.style?.left ?? '-100%',
+        width: props.style?.width ?? '240%',
         display: 'block',
         overflow: 'visible',
         filter: 'blur(160px)',
         maskImage: 'radial-gradient(circle, black, transparent 80%)',
         WebkitMaskImage: 'radial-gradient(circle, black, transparent 80%)',
+        // extra translate to ensure edges remain offscreen unless explicitly overridden
+        transform: props.style?.transform ?? 'translateX(-140px)',
         ...props.style
       }}
       animate={{
