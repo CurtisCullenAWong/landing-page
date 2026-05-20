@@ -519,7 +519,7 @@ export default function WhyBossCargo() {
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 4,
-          transform: { xs: 'scale(1.2)', md: 'scale(1.35)' }, // Increased base map component scale
+          transform: { xs: 'scale(1.24)', md: 'scale(1.42)' },
           // Removed overflow: hidden to prevent tooltips from clipping when map is zoomed
         }}>
           <Box
@@ -694,6 +694,7 @@ export default function WhyBossCargo() {
                   sizes="(max-width: 900px) 100vw, 50vw"
                   rounded={0}
                   shadow={0}
+                  style={{ transform: 'scale(1.08)', transformOrigin: 'center center' }}
                 />
               </DecorativeImageFrame>
             </Grid>
@@ -816,7 +817,7 @@ export default function WhyBossCargo() {
                     borderRadius: '50%',
                   }} />
                 </Paper>
-                <Box sx={{ maxWidth: '280px', mx: 'auto' }}>
+                <Box sx={{ maxWidth: { xs: '100%', md: '360px' }, mx: 'auto' }}>
                   <DecorativeImageFrame theme={theme}>
                     <ImageWithFallback
                       src={IMAGE_URLS.WHY_US_CULTURE}
@@ -826,6 +827,7 @@ export default function WhyBossCargo() {
                       sizes="(max-width: 900px) 100vw, 50vw"
                       rounded={0}
                       shadow={0}
+                      style={{ transform: 'scale(1.1)', transformOrigin: 'center center' }}
                     />
                   </DecorativeImageFrame>
                 </Box>

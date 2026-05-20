@@ -431,13 +431,30 @@ export default function JobPostingsPage() {
                   >
                     <CornerBrackets color={tertiaryMain} radius={16} hideTopLeft={true} />
                     <Stack spacing={3}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ p: 1.5, bgcolor: primaryMain, color: 'white', borderRadius: 2, display: 'flex' }}>
-                          <GraduationCap size={28} />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          px: { xs: 1, md: 2 },
+                          py: { xs: 1.5, md: 2 },
+                          borderRadius: 3,
+                          bgcolor: '#F7F3EC',
+                          border: `1px solid ${alpha('#000', 0.08)}`,
+                        }}
+                      >
+                        <Box sx={{ width: '100%', maxWidth: 520 }}>
+                          <ImageWithFallback
+                            src={IMAGE_URLS.JOBS_BCU}
+                            alt="Boss Cargo University logo"
+                            layout="responsive"
+                            aspectRatio="21:9"
+                            objectFit="contain"
+                            rounded={0}
+                            priority
+                            style={{ width: '100%' }}
+                          />
                         </Box>
-                        <Typography variant="h3" sx={{ fontWeight: 800, color: primaryMain, letterSpacing: { xs: -0.5, md: -1 }, fontSize: { xs: '1.5rem', sm: '2.25rem', md: '3rem' } }}>
-                          Boss Cargo University
-                        </Typography>
                       </Box>
 
                       <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontSize: { xs: '1rem', md: '1.125rem' }, fontWeight: 500 }}>

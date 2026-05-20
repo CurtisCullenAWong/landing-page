@@ -626,14 +626,20 @@ export default function PartnershipsPage() {
                             bgcolor: membership.whiteBackground ? '#fff' : alpha(primaryMain, 0.03),
                           }}
                         >
-                          <Box sx={{ position: 'relative', width: '85%', height: '85%' }}>
-                            <ImageWithFallback
-                              src={membership.image}
-                              alt={membership.fullName}
-                              layout="fill"
-                              objectFit="contain"
-                              sizes="160px"
-                            />
+                          <Box sx={{ position: 'relative', width: '85%', height: '85%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {membership.image ? (
+                              <ImageWithFallback
+                                src={membership.image}
+                                alt={membership.fullName}
+                                layout="fill"
+                                objectFit="contain"
+                                sizes="160px"
+                              />
+                            ) : (
+                              <Typography variant="h2" sx={{ color: 'primary.main', opacity: 0.3, fontWeight: 900 }}>
+                                {membership.fullName.charAt(0)}
+                              </Typography>
+                            )}
                           </Box>
                         </Box>
                         <CardContent sx={{ p: 4, flexGrow: 1, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

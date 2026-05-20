@@ -13,6 +13,7 @@ import PartnershipsHandshake from '@/assets/images/partnerships/PARTNERSHIPS_HAN
 
 import JobsCareerGrowth from '@/assets/images/careers/JOBS_CAREER_GROWTH.jpg';
 import JobsOfficeEnvironment from '@/assets/images/careers/JOBS_OFFICE_ENVIRONMENT.jpg';
+import JobsBCU from '@/assets/images/careers/JOBS_BCU.png';
 
 import WhyUsValues from '@/assets/images/why-us/WHY_US_VALUES.jpg';
 import WhyUsCulture from '@/assets/images/why-us/WHY_US_CULTURE.jpg';
@@ -54,6 +55,7 @@ export const IMAGE_URLS = {
   // Careers Page
   JOBS_CAREER_GROWTH: JobsCareerGrowth,
   JOBS_OFFICE_ENVIRONMENT: JobsOfficeEnvironment,
+  JOBS_BCU: JobsBCU,
 
   // Job Details Page
   JOB_DETAILS_PROFESSIONAL: JobDetailsProfessional,
