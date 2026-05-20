@@ -119,6 +119,7 @@ export function AdminHeader() {
                   height: 40,
                   width: 'auto',
                   flexShrink: 0,
+                  objectFit: 'contain',
                   display: 'block',
                 }}
               />

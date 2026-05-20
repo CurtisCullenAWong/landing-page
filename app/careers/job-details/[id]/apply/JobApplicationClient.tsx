@@ -298,7 +298,6 @@ export default function JobApplicationClient() {
           salary: data.salary,
           postedDate,
           status: data.status,
-          application_url: data.application_url || undefined,
           benefits: []
         };
 
@@ -702,12 +701,12 @@ export default function JobApplicationClient() {
                           </IconButton>
                         </Box>
                       ) : (
-                        <>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                           <Upload size={32} style={{ marginBottom: 8, opacity: 0.5 }} />
                           <Typography variant="body2">
                             {isDragActive ? 'Drop your file here' : 'Drag & drop your resume or click to upload'}
                           </Typography>
-                        </>
+                        </Box>
                       )}
                     </Paper>
 

@@ -19,18 +19,13 @@ export interface Job {
   salary_frequency?: string | null;
   postedDate: string;
   status: 'active' | 'closed';
-  application_url?: string | null;
   employment_type?: string | null;
   work_setup?: string | null;
   job_level?: string | null;
   schedule?: string | null;
-  application_email?: string | null;
-  external_application_url?: string | null;
   views_count?: number;
   applications_count?: number;
   featured?: boolean;
-  published_at?: string | null;
-  expires_at?: string | null;
 }
 
 export interface Department {
@@ -55,18 +50,13 @@ interface DatabaseJob {
   salary_frequency: string | null;
   posted_date: string | null;
   status: 'active' | 'closed';
-  application_url?: string | null;
   employment_type: string | null;
   work_setup: string | null;
   job_level: string | null;
   schedule: string | null;
-  application_email: string | null;
-  external_application_url: string | null;
   views_count: number | null;
   applications_count: number | null;
   featured: boolean | null;
-  published_at: string | null;
-  expires_at: string | null;
   created_at?: string;
 }
 
@@ -111,18 +101,13 @@ function mapDatabaseJobToJob(dbJob: DatabaseJob): Job {
     salary_frequency: dbJob.salary_frequency ?? undefined,
     postedDate,
     status: dbJob.status,
-    application_url: dbJob.application_url || undefined,
     employment_type: dbJob.employment_type ?? undefined,
     work_setup: dbJob.work_setup ?? undefined,
     job_level: dbJob.job_level ?? undefined,
     schedule: dbJob.schedule ?? undefined,
-    application_email: dbJob.application_email ?? undefined,
-    external_application_url: dbJob.external_application_url ?? undefined,
     views_count: dbJob.views_count ?? undefined,
     applications_count: dbJob.applications_count ?? undefined,
     featured: dbJob.featured ?? undefined,
-    published_at: dbJob.published_at ?? undefined,
-    expires_at: dbJob.expires_at ?? undefined,
   };
 }
 
@@ -284,18 +269,13 @@ export function JobProvider({ children }: { children: ReactNode }) {
           salary_frequency: job.salary_frequency || null,
           status: job.status || 'active',
           posted_date: new Date().toISOString(),
-          application_url: job.application_url || null,
           employment_type: job.employment_type || null,
           work_setup: job.work_setup || null,
           job_level: job.job_level || null,
           schedule: job.schedule || null,
-          application_email: job.application_email || null,
-          external_application_url: job.external_application_url || null,
           views_count: job.views_count || 0,
           applications_count: job.applications_count || 0,
           featured: job.featured || false,
-          published_at: job.published_at || null,
-          expires_at: job.expires_at || null,
         })
         .select()
         .single();
@@ -337,18 +317,13 @@ export function JobProvider({ children }: { children: ReactNode }) {
         salary_frequency: job.salary_frequency || null,
         status: job.status || 'active',
         posted_date: now,
-        application_url: job.application_url || null,
         employment_type: job.employment_type || null,
         work_setup: job.work_setup || null,
         job_level: job.job_level || null,
         schedule: job.schedule || null,
-        application_email: job.application_email || null,
-        external_application_url: job.external_application_url || null,
         views_count: job.views_count || 0,
         applications_count: job.applications_count || 0,
         featured: job.featured || false,
-        published_at: job.published_at || null,
-        expires_at: job.expires_at || null,
       }));
 
       const { data, error } = await supabase
@@ -390,18 +365,13 @@ export function JobProvider({ children }: { children: ReactNode }) {
       if (updatedJob.salary_frequency !== undefined) updateData.salary_frequency = updatedJob.salary_frequency;
       if (updatedJob.status !== undefined) updateData.status = updatedJob.status;
       if (updatedJob.postedDate !== undefined) updateData.posted_date = updatedJob.postedDate;
-      if (updatedJob.application_url !== undefined) updateData.application_url = updatedJob.application_url || null;
       if (updatedJob.employment_type !== undefined) updateData.employment_type = updatedJob.employment_type || null;
       if (updatedJob.work_setup !== undefined) updateData.work_setup = updatedJob.work_setup || null;
       if (updatedJob.job_level !== undefined) updateData.job_level = updatedJob.job_level || null;
       if (updatedJob.schedule !== undefined) updateData.schedule = updatedJob.schedule || null;
-      if (updatedJob.application_email !== undefined) updateData.application_email = updatedJob.application_email || null;
-      if (updatedJob.external_application_url !== undefined) updateData.external_application_url = updatedJob.external_application_url || null;
       if (updatedJob.views_count !== undefined) updateData.views_count = updatedJob.views_count;
       if (updatedJob.applications_count !== undefined) updateData.applications_count = updatedJob.applications_count;
       if (updatedJob.featured !== undefined) updateData.featured = updatedJob.featured;
-      if (updatedJob.published_at !== undefined) updateData.published_at = updatedJob.published_at || null;
-      if (updatedJob.expires_at !== undefined) updateData.expires_at = updatedJob.expires_at || null;
 
       const { data, error } = await supabase
         .from('jobs')

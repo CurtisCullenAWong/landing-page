@@ -158,6 +158,7 @@ export function UserHeader() {
             sx={{
               display: 'flex',
               alignItems: 'center',
+              flexShrink: 0,
               outline: 'none',
               textDecoration: 'none',
               '&:hover .logo-container': {
@@ -177,6 +178,7 @@ export function UserHeader() {
                 border: `2px solid ${alpha(theme.palette.tertiary.main, 0.3)}`,
                 boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.1)}`,
                 transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                flexShrink: 0,
                 '&:hover': {
                   borderRadius: '12px 32px 12px 32px', // Dynamic shape shift
                   borderColor: theme.palette.tertiary.main,
@@ -190,6 +192,8 @@ export function UserHeader() {
                 sx={{
                   height: 50,
                   width: 'auto',
+                  flexShrink: 0,
+                  objectFit: 'contain',
                   display: 'block',
                   transition: 'transform 0.3s ease',
                   '.logo-container:hover &': { transform: 'scale(1.05)' }

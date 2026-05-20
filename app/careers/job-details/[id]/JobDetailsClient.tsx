@@ -122,7 +122,6 @@ export default function JobDetailsClient() {
             salary: data.salary,
             postedDate,
             status: data.status,
-            application_url: data.application_url || undefined,
             employment_type: data.employment_type || undefined,
             work_setup: data.work_setup || undefined,
             job_level: data.job_level || undefined,
@@ -167,18 +166,13 @@ export default function JobDetailsClient() {
           salary: string;
           status: 'active' | 'closed';
           posted_date: string | number | Date;
-          application_url: string | null;
           employment_type: string | null;
           work_setup: string | null;
           job_level: string | null;
           schedule: string | null;
-          application_email: string | null;
-          external_application_url: string | null;
           views_count: number | null;
           applications_count: number | null;
           featured: boolean | null;
-          published_at: string | null;
-          expires_at: string | null;
         }; }) => {
           if (payload.eventType === 'UPDATE' && payload.new) {
             let postedDate = new Date().toISOString().split('T')[0];
@@ -203,18 +197,13 @@ export default function JobDetailsClient() {
               salary: payload.new.salary,
               postedDate,
               status: payload.new.status,
-              application_url: payload.new.application_url || undefined,
               employment_type: payload.new.employment_type || undefined,
               work_setup: payload.new.work_setup || undefined,
               job_level: payload.new.job_level || undefined,
               schedule: payload.new.schedule || undefined,
-              application_email: payload.new.application_email || undefined,
-              external_application_url: payload.new.external_application_url || undefined,
               views_count: payload.new.views_count || undefined,
               applications_count: payload.new.applications_count || undefined,
               featured: payload.new.featured || undefined,
-              published_at: payload.new.published_at || undefined,
-              expires_at: payload.new.expires_at || undefined,
             };
             setJob(updatedJob);
           } else if (payload.eventType === 'DELETE') {
@@ -562,14 +551,12 @@ export default function JobDetailsClient() {
             <Box sx={{ pt: 4, mt: 4, borderTop: `1px solid ${theme.palette.divider}`, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Button
                 component={Link}
-                href={job.external_application_url || job.application_url || `/careers/job-details/${job.id}/apply`}
+                href={`/careers/job-details/${job.id}/apply`}
                 variant="contained"
                 size="large"
                 fullWidth={false}
                 sx={{ px: 6, py: 1.5, fontWeight: 800, borderRadius: 2 }}
                 startIcon={<FileText size={20} />}
-                target={(job.external_application_url || job.application_url) ? "_blank" : undefined}
-                rel={(job.external_application_url || job.application_url) ? "noopener noreferrer" : undefined}
               >
                 Submit Application
               </Button>
