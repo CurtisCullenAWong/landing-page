@@ -86,7 +86,8 @@ export const ChatWidget = ({
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Speech State
-  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
+  const voiceFeatureEnabled = process.env.NEXT_PUBLIC_ENABLE_VOICE_FEATURE === 'true';
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(voiceFeatureEnabled);
   const [isSpeechLoading, setIsSpeechLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [mascotFrame, setMascotFrame] = useState<'default' | 1 | 2 | 3 | 4 | 5>('default');
@@ -172,7 +173,7 @@ export const ChatWidget = ({
           if (active && response && (response.response || response.content || response.message?.content)) {
             const greeting = response.response || response.content || response.message?.content;
             setMessages([{ role: 'assistant', content: greeting }]);
-            if (isSpeechEnabled) speak(greeting);
+            if (voiceFeatureEnabled && isSpeechEnabled) speak(greeting);
           }
         } catch (error: any) {
           if (active && error.name !== 'AbortError') {
@@ -184,7 +185,7 @@ export const ChatWidget = ({
                 role: 'assistant',
                 content: errorMsg
               }]);
-              if (isSpeechEnabled) speak(errorMsg);
+              if (voiceFeatureEnabled && isSpeechEnabled) speak(errorMsg);
             }
           }
         } finally {
@@ -208,6 +209,11 @@ export const ChatWidget = ({
 
   // Dictate latest message if speech is enabled or toggled on/changed
   useEffect(() => {
+    if (!voiceFeatureEnabled) {
+      cancelSpeech();
+      return;
+    }
+
     if (isSpeechEnabled && messages.length > 0) {
       const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
       if (lastAssistantMessage) {
@@ -216,7 +222,7 @@ export const ChatWidget = ({
     } else if (!isSpeechEnabled) {
       cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
     }
-  }, [isSpeechEnabled, gender, isOpen]);
+  }, [isSpeechEnabled, gender, isOpen, voiceFeatureEnabled]);
 
   useEffect(() => {
     return () => {
@@ -233,7 +239,7 @@ export const ChatWidget = ({
     const activeEnabled = forceEnabled !== undefined ? forceEnabled : isSpeechEnabled;
     const activeGender = forceGender !== undefined ? forceGender : gender;
 
-    if (!activeEnabled || typeof window === 'undefined') return;
+    if (!voiceFeatureEnabled || !activeEnabled || typeof window === 'undefined') return;
 
     // 1. Thorough text clean
     const cleanText = text
@@ -404,14 +410,14 @@ export const ChatWidget = ({
 
       if (response && response.message) {
         setMessages(prev => [...prev, response.message]);
-        if (isSpeechEnabled) speak(response.message.content);
+        if (voiceFeatureEnabled && isSpeechEnabled) speak(response.message.content);
       } else if (response && (response.content || response.response)) {
         const content = response.content || response.response;
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: content
         }]);
-        if (isSpeechEnabled) speak(content);
+        if (voiceFeatureEnabled && isSpeechEnabled) speak(content);
       }
 
     } catch (error: any) {
@@ -432,7 +438,7 @@ export const ChatWidget = ({
           role: 'assistant',
           content: errorMsg
         }]);
-        if (isSpeechEnabled) speak(errorMsg);
+        if (voiceFeatureEnabled && isSpeechEnabled) speak(errorMsg);
       }
 
     } finally {
@@ -561,34 +567,36 @@ export const ChatWidget = ({
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Tooltip title={isSpeechLoading ? "Loading Voice..." : isSpeechEnabled ? "Turn Off Voice" : "Turn On Voice"} arrow placement="top">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const nextEnabled = !isSpeechEnabled;
-                      setIsSpeechEnabled(nextEnabled);
-                      if (!nextEnabled) {
-                        cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
-                      }
-                    }}
-                    sx={{
-                      color: isSpeechEnabled ? 'inherit' : 'rgba(255,255,255,0.5)',
-                      '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {isSpeechLoading ? (
-                      <CircularProgress size={18} color="inherit" />
-                    ) : isSpeechEnabled ? (
-                      <Volume2 size={18} />
-                    ) : (
-                      <VolumeX size={18} />
-                    )}
-                  </IconButton>
-                </span>
-              </Tooltip>
+              {voiceFeatureEnabled ? (
+                <Tooltip title={isSpeechLoading ? "Loading Voice..." : isSpeechEnabled ? "Turn Off Voice" : "Turn On Voice"} arrow placement="top">
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const nextEnabled = !isSpeechEnabled;
+                        setIsSpeechEnabled(nextEnabled);
+                        if (!nextEnabled) {
+                          cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
+                        }
+                      }}
+                      sx={{
+                        color: isSpeechEnabled ? 'inherit' : 'rgba(255,255,255,0.5)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isSpeechLoading ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : isSpeechEnabled ? (
+                        <Volume2 size={18} />
+                      ) : (
+                        <VolumeX size={18} />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ) : null}
 
               <Tooltip title={`Switch to ${gender === 'female' ? 'Male' : 'Female'} Narrator`} arrow placement="top">
                 <span>

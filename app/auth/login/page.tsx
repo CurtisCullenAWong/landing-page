@@ -229,20 +229,20 @@ export default function Page() {
                 </Button>
               </Stack>
 
-              <Box sx={{ mt: 4, textAlign: "center" }}>
+              {/* <Box sx={{ mt: 4, textAlign: "center" }}>
                 <Typography variant="body2" color="text.secondary">
                   Unauthorized access is strictly prohibited.{" "}
                   <Link href="/auth/sign-up" style={{ color: primaryMain, fontWeight: 700, textDecoration: 'none' }}>
                     Request Access
                   </Link>
                 </Typography>
-              </Box>
+              </Box> */}
             </form>
           </CardContent>
         </Card>
 
         <Typography variant="caption" color="text.disabled" sx={{ mt: 4, display: 'block', textAlign: 'center', fontWeight: 600 }}>
-          © {new Date().getFullYear()} Boss Cargo Express Administrative Division. All Rights Reserved.
+          © {new Date().getFullYear()} Boss Cargo Express Business Technology Department. All Rights Reserved.
         </Typography>
       </Container>
     </Box>

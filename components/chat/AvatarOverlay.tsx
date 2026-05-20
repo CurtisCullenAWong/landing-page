@@ -8,6 +8,8 @@ import * as THREE from 'three';
 import { useGLTF, Float, PerspectiveCamera, Stage, Center, AdaptiveEvents } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 
+const avatarOverlayEnabled = process.env.NEXT_PUBLIC_ENABLE_AVATAR_OVERLAY === 'true';
+
 // ─── Random Blob Generator ───────────────────────────────────────────────────
 // Generates a smooth, completely random SVG path every time it is called.
 // It maintains a consistent structure (1 Move, 7 Cubics, 1 Close) so Framer Motion
@@ -46,8 +48,10 @@ const generateRandomBlob = () => {
   return path + ' Z';
 };
 
-// Preload the 3D model in the background
-useGLTF.preload('/models/avatar.glb');
+// Preload the 3D model in the background only when the overlay is enabled.
+if (avatarOverlayEnabled) {
+  useGLTF.preload('/models/avatar.glb');
+}
 
 // ─── AvatarModel ─────────────────────────────────────────────────────────────
 const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'male' | 'female' }) => {
@@ -56,6 +60,7 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'ma
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const oscIntervalRef = useRef<number | null>(null);
+  const voiceFeatureEnabled = process.env.NEXT_PUBLIC_ENABLE_VOICE_FEATURE === 'true';
 
   const scene = useMemo(() => SkeletonUtils.clone(originalScene), [originalScene]);
   const mixer = useMemo(() => new THREE.AnimationMixer(scene), [scene]);
@@ -64,6 +69,20 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'ma
   useFrame((_state, delta) => mixer.update(delta));
 
   useEffect(() => {
+    if (!voiceFeatureEnabled) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      if (oscIntervalRef.current) {
+        window.clearInterval(oscIntervalRef.current);
+        oscIntervalRef.current = null;
+      }
+      return;
+    }
+
     if (!animations?.length) return;
 
     const keywords = ['idle', 'walk', 'wave', 'run', 'sprint', 'dance'];
@@ -127,7 +146,7 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'ma
     }, 100);
 
     return () => clearTimeout(audioTimeout);
-  }, [manualIndex, animations, mixer]);
+  }, [manualIndex, animations, mixer, voiceFeatureEnabled]);
 
   return (
     <group ref={group} dispose={null}>
@@ -139,7 +158,7 @@ const AvatarModel = ({ manualIndex, gender }: { manualIndex: number; gender: 'ma
 };
 
 // ─── AvatarOverlay ────────────────────────────────────────────────────────────
-export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | 'female'; isVisible?: boolean }) => {
+const AvatarOverlayContent = ({ gender, isVisible = true }: { gender: 'male' | 'female'; isVisible?: boolean }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -393,4 +412,12 @@ export const AvatarOverlay = ({ gender, isVisible = true }: { gender: 'male' | '
       </motion.div>
     </>
   );
+};
+
+export const AvatarOverlay = (props: { gender: 'male' | 'female'; isVisible?: boolean }) => {
+  if (!avatarOverlayEnabled) {
+    return null;
+  }
+
+  return <AvatarOverlayContent {...props} />;
 };
