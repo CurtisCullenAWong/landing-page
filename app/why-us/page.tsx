@@ -216,7 +216,7 @@ const MapDot = memo(({
   }), [anchorAbove]);
 
   const [isHovered, setIsHovered] = useState(false);
-  const showBadge = isSelected || isHovered; // hover handled via state; click = persistent
+  const showBadge = isSelected || (isHovered && !isZoomedOut); // Hide icon badge on hover while map is zoomed
 
   return (
     <Box
@@ -254,15 +254,25 @@ const MapDot = memo(({
       {/* Map dot */}
       <Box
         component={motion.div}
+        animate={{
+          scale: isHovered && isZoomedOut ? 1.5 : 1, // Scaled down highlighting to 1.5
+          backgroundColor: isSelected 
+            ? tertiaryMain 
+            : isHovered && isZoomedOut 
+              ? tertiaryMain 
+              : primaryMain,
+          boxShadow: isSelected
+            ? `0 0 10px ${tertiaryMain}`
+            : isHovered && isZoomedOut
+              ? `0 0 10px ${tertiaryMain}, 0 0 2px ${tertiaryMain}`
+              : `0 0 4px ${primaryMain}`,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
         sx={{
           width: 6,
           height: 6,
-          bgcolor: isSelected ? tertiaryMain : primaryMain,
           borderRadius: '50%',
           border: '1px solid rgba(255,255,255,0.9)',
-          boxShadow: isSelected
-            ? `0 0 8px ${tertiaryMain}`
-            : `0 0 4px ${primaryMain}`,
           flexShrink: 0,
         }}
       />
@@ -298,14 +308,14 @@ const MapDot = memo(({
           } : {}),
         }}
       >
-        {/* Icon circle */}
+        {/* Icon circle - scaled down to 32px to look cleaner */}
         <Box sx={{
-          width: 40,
-          height: 40,
+          width: 32,
+          height: 32,
           bgcolor: primaryMain,
           borderRadius: '50%',
           p: 0.5,
-          boxShadow: `0 4px 12px rgba(0,0,0,0.3)`,
+          boxShadow: `0 3px 8px rgba(0,0,0,0.3)`,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -317,8 +327,8 @@ const MapDot = memo(({
             alt={point.name}
             layout="fill"
             objectFit="contain"
-            sizes="40px"
-            style={{ padding: '4px' }}
+            sizes="32px"
+            style={{ padding: '3px' }}
           />
         </Box>
 
@@ -359,6 +369,50 @@ const MapDot = memo(({
           )}
         </Box>
       </Box>
+
+      {/* Simple Text Tooltip: visible ONLY on hover while zoomed */}
+      <Box
+        component={motion.div}
+        initial={{ opacity: 0, scale: 0.8, y: -4 }}
+        animate={{
+          opacity: isHovered && isZoomedOut ? 1 : 0,
+          scale: isHovered && isZoomedOut ? 1 : 0.8,
+          y: isHovered && isZoomedOut ? 0 : -4
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        sx={{
+          position: 'absolute',
+          bottom: '70%', // Moved closer to the dot center (was bottom: 130%)
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 30,
+          pointerEvents: 'none',
+          transform: 'scale(0.5) !important', // Keep it very compact on zoomed 3x map
+          transformOrigin: 'bottom center',
+        }}
+      >
+        <Box sx={{
+          backgroundColor: 'rgba(32, 41, 69, 0.95)',
+          borderRadius: 1,
+          px: 1.25,
+          py: 0.75,
+          border: `1px solid ${tertiaryMain}88`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          whiteSpace: 'nowrap',
+        }}>
+          <Typography sx={{
+            color: 'white',
+            fontWeight: 800,
+            fontSize: '0.6rem',
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            lineHeight: 1,
+          }}>
+            {point.name}
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 });
@@ -380,7 +434,7 @@ export default function WhyBossCargo() {
   // Map pan/zoom spring config defined once
   const mapSpring = useMemo(() => ({ type: 'spring' as const, stiffness: 120, damping: 22 }), []);
   const mapAnimate = useMemo(() => selectedPoint
-    ? { scale: 3, x: `${-3 * (selectedPoint.x - 50)}%`, y: `${-3 * (selectedPoint.y - 50)}%` }
+    ? { scale: 3, x: `${-3 * (selectedPoint.x - 50)}%`, y: `${-3 * (selectedPoint.y - 50) - 4}%` } // Shifted camera downwards slightly to center the tooltip perfectly
     : { scale: 1, x: '0%', y: '0%' },
     [selectedPoint]);
 
@@ -774,6 +828,8 @@ export default function WhyBossCargo() {
             </Grid>
           </Grid>
         </PageContainer>
+
+        <SectionTransition toColor={theme.palette.background.default} />
       </Box>
     </Box>
   );

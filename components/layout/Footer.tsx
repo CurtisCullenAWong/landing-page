@@ -106,13 +106,13 @@ export function Footer() {
         <MassiveAbstractShape
           color={theme.palette.primary.main}
           opacity={0.55}
-          style={{ top: '-40%', right: '-30%', width: '170%', height: '200%' }}
+          style={{ top: '-40%', left: '-85%', width: '225%', height: '200%' }}
         />
         <MassiveAbstractShape
           color={theme.palette.tertiary.main}
           opacity={0.6}
           delay={10}
-          style={{ bottom: '-50%', left: '-30%', width: '180%', height: '210%', transform: 'rotate(25deg)' }}
+          style={{ bottom: '-50%', left: '-80%', width: '220%', height: '210%' }}
         />
         <FilledAbstractShape
           color={theme.palette.tertiary.main}

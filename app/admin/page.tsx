@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
             variant="outlined"
             startIcon={<Newspaper size={18} />}
             component={Link}
-            href="/admin/posts"
+            href="/admin/content-manager"
             sx={{ borderRadius: 2 }}
           >
             Manage Content

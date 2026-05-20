@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { useJobs, Job } from '../../../contexts/JobContext';
-import { Plus, Edit2, Trash2, Save, X, Search, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Search, ArrowUpDown, ChevronDown, ChevronUp, ArrowLeft, Briefcase, FileText } from 'lucide-react';
+import Link from 'next/link';
 import {
   Box,
   Container,
@@ -42,7 +43,11 @@ import {
   FormControlLabel,
   alpha,
   Checkbox,
+  Tabs,
+  Tab,
 } from '@mui/material';
+
+import JobApplicationsTab from '@/components/admin/JobApplicationsTab';
 
 import { AdminTableSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../../lib/usePageTitle';
@@ -106,8 +111,9 @@ type JobFormState = {
 };
 
 export default function AdminPage() {
-  usePageTitle('Admin');
+  usePageTitle('Recruitment');
   const { jobs, departments, isLoading, addJobs, updateJob, deleteJob } = useJobs();
+  const [activeTab, setActiveTab] = useState(0); // 0: Job Postings, 1: Job Applications
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -185,10 +191,10 @@ export default function AdminPage() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.department.toLowerCase().includes(query) ||
-        job.location.toLowerCase().includes(query) ||
-        job.description.toLowerCase().includes(query)
+        (job.title || '').toLowerCase().includes(query) ||
+        (job.department || '').toLowerCase().includes(query) ||
+        (job.location || '').toLowerCase().includes(query) ||
+        (job.description || '').toLowerCase().includes(query)
       );
     }
 
@@ -213,24 +219,26 @@ export default function AdminPage() {
 
       switch (sortField) {
         case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
+          aValue = (a.title || '').toLowerCase();
+          bValue = (b.title || '').toLowerCase();
           break;
         case 'department':
-          aValue = a.department.toLowerCase();
-          bValue = b.department.toLowerCase();
+          aValue = (a.department || '').toLowerCase();
+          bValue = (b.department || '').toLowerCase();
           break;
         case 'location':
-          aValue = a.location.toLowerCase();
-          bValue = b.location.toLowerCase();
+          aValue = (a.location || '').toLowerCase();
+          bValue = (b.location || '').toLowerCase();
           break;
         case 'postedDate':
-          aValue = new Date(a.postedDate).getTime();
-          bValue = new Date(b.postedDate).getTime();
+          const timeA = a.postedDate ? new Date(a.postedDate).getTime() : 0;
+          const timeB = b.postedDate ? new Date(b.postedDate).getTime() : 0;
+          aValue = isNaN(timeA) ? 0 : timeA;
+          bValue = isNaN(timeB) ? 0 : timeB;
           break;
         case 'status':
-          aValue = a.status;
-          bValue = b.status;
+          aValue = (a.status || '').toLowerCase();
+          bValue = (b.status || '').toLowerCase();
           break;
         default:
           return 0;
@@ -523,47 +531,73 @@ export default function AdminPage() {
 
   return (
     <Box>
-      <Container maxWidth="xl" sx={{ px: 0 }}>
-        {/* Header */}
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          gap: { xs: 3, sm: 4 },
-          mb: 4,
-          pb: 3,
-          borderBottom: 1,
-          borderColor: 'divider'
-        }}>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-              Careers Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Create, edit, and manage your company's job postings.
-            </Typography>
-          </Box>
+      {/* Header */}
+      <Box sx={{
+        mb: 4,
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between',
+        alignItems: { xs: 'stretch', sm: 'flex-start' },
+        gap: 2
+      }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Button
+            component={Link}
+            href="/admin"
+            startIcon={<ArrowLeft size={18} />}
+            sx={{ mb: 2, color: 'text.secondary', textTransform: 'none', fontWeight: 600 }}
+          >
+            Back to Dashboard
+          </Button>
+          <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Briefcase size={32} color={theme.palette.primary.main} />
+            Recruitment Management
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {activeTab === 0
+              ? "Create, edit, and manage your company's job postings."
+              : "Manage and update job application statuses."}
+          </Typography>
+        </Box>
+        {activeTab === 0 && (
           <Button
             variant="contained"
-            startIcon={<Plus size={20} />}
+            startIcon={<Plus size={18} />}
             onClick={() => setIsFormOpen(true)}
-            sx={{
-              alignSelf: { xs: 'stretch', sm: 'auto' },
-              minWidth: { xs: '100%', sm: 'auto' },
-              px: { xs: 2, sm: 3 },
-              py: 1.5,
-              fontSize: '0.9375rem',
-              fontWeight: 600
-            }}
+            sx={{ borderRadius: 2, px: 3, py: 1.5, fontWeight: 700, boxShadow: theme.shadows[4] }}
           >
             Add New Job
           </Button>
-        </Box>
+        )}
+      </Box>
 
-        {/* Job Form */}
+      {/* Tabs */}
+      <Tabs
+        value={activeTab}
+        onChange={(_, val) => {
+          setActiveTab(val);
+          setPage(0); // Reset page on tab change
+        }}
+        sx={{
+          mb: 4,
+          borderBottom: 1,
+          borderColor: 'divider',
+          '& .MuiTab-root': {
+            fontWeight: 700,
+            textTransform: 'none',
+            fontSize: '1rem',
+          },
+        }}
+      >
+        <Tab icon={<Briefcase size={18} style={{ marginRight: 8 }} />} label="Job Postings" iconPosition="start" />
+        <Tab icon={<FileText size={18} style={{ marginRight: 8 }} />} label="Job Applications" iconPosition="start" />
+      </Tabs>
+
+        {activeTab === 0 ? (
+          <>
+            {/* Job Form */}
         {isFormOpen && (
-          <Card sx={{ mb: 4 }}>
+          <Card elevation={0} sx={{ mb: 4, border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box sx={{
                 display: 'flex',
@@ -947,248 +981,203 @@ export default function AdminPage() {
         )}
 
         {/* Jobs List */}
-        <Card>
-          <Box
-            sx={{
-              px: 3,
-              py: 2,
-              bgcolor: isDark ? 'primary.dark' : 'primary.main',
-              color: isDark ? 'text.primary' : 'primary.contrastText',
-            }}
-          >
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+        <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
+          <Box sx={{ px: 3, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: 'background.paper' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
               All Careers ({filteredAndSortedJobs.length} of {validJobs.length})
             </Typography>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleResetFilters}
+                  startIcon={<X size={16} />}
+                  sx={{ mr: 1, fontWeight: 600 }}
+                >
+                  Reset
+                </Button>
+              )}
+              <Button
+                size="small"
+                startIcon={filtersExpanded ? <ChevronUp size={18} /> : <Search size={18} />}
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+                sx={{ fontWeight: 600 }}
+              >
+                {filtersExpanded ? 'Hide Filters' : 'Search & Filter'}
+              </Button>
+            </Box>
           </Box>
 
           {/* Search and Filters */}
-          {validJobs.length > 0 && (
-            <Paper sx={{ p: 3, mb: 0, borderRadius: 0 }}>
-              {/* Expandable Header */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                }}
-                onClick={() => setFiltersExpanded(!filtersExpanded)}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Search size={20} style={{ color: theme.palette.text.secondary }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 1 }}>
-                    Search & Filter
-                  </Typography>
-                  {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        ml: 1,
-                        px: 1,
-                        py: 0.25,
-                        borderRadius: 1,
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        fontWeight: 600,
+          <Collapse in={filtersExpanded}>
+            <Box sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.primary.main, 0.01) }}>
+              <Grid container spacing={2}>
+                {/* Search */}
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search jobs by title, department, location..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(0);
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+
+                {/* Status Filter */}
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={filterStatus}
+                      label="Status"
+                      onChange={(e) => {
+                        setFilterStatus(e.target.value);
+                        setPage(0);
                       }}
                     >
-                      {[
-                        searchQuery ? 'Search' : null,
-                        filterStatus !== 'all' ? 'Status' : null,
-                        filterDepartment !== 'all' ? 'Dept' : null,
-                        filterType !== 'all' ? 'Type' : null,
-                        filterLocation !== 'all' ? 'Loc' : null,
-                      ].filter(Boolean).length} active
-                    </Typography>
-                  )}
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {(searchQuery || filterStatus !== 'all' || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleResetFilters();
+                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="active">Active</MenuItem>
+                      <MenuItem value="closed">Closed</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                {/* Department Filter */}
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Department</InputLabel>
+                    <Select
+                      value={filterDepartment}
+                      label="Department"
+                      onChange={(e) => {
+                        setFilterDepartment(e.target.value);
+                        setPage(0);
                       }}
-                      startIcon={<X size={16} />}
-                      sx={{ mr: 1 }}
                     >
-                      Reset
-                    </Button>
-                  )}
-                  {filtersExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </Box>
-              </Box>
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueDepartments.map((dept) => (
+                        <MenuItem key={dept} value={dept}>
+                          {dept}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-              {/* Expandable Content */}
-              <Collapse in={filtersExpanded}>
-                <Box sx={{ mt: 3, pt: 3, borderTop: `1px solid ${theme.palette.divider}` }}>
-                  <Grid container spacing={2} alignItems="flex-end">
-                    {/* Search */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Search jobs by title, department, location..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          setPage(0);
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Search size={20} />
-                            </InputAdornment>
-                          ),
-                        }}
-                        size="small"
-                      />
-                    </Grid>
+                {/* Type Filter */}
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Type</InputLabel>
+                    <Select
+                      value={filterType}
+                      label="Type"
+                      onChange={(e) => {
+                        setFilterType(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
 
-                    {/* Status Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                          value={filterStatus}
-                          label="Status"
-                          onChange={(e) => {
-                            setFilterStatus(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          <MenuItem value="active">Active</MenuItem>
-                          <MenuItem value="closed">Closed</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    {/* Department Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Department</InputLabel>
-                        <Select
-                          value={filterDepartment}
-                          label="Department"
-                          onChange={(e) => {
-                            setFilterDepartment(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueDepartments.map((dept) => (
-                            <MenuItem key={dept} value={dept}>
-                              {dept}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    {/* Type Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Type</InputLabel>
-                        <Select
-                          value={filterType}
-                          label="Type"
-                          onChange={(e) => {
-                            setFilterType(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueTypes.map((type) => (
-                            <MenuItem key={type} value={type}>
-                              {type}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    {/* Location Filter */}
-                    <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Location</InputLabel>
-                        <Select
-                          value={filterLocation}
-                          label="Location"
-                          onChange={(e) => {
-                            setFilterLocation(e.target.value);
-                            setPage(0);
-                          }}
-                        >
-                          <MenuItem value="all">All</MenuItem>
-                          {uniqueLocations.map((location) => (
-                            <MenuItem key={location} value={location}>
-                              {location}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Collapse>
-            </Paper>
-          )}
+                {/* Location Filter */}
+                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Location</InputLabel>
+                    <Select
+                      value={filterLocation}
+                      label="Location"
+                      onChange={(e) => {
+                        setFilterLocation(e.target.value);
+                        setPage(0);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      {uniqueLocations.map((location) => (
+                        <MenuItem key={location} value={location}>
+                          {location}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Box>
+          </Collapse>
 
           {/* Desktop Table View */}
           {!isMobile ? (
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                  <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>
                       <TableSortLabel
                         active={sortField === 'title'}
                         direction={sortField === 'title' ? sortDirection : 'asc'}
                         onClick={() => handleSort('title')}
+                        sx={{ fontWeight: 700 }}
                       >
                         Title
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>
                       <TableSortLabel
                         active={sortField === 'department'}
                         direction={sortField === 'department' ? sortDirection : 'asc'}
                         onClick={() => handleSort('department')}
+                        sx={{ fontWeight: 700 }}
                       >
                         Department
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>
                       <TableSortLabel
                         active={sortField === 'location'}
                         direction={sortField === 'location' ? sortDirection : 'asc'}
                         onClick={() => handleSort('location')}
+                        sx={{ fontWeight: 700 }}
                       >
                         Location
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>
                       <TableSortLabel
                         active={sortField === 'status'}
                         direction={sortField === 'status' ? sortDirection : 'asc'}
                         onClick={() => handleSort('status')}
+                        sx={{ fontWeight: 700 }}
                       >
                         Status
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Posted</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Analytics</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>UUID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>Posted</TableCell>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>Analytics</TableCell>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>UUID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, py: 2 }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedJobs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                         <Typography variant="body1" color="text.secondary">
                           No careers found matching your criteria.
                         </Typography>
@@ -1199,32 +1188,32 @@ export default function AdminPage() {
                       <TableRow
                         key={job.id}
                         sx={{
-                          '&:hover': { bgcolor: 'action.hover' },
+                          '&:hover': { bgcolor: alpha(theme.palette.action.hover, 0.5) },
                         }}
                       >
-                        <TableCell>{job.title}</TableCell>
-                        <TableCell>{job.department}</TableCell>
-                        <TableCell>{job.location}</TableCell>
-                        <TableCell>
+                        <TableCell sx={{ py: 2 }}>{job.title}</TableCell>
+                        <TableCell sx={{ py: 2 }}>{job.department}</TableCell>
+                        <TableCell sx={{ py: 2 }}>{job.location}</TableCell>
+                        <TableCell sx={{ py: 2 }}>
                           <Chip
                             label={formatStatus(job.status)}
                             size="small"
                             color={job.status === 'active' ? 'success' : 'default'}
                           />
                         </TableCell>
-                        <TableCell>
-                          {new Date(job.postedDate).toLocaleDateString()}
+                        <TableCell sx={{ py: 2 }}>
+                          {job.postedDate ? new Date(job.postedDate).toLocaleDateString() : 'N/A'}
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ py: 2 }}>
                           <Stack direction="row" spacing={1}>
                             <Chip label={`👁 ${job.views_count || 0}`} size="small" variant="outlined" />
                             <Chip label={`📝 ${job.applications_count || 0}`} size="small" variant="outlined" />
                           </Stack>
                         </TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
+                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary', py: 2 }}>
                           {job.id}
                         </TableCell>
-                        <TableCell>
+                        <TableCell sx={{ py: 2 }}>
                           <Box sx={{ display: 'flex', gap: 1 }}>
                             <IconButton
                               onClick={() => handleEdit(job)}
@@ -1232,7 +1221,7 @@ export default function AdminPage() {
                               color="primary"
                               title="Edit"
                             >
-                              <Edit2 size={18} />
+                              <Edit2 size={16} />
                             </IconButton>
                             <IconButton
                               onClick={() => handleDeleteClick(job.id)}
@@ -1240,7 +1229,7 @@ export default function AdminPage() {
                               color="error"
                               title="Delete"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </IconButton>
                           </Box>
                         </TableCell>
@@ -1390,7 +1379,10 @@ export default function AdminPage() {
             </Button>
           </DialogActions>
         </Dialog>
-      </Container>
-    </Box>
-  );
+        </>
+      ) : (
+        <JobApplicationsTab jobs={jobs} />
+      )}
+  </Box>
+);
 }

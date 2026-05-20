@@ -87,6 +87,7 @@ export function AdminHeader() {
             sx={{
               display: 'flex',
               alignItems: 'center',
+              flexShrink: 0,
               outline: 'none',
               textDecoration: 'none',
               transition: 'transform 0.2s ease',
@@ -99,6 +100,7 @@ export function AdminHeader() {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
+                flexShrink: 0,
                 mr: 1,
                 gap: 2,
                 bgcolor: alpha(theme.palette.common.white, 0.05),
@@ -116,10 +118,11 @@ export function AdminHeader() {
                 sx={{
                   height: 40,
                   width: 'auto',
+                  flexShrink: 0,
                   display: 'block',
                 }}
               />
-              <Box sx={{ display: 'flex', flexDirection: 'column', borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, pl: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', borderLeft: `1px solid ${alpha(theme.palette.common.white, 0.2)}`, pl: 2, flexShrink: 0 }}>
                 <Typography
                   variant="caption"
                   sx={{

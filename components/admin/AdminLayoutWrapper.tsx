@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
+import { Box, useMediaQuery, useTheme, CircularProgress, Container } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { JobProvider } from '@/contexts/JobContext';
+
 
 interface AdminLayoutWrapperProps {
   children: React.ReactNode;
@@ -60,8 +60,7 @@ export default function AdminLayoutWrapper({ children }: AdminLayoutWrapperProps
   if (!isAuthenticated) return null;
 
   return (
-    <JobProvider>
-      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : '#f8f9fa' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : '#f8f9fa' }}>
 
         <Box
           component="main"
@@ -74,11 +73,10 @@ export default function AdminLayoutWrapper({ children }: AdminLayoutWrapperProps
             }),
           }}
         >
-          <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 3, sm: 4, md: 5 }, pt: { xs: 1, sm: 1.5, md: 2 } }}>
             {children}
-          </Box>
+          </Container>
         </Box>
       </Box>
-    </JobProvider>
   );
 }

@@ -18,11 +18,12 @@ import {
   alpha,
   Stack,
 } from '@mui/material';
+import { createClient } from '@/lib/supabase/client';
 import { PageContainer, PageHeader } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 import { SECTION_SPACING } from '@/constants/layout';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -134,33 +135,78 @@ export default function PartnershipsPage() {
   const secondaryMain = theme.palette.secondary.main;
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
 
-  const industries = SITE_CONTENT.partnerships.industries.map(industry => {
+  const [partnerItems, setPartnerItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('partners')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (!error && data) {
+          setPartnerItems(data);
+        }
+      } catch (err) {
+        console.error('Error fetching partners:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPartners();
+  }, []);
+
+  const dbIndustries = partnerItems.filter(item => item.type === 'industry');
+  const displayIndustries = dbIndustries.length > 0 ? dbIndustries : SITE_CONTENT.partnerships.industries;
+
+  const industries = displayIndustries.map(industry => {
     let icon = Briefcase;
-    if (industry.name.includes('Consumer Goods')) icon = Package;
+    if (industry.name.includes('Consumer Goods') || industry.name.includes('FMCG')) icon = Package;
     if (industry.name.includes('Engineering')) icon = Wrench;
     if (industry.name.includes('Food')) icon = UtensilsCrossed;
     if (industry.name.includes('Financial')) icon = DollarSign;
     if (industry.name.includes('Retail')) icon = Store;
-    return { ...industry, icon };
-  });
-
-  const memberships = SITE_CONTENT.partnerships.memberships.map(m => {
-    let image = IMAGE_URLS.MEMBERSHIP_SCMAP;
-    let whiteBackground = false;
-    if (m.name.includes('PEZA')) {
-      image = IMAGE_URLS.MEMBERSHIP_PEZA;
-      whiteBackground = true;
-    }
-    if (m.name.includes('JCtrans')) image = IMAGE_URLS.MEMBERSHIP_JCTRANS;
-
     return {
-      name: m.name,
-      fullName: m.name,
-      description: m.role,
-      image,
-      whiteBackground
+      name: industry.name,
+      description: industry.description || (industry as any).role || '',
+      icon
     };
   });
+
+  const PARTNER_IMAGE_MAP: Record<string, any> = {
+    'SCMAP': IMAGE_URLS.MEMBERSHIP_SCMAP,
+    'PEZA': IMAGE_URLS.MEMBERSHIP_PEZA,
+    'JCTRANS': IMAGE_URLS.MEMBERSHIP_JCTRANS,
+  };
+
+  const dbMemberships = partnerItems.filter(item => item.type === 'membership');
+  const memberships = dbMemberships.length > 0
+    ? dbMemberships.map(m => ({
+        name: m.name,
+        fullName: m.name,
+        description: m.description || '',
+        image: PARTNER_IMAGE_MAP[m.image_url] || m.image_url,
+        whiteBackground: m.white_background
+      }))
+    : SITE_CONTENT.partnerships.memberships.map(m => {
+        let image = IMAGE_URLS.MEMBERSHIP_SCMAP;
+        let whiteBackground = false;
+        if (m.name.includes('PEZA')) {
+          image = IMAGE_URLS.MEMBERSHIP_PEZA;
+          whiteBackground = true;
+        }
+        if (m.name.includes('JCtrans')) image = IMAGE_URLS.MEMBERSHIP_JCTRANS;
+
+        return {
+          name: m.name,
+          fullName: m.name,
+          description: m.role,
+          image,
+          whiteBackground
+        };
+      });
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % memberships.length);

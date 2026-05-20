@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
+import { createClient } from '../../lib/supabase/client';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import { PageContainer, PageHeader } from '../../components/layout';
@@ -62,6 +64,21 @@ const AbstractBlob = ({ color, top, left, right, bottom, size, rotate, opacity =
       />
     </svg>
   </Box>
+);
+
+const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string; position?: 'top' | 'bottom' }) => (
+  <Box
+    sx={{
+      position: 'absolute',
+      [position]: 0,
+      left: 0,
+      right: 0,
+      height: '15dvh',
+      background: `linear-gradient(to ${position === 'bottom' ? 'bottom' : 'top'}, transparent, ${toColor})`,
+      pointerEvents: 'none',
+      zIndex: 1,
+    }}
+  />
 );
 
 const DecorativeImageFrame = ({ children, theme }: any) => {
@@ -136,21 +153,49 @@ export default function HistoryPage() {
   const secondaryMain = theme.palette.secondary.main;
   const tertiaryMain = (theme.palette as any).tertiary?.main || primaryMain;
 
-  const milestones = SITE_CONTENT.company.strategy.milestones.map((m, index) => {
-    const colors = [primaryMain, secondaryMain, tertiaryMain];
-    return {
-      year: ('year' in m ? m.year : null) || (index === 1 ? '2015-2018' : index === 2 ? '2019-2022' : '2023-Present'),
-      title: m.title,
-      description: m.description,
-      color: colors[index % colors.length]
+  const [dbMilestones, setDbMilestones] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchMilestones = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('milestones')
+          .select('*')
+          .order('display_order', { ascending: true });
+        
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setDbMilestones(data);
+        }
+      } catch (err) {
+        console.error('Error fetching milestones from database:', err);
+      }
     };
-  });
+    fetchMilestones();
+  }, []);
+
+  const milestones = useMemo(() => {
+    const sourceList = dbMilestones.length > 0 ? dbMilestones : SITE_CONTENT.company.strategy.milestones;
+    return sourceList.map((m, index) => {
+      const colors = [primaryMain, secondaryMain, tertiaryMain];
+      return {
+        year: m.year || (index === 1 ? '2015-2018' : index === 2 ? '2019-2022' : '2023-Present'),
+        title: m.title,
+        description: m.description,
+        color: colors[index % colors.length]
+      };
+    });
+  }, [dbMilestones, primaryMain, secondaryMain, tertiaryMain]);
 
   // Scalable Milestone Grouping (2 per slide)
-  const milestoneChunks = [];
-  for (let i = 0; i < milestones.length; i += 2) {
-    milestoneChunks.push(milestones.slice(i, i + 2));
-  }
+  const milestoneChunks = useMemo(() => {
+    const chunks = [];
+    for (let i = 0; i < milestones.length; i += 2) {
+      chunks.push(milestones.slice(i, i + 2));
+    }
+    return chunks;
+  }, [milestones]);
 
   return (
     <Box>
@@ -462,7 +507,19 @@ export default function HistoryPage() {
           </PageContainer>
 
           {/* Smooth transition to next section */}
-
+          {slideIndex < milestoneChunks.length - 1 ? (
+            <SectionTransition
+              toColor={
+                slideIndex % 2 === 0
+                  ? theme.palette.background.default
+                  : theme.palette.background.paper
+              }
+            />
+          ) : (
+            slideIndex % 2 === 0 && (
+              <SectionTransition toColor={theme.palette.background.default} />
+            )
+          )}
         </Box>
       ))}
     </Box>

@@ -23,7 +23,8 @@ import {
   Button,
   Collapse,
   TableSortLabel,
-  useTheme
+  useTheme,
+  alpha
 } from '@mui/material';
 import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { formatStatus } from '@/lib/utils';
@@ -73,10 +74,10 @@ export default function ApplicantTable({
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(applicant =>
-        applicant.first_name.toLowerCase().includes(query) ||
-        applicant.last_name.toLowerCase().includes(query) ||
-        applicant.email.toLowerCase().includes(query) ||
-        (applicant.job_id ? jobTitlesMap.get(applicant.job_id)?.toLowerCase().includes(query) : 'general application'.includes(query))
+        (applicant.first_name || '').toLowerCase().includes(query) ||
+        (applicant.last_name || '').toLowerCase().includes(query) ||
+        (applicant.email || '').toLowerCase().includes(query) ||
+        (applicant.job_id ? (jobTitlesMap.get(applicant.job_id) || '').toLowerCase().includes(query) : 'general application'.includes(query))
       );
     }
 
@@ -90,24 +91,26 @@ export default function ApplicantTable({
 
       switch (sortField) {
         case 'name':
-          aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
-          bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+          aValue = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
+          bValue = `${b.first_name || ''} ${b.last_name || ''}`.toLowerCase();
           break;
         case 'email':
-          aValue = a.email.toLowerCase();
-          bValue = b.email.toLowerCase();
+          aValue = (a.email || '').toLowerCase();
+          bValue = (b.email || '').toLowerCase();
           break;
         case 'job_title':
           aValue = (a.job_id ? jobTitlesMap.get(a.job_id) || '' : 'General Application').toLowerCase();
           bValue = (b.job_id ? jobTitlesMap.get(b.job_id) || '' : 'General Application').toLowerCase();
           break;
         case 'status':
-          aValue = a.status.toLowerCase();
-          bValue = b.status.toLowerCase();
+          aValue = (a.status || '').toLowerCase();
+          bValue = (b.status || '').toLowerCase();
           break;
         case 'applied_at':
-          aValue = a.applied_at ? new Date(a.applied_at).getTime() : 0;
-          bValue = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+          const timeA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
+          const timeB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
+          aValue = isNaN(timeA) ? 0 : timeA;
+          bValue = isNaN(timeB) ? 0 : timeB;
           break;
         default:
           return 0;
@@ -150,8 +153,8 @@ export default function ApplicantTable({
   };
 
   return (
-    <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3 }}>
-      <Box sx={{ px: 3, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
+      <Box sx={{ px: 3, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: 'background.paper' }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           {title}
         </Typography>
@@ -160,6 +163,7 @@ export default function ApplicantTable({
             size="small"
             startIcon={filtersExpanded ? <ChevronUp size={18} /> : <Search size={18} />}
             onClick={() => setFiltersExpanded(!filtersExpanded)}
+            sx={{ fontWeight: 600 }}
           >
             {filtersExpanded ? 'Hide Filters' : 'Search & Filter'}
           </Button>
@@ -167,7 +171,7 @@ export default function ApplicantTable({
       </Box>
 
       <Collapse in={filtersExpanded}>
-        <Box sx={{ px: 3, pb: 3, pt: 1 }}>
+        <Box sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.primary.main, 0.01) }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 8 }}>
               <TextField
@@ -202,56 +206,61 @@ export default function ApplicantTable({
 
       <TableContainer>
         <Table size={compact ? "small" : "medium"}>
-          <TableHead sx={{ bgcolor: 'action.hover' }}>
-            <TableRow>
-              <TableCell>
+          <TableHead>
+            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'name'}
                   direction={sortField === 'name' ? sortDirection : 'asc'}
                   onClick={() => handleSort('name')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Name
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'job_title'}
                   direction={sortField === 'job_title' ? sortDirection : 'asc'}
                   onClick={() => handleSort('job_title')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Job Title
                 </TableSortLabel>
               </TableCell>
               {!compact && (
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>
                   <TableSortLabel
                     active={sortField === 'email'}
                     direction={sortField === 'email' ? sortDirection : 'asc'}
                     onClick={() => handleSort('email')}
+                    sx={{ fontWeight: 700 }}
                   >
                     Email
                   </TableSortLabel>
                 </TableCell>
               )}
-              <TableCell>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'status'}
                   direction={sortField === 'status' ? sortDirection : 'asc'}
                   onClick={() => handleSort('status')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Status
                 </TableSortLabel>
               </TableCell>
               {!compact && (
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>
                   UUID
                 </TableCell>
               )}
-              <TableCell align="right">
+              <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'applied_at'}
                   direction={sortField === 'applied_at' ? sortDirection : 'asc'}
                   onClick={() => handleSort('applied_at')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Date
                 </TableSortLabel>

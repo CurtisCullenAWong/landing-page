@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 
 import { useJobs } from '../../contexts/JobContext';
-import { MapPin, Briefcase, Clock, Search, X, ChevronDown, ChevronUp, GraduationCap, Target, Users, Sparkles } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, X, ChevronDown, ChevronUp, GraduationCap, Target, Users, Sparkles, ArrowRight } from 'lucide-react';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
 import {
@@ -41,6 +41,21 @@ import { JobListingsSkeleton } from '@/components/loading';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 import { motion } from 'framer-motion';
+
+const SectionTransition = ({ toColor, position = 'bottom' }: { toColor: string; position?: 'top' | 'bottom' }) => (
+  <Box
+    sx={{
+      position: 'absolute',
+      [position]: 0,
+      left: 0,
+      right: 0,
+      height: '15dvh',
+      background: `linear-gradient(to ${position === 'bottom' ? 'bottom' : 'top'}, transparent, ${toColor})`,
+      pointerEvents: 'none',
+      zIndex: 1,
+    }}
+  />
+);
 
 type SortField = 'title' | 'department' | 'location' | 'type' | 'postedDate';
 type SortDirection = 'asc' | 'desc';
@@ -89,6 +104,26 @@ const CornerBrackets = ({
   </>
 );
 
+// Helper function to format date relatively
+const getRelativeTimeString = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    // Reset hours to get exact day differences
+    const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffTime = nowMidnight.getTime() - dateMidnight.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) return 'Posted today';
+    if (diffDays === 1) return 'Posted yesterday';
+    if (diffDays <= 7) return `Posted ${diffDays} days ago`;
+    return `Posted on ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  } catch (e) {
+    return 'Recently posted';
+  }
+};
+
 export default function JobPostingsPage() {
   usePageTitle('Careers');
   const { jobs, departments, isLoading } = useJobs();
@@ -120,6 +155,15 @@ export default function JobPostingsPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [sortOption, setSortOption] = useState<string>('postedDate_desc');
+
+  const handleSortChange = (value: string) => {
+    setSortOption(value);
+    const [field, direction] = value.split('_') as [SortField, SortDirection];
+    setSortField(field);
+    setSortDirection(direction);
+    setPage(0);
+  };
 
 
 
@@ -240,6 +284,9 @@ export default function JobPostingsPage() {
     setFilterDepartment('all');
     setFilterType('all');
     setFilterLocation('all');
+    setSortOption('postedDate_desc');
+    setSortField('postedDate');
+    setSortDirection('desc');
     setPage(0);
   };
 
@@ -276,8 +323,8 @@ export default function JobPostingsPage() {
               zIndex: 0,
               pointerEvents: 'none',
               overflow: 'hidden',
-              maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
-              WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
             }}>
               {/* Massive Squiggly Shape (Teal Gradient) */}
               <Box
@@ -446,8 +493,8 @@ export default function JobPostingsPage() {
               zIndex: 0,
               pointerEvents: 'none',
               overflow: 'hidden',
-              maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
-              WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%), linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
             }}>
               {/* Massive Organic Shape (Yellow Gradient) */}
               <Box
@@ -647,6 +694,9 @@ export default function JobPostingsPage() {
                 </Grid>
               </Grid>
             </Container>
+            {activeJobs.length === 0 && (
+              <SectionTransition toColor={theme.palette.mode === 'dark' ? theme.palette.background.default : '#0B0F14'} />
+            )}
           </Box>
           {/* Slide 2: Career Opportunities */}
           {activeJobs.length > 0 && (
@@ -676,7 +726,9 @@ export default function JobPostingsPage() {
                 zIndex: 0,
                 pointerEvents: 'none',
                 overflow: 'hidden', // Contain background elements
-                mixBlendMode: 'multiply',
+                mixBlendMode: isDark ? 'screen' : 'multiply',
+                maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
               }}>
                 {/* Gradient Glow */}
                 <Box sx={{
@@ -765,7 +817,7 @@ export default function JobPostingsPage() {
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {(searchQuery || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all') && (
+                        {(searchQuery || filterDepartment !== 'all' || filterType !== 'all' || filterLocation !== 'all' || sortOption !== 'postedDate_desc') && (
                           <Button
                             variant="outlined"
                             size="small"
@@ -785,7 +837,7 @@ export default function JobPostingsPage() {
                     <Collapse in={filtersExpanded}>
                       <Box sx={{ mt: 3, pt: 3, borderTop: `1px dashed ${theme.palette.divider}` }}>
                         <Grid container spacing={2}>
-                          <Grid size={{ xs: 12, md: 6 }}>
+                          <Grid size={{ xs: 12, md: 4 }}>
                             <TextField
                               fullWidth
                               placeholder="Search job titles, skills, or keywords..."
@@ -802,7 +854,7 @@ export default function JobPostingsPage() {
                               size="small"
                             />
                           </Grid>
-                          <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Department</InputLabel>
                               <Select value={filterDepartment} label="Department" onChange={(e) => { setFilterDepartment(e.target.value); setPage(0); }} sx={{ borderRadius: 2 }}>
@@ -811,7 +863,7 @@ export default function JobPostingsPage() {
                               </Select>
                             </FormControl>
                           </Grid>
-                          <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Employment</InputLabel>
                               <Select value={filterType} label="Employment" onChange={(e) => { setFilterType(e.target.value); setPage(0); }} sx={{ borderRadius: 2 }}>
@@ -820,7 +872,7 @@ export default function JobPostingsPage() {
                               </Select>
                             </FormControl>
                           </Grid>
-                          <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                             <FormControl fullWidth size="small">
                               <InputLabel>Location</InputLabel>
                               <Select value={filterLocation} label="Location" onChange={(e) => { setFilterLocation(e.target.value); setPage(0); }} sx={{ borderRadius: 2 }}>
@@ -829,140 +881,215 @@ export default function JobPostingsPage() {
                               </Select>
                             </FormControl>
                           </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Sort By</InputLabel>
+                              <Select value={sortOption} label="Sort By" onChange={(e) => handleSortChange(e.target.value as string)} sx={{ borderRadius: 2 }}>
+                                <MenuItem value="postedDate_desc">Date (Newest)</MenuItem>
+                                <MenuItem value="postedDate_asc">Date (Oldest)</MenuItem>
+                                <MenuItem value="title_asc">Title (A-Z)</MenuItem>
+                                <MenuItem value="title_desc">Title (Z-A)</MenuItem>
+                                <MenuItem value="department_asc">Department (A-Z)</MenuItem>
+                                <MenuItem value="location_asc">Location (A-Z)</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
                         </Grid>
                       </Box>
                     </Collapse>
                   </Paper>
 
-                  <TableContainer sx={{ display: { xs: 'none', md: 'block' }, maxHeight: { xs: '40vh', lg: '50vh' } }}>
-                    <Table stickyHeader>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{
-                            fontWeight: 800,
-                            bgcolor: alpha(theme.palette.background.paper, 0.9),
-                            backdropFilter: 'blur(8px)',
-                            py: 2,
-                            zIndex: 3
-                          }}>
-                            <TableSortLabel active={sortField === 'title'} direction={sortField === 'title' ? sortDirection : 'asc'} onClick={() => handleSort('title')}>
-                              Position Title
-                            </TableSortLabel>
-                          </TableCell>
-                          <TableCell sx={{
-                            fontWeight: 800,
-                            bgcolor: alpha(theme.palette.background.paper, 0.9),
-                            backdropFilter: 'blur(8px)',
-                            zIndex: 3
-                          }}>
-                            <TableSortLabel active={sortField === 'department'} direction={sortField === 'department' ? sortDirection : 'asc'} onClick={() => handleSort('department')}>
-                              Department
-                            </TableSortLabel>
-                          </TableCell>
-                          <TableCell sx={{
-                            fontWeight: 800,
-                            bgcolor: alpha(theme.palette.background.paper, 0.9),
-                            backdropFilter: 'blur(8px)',
-                            zIndex: 3
-                          }}>Work Location</TableCell>
-                          <TableCell sx={{
-                            fontWeight: 800,
-                            bgcolor: alpha(theme.palette.background.paper, 0.9),
-                            backdropFilter: 'blur(8px)',
-                            zIndex: 3
-                          }}>Contract</TableCell>
-                          <TableCell sx={{
-                            fontWeight: 800,
-                            bgcolor: alpha(theme.palette.background.paper, 0.9),
-                            backdropFilter: 'blur(8px)',
-                            textAlign: 'right',
-                            zIndex: 3
-                          }}>Action</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {paginatedJobs.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
-                              <Stack alignItems="center" spacing={2}>
-                                <Search size={48} color={theme.palette.text.disabled} />
-                                <Typography variant="h6" color="text.secondary">No matching opportunities found.</Typography>
-                                <Button onClick={handleResetFilters} variant="text" color="primary">Clear all filters</Button>
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          paginatedJobs.map((job) => (
-                            <TableRow
-                              key={job.id}
-                              hover
-                              sx={{
-                                ...(job.featured && {
-                                  bgcolor: alpha(tertiaryMain, 0.08),
-                                  '& td': { borderColor: alpha(tertiaryDark, 0.22) }
-                                }),
+                  {/* Card-Based Job List */}
+                  <Box sx={{ bgcolor: 'background.paper' }}>
+                    {paginatedJobs.length === 0 ? (
+                      <Box sx={{ py: 8, textAlign: 'center' }}>
+                        <Stack alignItems="center" spacing={2}>
+                          <Search size={40} color={theme.palette.text.disabled} />
+                          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            No matching opportunities found.
+                          </Typography>
+                          <Button onClick={handleResetFilters} variant="text" size="small" color="primary" sx={{ fontWeight: 700 }}>
+                            Clear all filters
+                          </Button>
+                        </Stack>
+                      </Box>
+                    ) : (
+                      <Stack divider={<Divider />} sx={{ width: '100%' }}>
+                        {paginatedJobs.map((job) => (
+                          <Box
+                            key={job.id}
+                            component={motion.div}
+                            whileHover={{ x: 4 }}
+                            transition={{ duration: 0.2 }}
+                            sx={{
+                              position: 'relative',
+                              px: { xs: 3, md: 4 },
+                              py: { xs: 2.5, md: 3 },
+                              transition: 'background-color 0.2s',
+                              ...(job.featured ? {
+                                bgcolor: alpha(tertiaryMain, 0.03),
                                 '&:hover': {
-                                  bgcolor: job.featured ? alpha(tertiaryMain, 0.16) : alpha(primaryMain, 0.02)
+                                  bgcolor: alpha(tertiaryMain, 0.07),
                                 }
-                              }}
-                            >
-                              <TableCell>
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.primary' }}>{job.title}</Typography>
-                                {job.featured && (
-                                  <Chip
-                                    icon={<Sparkles size={12} />}
-                                    label="Featured"
+                              } : {
+                                '&:hover': {
+                                  bgcolor: alpha(primaryMain, 0.02),
+                                }
+                              })
+                            }}
+                          >
+                            {/* Left accent border for featured jobs */}
+                            {job.featured && (
+                              <Box sx={{
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                bottom: 0,
+                                width: '4px',
+                                background: `linear-gradient(to bottom, ${tertiaryMain}, ${primaryMain})`
+                              }} />
+                            )}
+
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid size={{ xs: 12, md: 8.5 }}>
+                                <Stack spacing={1.5}>
+                                  {/* Tags / Metadata Row */}
+                                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ gap: 1, alignItems: 'center' }}>
+                                    {job.featured && (
+                                      <Chip
+                                        icon={<Sparkles size={12} />}
+                                        label="Featured"
+                                        size="small"
+                                        sx={{
+                                          height: 20,
+                                          fontWeight: 800,
+                                          bgcolor: tertiaryMain,
+                                          color: secondaryDark,
+                                          border: `1px solid ${alpha(secondaryDark, 0.1)}`,
+                                          fontSize: '0.7rem',
+                                          '& .MuiChip-icon': { color: secondaryDark }
+                                        }}
+                                      />
+                                    )}
+                                    <Chip
+                                      icon={<Briefcase size={12} />}
+                                      label={job.department}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        height: 20,
+                                        fontWeight: 600,
+                                        fontSize: '0.7rem',
+                                        borderColor: alpha(primaryMain, 0.25),
+                                        color: primaryMain,
+                                        bgcolor: alpha(primaryMain, 0.02),
+                                        '& .MuiChip-icon': { color: primaryMain }
+                                      }}
+                                    />
+                                    <Chip
+                                      icon={<MapPin size={12} />}
+                                      label={job.location}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        height: 20,
+                                        fontWeight: 600,
+                                        fontSize: '0.7rem',
+                                        borderColor: alpha(theme.palette.text.secondary, 0.15),
+                                        color: 'text.secondary',
+                                        '& .MuiChip-icon': { color: 'text.secondary' }
+                                      }}
+                                    />
+                                    <Chip
+                                      label={job.type}
+                                      size="small"
+                                      sx={{
+                                        height: 20,
+                                        fontWeight: 700,
+                                        fontSize: '0.7rem',
+                                        bgcolor: alpha(primaryMain, 0.08),
+                                        color: isDark ? '#fff' : primaryMain,
+                                        border: `1px solid ${alpha(primaryMain, 0.15)}`
+                                      }}
+                                    />
+                                  </Stack>
+
+                                  {/* Title and Salary */}
+                                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.5, sm: 2 }} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.3 }}>
+                                      {job.title}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: primaryMain, fontWeight: 700, bgcolor: alpha(primaryMain, 0.06), px: 1.2, py: 0.3, borderRadius: 1 }}>
+                                      {job.salary}
+                                    </Typography>
+                                  </Stack>
+
+                                  {/* Description Snippet */}
+                                  <Typography variant="body2" color="text.secondary" sx={{
+                                    lineHeight: 1.5,
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    fontSize: '0.875rem'
+                                  }}>
+                                    {job.description}
+                                  </Typography>
+                                </Stack>
+                              </Grid>
+
+                              <Grid size={{ xs: 12, md: 3.5 }}>
+                                <Stack
+                                  spacing={1.5}
+                                  alignItems={{ xs: 'flex-start', md: 'flex-end' }}
+                                  justifyContent="center"
+                                  sx={{
+                                    height: '100%',
+                                    pt: { xs: 1.5, md: 0 },
+                                    borderTop: { xs: `1px dashed ${theme.palette.divider}`, md: 'none' }
+                                  }}
+                                >
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                                    {getRelativeTimeString(job.postedDate)}
+                                  </Typography>
+                                  
+                                  <Button
+                                    component={Link}
+                                    href={`/careers/job-details/${job.id}`}
+                                    variant="contained"
                                     size="small"
+                                    endIcon={<ArrowRight size={14} />}
                                     sx={{
-                                      mt: 0.5,
-                                      mr: 0.5,
-                                      mb: 0.5,
-                                      height: 20,
+                                      borderRadius: 1.5,
                                       fontWeight: 700,
-                                      bgcolor: tertiaryMain,
-                                      color: secondaryDark,
-                                      border: `1px solid ${alpha(secondaryDark, 0.2)}`,
-                                      '& .MuiChip-icon': { color: secondaryDark }
+                                      px: 3,
+                                      py: 0.75,
+                                      width: { xs: '100%', md: 'auto' },
+                                      boxShadow: 'none',
+                                      '&:hover': {
+                                        boxShadow: `0 4px 12px ${alpha(primaryMain, 0.15)}`,
+                                        '& .MuiButton-endIcon': {
+                                          transform: 'translateX(3px)'
+                                        }
+                                      },
+                                      '& .MuiButton-endIcon': {
+                                        transition: 'transform 0.2s'
+                                      },
+                                      transition: 'all 0.2s ease-in-out'
                                     }}
-                                  />
-                                )}
-                                <Typography variant="caption" sx={{ color: primaryMain, fontWeight: 700 }}>{job.salary}</Typography>
-                              </TableCell>
-                              <TableCell>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-                                  <Briefcase size={16} color={primaryMain} />
-                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{job.department}</Typography>
-                                </Box>
-                              </TableCell>
-                              <TableCell>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-                                  <MapPin size={16} color={primaryMain} />
-                                  <Typography variant="body2">{job.location}</Typography>
-                                </Box>
-                              </TableCell>
-                              <TableCell>
-                                <Typography variant="caption" sx={{
-                                  px: 1.5, py: 0.5, borderRadius: 1,
-                                  bgcolor: alpha(primaryMain, 0.1),
-                                  color: isDark ? '#fff' : primaryMain,
-                                  fontWeight: 800,
-                                  textTransform: 'uppercase',
-                                  border: `1px solid ${alpha(primaryMain, 0.2)}`
-                                }}>
-                                  {job.type}
-                                </Typography>
-                              </TableCell>
-                              <TableCell align="right">
-                                <Button component={Link} href={`/careers/job-details/${job.id}`} variant="contained" size="small" sx={{ borderRadius: 2, fontWeight: 700 }}>
-                                  Apply Now
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                                  >
+                                    View Details
+                                  </Button>
+                                </Stack>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        ))}
+                      </Stack>
+                    )}
+                  </Box>
+
                   <TablePagination
                     component="div"
                     count={filteredAndSortedJobs.length}
@@ -979,77 +1106,11 @@ export default function JobPostingsPage() {
                       zIndex: 2
                     }}
                   />
-
-                  {/* Mobile Card View */}
-                  <Box sx={{ display: { xs: 'block', md: 'none' }, p: 2, bgcolor: alpha(paperColor, 0.9), backdropFilter: 'blur(10px)' }}>
-                    {paginatedJobs.map((job) => (
-                      <Card
-                        key={job.id}
-                        sx={{
-                          mb: 2,
-                          border: `1px solid ${job.featured ? alpha(tertiaryDark, 0.35) : alpha(theme.palette.divider, 0.1)}`,
-                          position: 'relative',
-                          borderRadius: 2,
-                          ...(job.featured && {
-                            bgcolor: alpha(tertiaryMain, 0.07),
-                            boxShadow: `0 8px 24px ${alpha(tertiaryMain, 0.2)}`
-                          })
-                        }}
-                      >
-                        <CornerBrackets color={tertiaryMain} radius={16} size={16} hideTopLeft={true} />
-                        <CardContent sx={{ p: 2.5 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.75, color: primaryMain }}>{job.title}</Typography>
-                          {job.featured && (
-                            <Chip
-                              icon={<Sparkles size={12} />}
-                              label="Featured"
-                              size="small"
-                              sx={{
-                                mb: 1.5,
-                                height: 20,
-                                fontWeight: 700,
-                                bgcolor: tertiaryMain,
-                                color: secondaryDark,
-                                border: `1px solid ${alpha(secondaryDark, 0.2)}`,
-                                '& .MuiChip-icon': { color: secondaryDark }
-                              }}
-                            />
-                          )}
-                          <Stack spacing={1.5} sx={{ mb: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Briefcase size={16} color={primaryMain} />
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{job.department}</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <MapPin size={16} color={primaryMain} />
-                              <Typography variant="body2">{job.location}</Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Clock size={16} color={primaryMain} />
-                              <Typography variant="caption" sx={{
-                                px: 1.2, py: 0.3, borderRadius: 1,
-                                bgcolor: alpha(primaryMain, 0.1),
-                                color: isDark ? '#fff' : primaryMain,
-                                fontWeight: 800,
-                                textTransform: 'uppercase',
-                                border: `1px solid ${alpha(primaryMain, 0.2)}`
-                              }}>
-                                {job.type}
-                              </Typography>
-                            </Box>
-                          </Stack>
-                          <Button component={Link} href={`/careers/job-details/${job.id}`} variant="contained" fullWidth sx={{ borderRadius: 2, fontWeight: 700 }}>
-                            View Details
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    <Box sx={{ height: { xs: 96, sm: 120 } }} />
-                  </Box>
                 </Card>
               </Container>
 
 
+              <SectionTransition toColor={theme.palette.mode === 'dark' ? theme.palette.background.default : '#0B0F14'} />
             </Box>
           )}</>
       )}

@@ -15,9 +15,8 @@ export const NAV_LINKS = [
 
 export const ADMIN_NAV_LINKS = [
   { name: 'Dashboard', href: '/admin' },
-  { name: 'Posts', href: '/admin/posts' },
-  { name: 'Careers', href: '/admin/careers' },
-  { name: 'Job Applications', href: '/admin/job-applications' },
+  { name: 'Content Manager', href: '/admin/content-manager' },
+  { name: 'Recruitment', href: '/admin/careers' },
 ];
 
 export const CONTACT_INFO = {
@@ -34,7 +33,7 @@ export const scrollToHref = (href: string) => {
   let id = href.replace('/#', '').replace('/', '');
   if (!id) id = 'home';
   const element = document.getElementById(id);
-  
+
   if (element) {
     // Account for header height (80px)
     const headerOffset = 80;
@@ -77,7 +76,7 @@ export const useActiveSection = () => {
       isInitialLoadRef.current = false;
     }, 1000);
 
-    const sections = ['home', 'about-us', 'why-us', 'history', 'partnerships', 'careers'];
+    const sections = ['home', 'news', 'about-us', 'why-us', 'history', 'partnerships', 'careers'];
 
     const handleScroll = () => {
       // Defensive check: only run this on the home page
@@ -90,7 +89,7 @@ export const useActiveSection = () => {
         if (isInitialLoadRef.current && window.location.hash && window.location.hash !== '#home') {
           return;
         }
-        
+
         if (currentSectionRef.current !== 'home') {
           currentSectionRef.current = 'home';
           setActiveSection('home');
@@ -119,7 +118,7 @@ export const useActiveSection = () => {
             const rect = element.getBoundingClientRect();
             // Threshold is top 1/3 of the screen
             const threshold = window.innerHeight / 3;
-            
+
             // If the section's top has passed the threshold, it's a candidate
             if (rect.top <= threshold) {
               current = id;

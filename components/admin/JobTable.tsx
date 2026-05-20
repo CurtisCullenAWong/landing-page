@@ -24,7 +24,8 @@ import {
   Collapse,
   TableSortLabel,
   useTheme,
-  Grid
+  Grid,
+  alpha
 } from '@mui/material';
 import { Search, ChevronDown, ChevronUp, X, MapPin, Briefcase } from 'lucide-react';
 import { formatStatus } from '@/lib/utils';
@@ -58,9 +59,9 @@ export default function JobTable({
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.department.toLowerCase().includes(query) ||
-        job.location.toLowerCase().includes(query)
+        (job.title || '').toLowerCase().includes(query) ||
+        (job.department || '').toLowerCase().includes(query) ||
+        (job.location || '').toLowerCase().includes(query)
       );
     }
 
@@ -74,24 +75,26 @@ export default function JobTable({
 
       switch (sortField) {
         case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
+          aValue = (a.title || '').toLowerCase();
+          bValue = (b.title || '').toLowerCase();
           break;
         case 'department':
-          aValue = a.department.toLowerCase();
-          bValue = b.department.toLowerCase();
+          aValue = (a.department || '').toLowerCase();
+          bValue = (b.department || '').toLowerCase();
           break;
         case 'location':
-          aValue = a.location.toLowerCase();
-          bValue = b.location.toLowerCase();
+          aValue = (a.location || '').toLowerCase();
+          bValue = (b.location || '').toLowerCase();
           break;
         case 'status':
-          aValue = a.status;
-          bValue = b.status;
+          aValue = (a.status || '').toLowerCase();
+          bValue = (b.status || '').toLowerCase();
           break;
         case 'postedDate':
-          aValue = new Date(a.postedDate).getTime();
-          bValue = new Date(b.postedDate).getTime();
+          const timeA = a.postedDate ? new Date(a.postedDate).getTime() : 0;
+          const timeB = b.postedDate ? new Date(b.postedDate).getTime() : 0;
+          aValue = isNaN(timeA) ? 0 : timeA;
+          bValue = isNaN(timeB) ? 0 : timeB;
           break;
         default:
           return 0;
@@ -121,8 +124,8 @@ export default function JobTable({
   };
 
   return (
-    <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3 }}>
-      <Box sx={{ px: 3, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
+      <Box sx={{ px: 3, py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: 'background.paper' }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           {title}
         </Typography>
@@ -131,6 +134,7 @@ export default function JobTable({
             size="small"
             startIcon={filtersExpanded ? <ChevronUp size={18} /> : <Search size={18} />}
             onClick={() => setFiltersExpanded(!filtersExpanded)}
+            sx={{ fontWeight: 600 }}
           >
             {filtersExpanded ? 'Hide Filters' : 'Search & Filter'}
           </Button>
@@ -138,7 +142,7 @@ export default function JobTable({
       </Box>
 
       <Collapse in={filtersExpanded}>
-        <Box sx={{ px: 3, pb: 3, pt: 1 }}>
+        <Box sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: alpha(theme.palette.primary.main, 0.01) }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 8 }}>
               <TextField
@@ -172,56 +176,61 @@ export default function JobTable({
 
       <TableContainer>
         <Table size={compact ? "small" : "medium"}>
-          <TableHead sx={{ bgcolor: 'action.hover' }}>
-            <TableRow>
-              <TableCell>
+          <TableHead>
+            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'title'}
                   direction={sortField === 'title' ? sortDirection : 'asc'}
                   onClick={() => handleSort('title')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Job Title
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'department'}
                   direction={sortField === 'department' ? sortDirection : 'asc'}
                   onClick={() => handleSort('department')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Department
                 </TableSortLabel>
               </TableCell>
               {!compact && (
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>
                   <TableSortLabel
                     active={sortField === 'location'}
                     direction={sortField === 'location' ? sortDirection : 'asc'}
                     onClick={() => handleSort('location')}
+                    sx={{ fontWeight: 700 }}
                   >
                     Location
                   </TableSortLabel>
                 </TableCell>
               )}
-              <TableCell>
+              <TableCell sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'status'}
                   direction={sortField === 'status' ? sortDirection : 'asc'}
                   onClick={() => handleSort('status')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Status
                 </TableSortLabel>
               </TableCell>
               {!compact && (
-                <TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>
                   UUID
                 </TableCell>
               )}
-              <TableCell align="right">
+              <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>
                 <TableSortLabel
                   active={sortField === 'postedDate'}
                   direction={sortField === 'postedDate' ? sortDirection : 'asc'}
                   onClick={() => handleSort('postedDate')}
+                  sx={{ fontWeight: 700 }}
                 >
                   Posted
                 </TableSortLabel>

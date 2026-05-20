@@ -132,13 +132,13 @@ export function UserHeader() {
         <MassiveAbstractShape
           color={theme.palette.tertiary.main}
           opacity={0.3}
-          style={{ top: '-20%', left: '-20%', width: '140%', height: '160%', mixBlendMode: 'overlay' }}
+          style={{ top: '-20%', left: '-80%', width: '220%', height: '160%', mixBlendMode: 'overlay' }}
         />
         <MassiveAbstractShape
           color={theme.palette.primary.main}
           opacity={0.25}
           delay={5}
-          style={{ bottom: '-30%', right: '-20%', width: '150%', height: '170%', transform: 'rotate(-15deg)', mixBlendMode: 'soft-light' }}
+          style={{ bottom: '-30%', left: '-85%', width: '225%', height: '170%', mixBlendMode: 'soft-light' }}
         />
         <FilledAbstractShape
           color={theme.palette.tertiary.light}

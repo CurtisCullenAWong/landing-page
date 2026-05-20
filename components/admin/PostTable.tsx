@@ -43,15 +43,15 @@ export default function PostTable({ posts, onEdit, onDelete, onTogglePublish }: 
   };
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: isDark ? 4 : 1, border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+    <TableContainer>
       <Table>
         <TableHead>
-          <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
-            <TableCell sx={{ fontWeight: 700 }}>Content</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Type / Category</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Details</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 700 }}>Actions</TableCell>
+          <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+            <TableCell sx={{ fontWeight: 700, py: 2 }}>Content</TableCell>
+            <TableCell sx={{ fontWeight: 700, py: 2 }}>Type / Category</TableCell>
+            <TableCell sx={{ fontWeight: 700, py: 2 }}>Details</TableCell>
+            <TableCell sx={{ fontWeight: 700, py: 2 }}>Status</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -52,14 +52,14 @@ export const COVERAGE_POINTS = [
   { name: 'Roxas', x: 53.5, y: 58.0, description: 'Seafood capital of Capiz.' },
 
   // Mindanao (Eastern and Southern edges pulled inward)
-  { name: 'Butuan', x: 63.0, y: 72.0, description: 'Caraga regional commercial hub.' }, // Pulled left
+  { name: 'Butuan', x: 62.0, y: 72.0, description: 'Caraga regional commercial hub.' }, // Pulled left
   { name: 'Cagayan de Oro', x: 60.5, y: 74.0, description: 'Northern Mindanao logistics hub.' },
   { name: 'Cotabato', x: 59.5, y: 79.5, description: 'Central Mindanao trade center.' },
   { name: 'Davao', x: 62.5, y: 79.0, description: 'Largest city in Mindanao.' }, // Pulled left
   { name: 'Dipolog', x: 55.0, y: 74.5, description: 'Sardine capital of Zamboanga del Norte.' },
   { name: 'General Santos', x: 60.5, y: 83.5, description: 'Tuna capital of the Philippines.' }, // Pulled left and slightly up
   { name: 'Ozamis', x: 57.5, y: 76.0, description: 'Key port city in Misamis Occidental.' },
-  { name: 'Surigao', x: 63.5, y: 69.5, description: 'Gateway to northeastern Mindanao.' }, // Pulled left
-  { name: 'Zamboanga', x: 53.0, y: 81.0, description: 'Major trade center in the peninsula.' }, // Pulled right
+  { name: 'Surigao', x: 61.5, y: 69.5, description: 'Gateway to northeastern Mindanao.' }, // Pulled left
+  { name: 'Zamboanga', x: 53.0, y: 78.0, description: 'Major trade center in the peninsula.' }, // Pulled right
   { name: 'Pagadian', x: 56.0, y: 77.0, description: 'Regional center with rolling terrain.' },
 ].map((p, i) => ({ ...p, delay: (i % 30) * 0.03 }));
