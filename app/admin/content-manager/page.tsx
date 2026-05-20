@@ -53,6 +53,9 @@ import {
   ArrowUpDown,
   Building,
   Award,
+  Upload,
+  X,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePageTitle } from '@/lib/usePageTitle';
@@ -213,6 +216,76 @@ export default function AdminContentManagerPage() {
     white_background: false,
     display_order: 0,
   });
+  const [isUploadingPartnerLogo, setIsUploadingPartnerLogo] = useState(false);
+  const partnerFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const uploadPartnerImage = async (file: File) => {
+    const supabase = createClient();
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `partner-logos/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('posts')
+      .upload(filePath, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('posts')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  const deletePartnerImage = async (url: string) => {
+    const supabase = createClient();
+    const parts = url.split('/storage/v1/object/public/posts/');
+    if (parts.length < 2) return;
+
+    const filePath = parts[1];
+    const { error } = await supabase.storage
+      .from('posts')
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting partner image from storage:', error);
+    }
+  };
+
+  const handlePartnerImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPartnerLogo(true);
+    try {
+      if (partnerFormData.image_url) {
+        await deletePartnerImage(partnerFormData.image_url);
+      }
+      const url = await uploadPartnerImage(file);
+      setPartnerFormData(prev => ({ ...prev, image_url: url }));
+      showSnackbar('Logo uploaded successfully!');
+    } catch (error: any) {
+      console.error('Logo upload failed:', error);
+      showSnackbar(error.message || 'Failed to upload logo image.', 'error');
+    } finally {
+      setIsUploadingPartnerLogo(false);
+      if (partnerFileInputRef.current) partnerFileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemovePartnerLogo = async () => {
+    if (!partnerFormData.image_url) return;
+
+    try {
+      await deletePartnerImage(partnerFormData.image_url);
+      setPartnerFormData(prev => ({ ...prev, image_url: '' }));
+      showSnackbar('Logo removed.');
+    } catch (error) {
+      console.error('Error removing logo:', error);
+      setPartnerFormData(prev => ({ ...prev, image_url: '' }));
+    }
+  };
 
   const loadPartners = async () => {
     setIsLoadingPartners(true);
@@ -362,6 +435,11 @@ export default function AdminContentManagerPage() {
         .eq('id', activePartner.id);
 
       if (error) throw error;
+
+      if (activePartner.image_url) {
+        await deletePartnerImage(activePartner.image_url);
+      }
+
       showSnackbar('Partner deleted successfully!');
       setConfirmPartnerDeleteOpen(false);
       setActivePartner(null);
@@ -1023,21 +1101,78 @@ export default function AdminContentManagerPage() {
                 </Select>
               </FormControl>
 
-              <TextField
-                name="image_url"
-                label="Logo Identifier / Key"
-                placeholder="SCMAP, PEZA, JCTRANS or absolute image URL"
-                fullWidth
-                value={partnerFormData.image_url}
-                onChange={handlePartnerInputChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ImageIcon size={18} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ImageIcon size={18} />
+                  Organization Logo
+                </Typography>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  ref={partnerFileInputRef}
+                  onChange={handlePartnerImageUpload}
+                />
+
+                {partnerFormData.image_url ? (
+                  <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}`, width: '100%', height: 140, bgcolor: alpha(theme.palette.background.paper, 0.5), display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
+                    <img
+                      src={partnerFormData.image_url}
+                      alt="Logo Preview"
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    />
+                    <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+                      <IconButton
+                        size="small"
+                        onClick={handleRemovePartnerLogo}
+                        sx={{ bgcolor: theme.palette.error.main, color: 'white', '&:hover': { bgcolor: theme.palette.error.dark } }}
+                      >
+                        <X size={16} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => partnerFileInputRef.current?.click()}
+                    disabled={isUploadingPartnerLogo}
+                    sx={{
+                      height: 100,
+                      borderStyle: 'dashed',
+                      borderRadius: 2,
+                      flexDirection: 'column',
+                      gap: 1,
+                      color: 'text.secondary'
+                    }}
+                  >
+                    {isUploadingPartnerLogo ? (
+                      <>
+                        <Loader2 size={24} className="animate-spin" />
+                        <Typography variant="body2">Uploading...</Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={20} />
+                        <Typography variant="body2">Click to upload logo image</Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.7 }}>JPG, PNG or WEBP (Max 5MB)</Typography>
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                <TextField
+                  name="image_url"
+                  label="Or enter logo URL manually"
+                  fullWidth
+                  size="small"
+                  sx={{ mt: 2 }}
+                  value={partnerFormData.image_url}
+                  onChange={handlePartnerInputChange}
+                  placeholder="https://example.com/logo.png"
+                />
+              </Box>
 
               <TextField
                 name="display_order"

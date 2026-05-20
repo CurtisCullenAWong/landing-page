@@ -175,38 +175,16 @@ export default function PartnershipsPage() {
     };
   });
 
-  const PARTNER_IMAGE_MAP: Record<string, any> = {
-    'SCMAP': IMAGE_URLS.MEMBERSHIP_SCMAP,
-    'PEZA': IMAGE_URLS.MEMBERSHIP_PEZA,
-    'JCTRANS': IMAGE_URLS.MEMBERSHIP_JCTRANS,
-  };
-
   const dbMemberships = partnerItems.filter(item => item.type === 'membership');
-  const memberships = dbMemberships.length > 0
-    ? dbMemberships.map(m => ({
-        name: m.name,
-        fullName: m.name,
-        description: m.description || '',
-        image: PARTNER_IMAGE_MAP[m.image_url] || m.image_url,
-        whiteBackground: m.white_background
-      }))
-    : SITE_CONTENT.partnerships.memberships.map(m => {
-        let image = IMAGE_URLS.MEMBERSHIP_SCMAP;
-        let whiteBackground = false;
-        if (m.name.includes('PEZA')) {
-          image = IMAGE_URLS.MEMBERSHIP_PEZA;
-          whiteBackground = true;
-        }
-        if (m.name.includes('JCtrans')) image = IMAGE_URLS.MEMBERSHIP_JCTRANS;
-
-        return {
-          name: m.name,
-          fullName: m.name,
-          description: m.role,
-          image,
-          whiteBackground
-        };
-      });
+  const memberships = dbMemberships.map(m => {
+    return {
+      name: m.name,
+      fullName: m.name,
+      description: m.description || '',
+      image: m.image_url || '',
+      whiteBackground: m.white_background
+    };
+  });
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % memberships.length);

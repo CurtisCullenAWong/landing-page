@@ -148,11 +148,6 @@ export const SITE_CONTENT = {
       { name: "Food Services", description: "Specialized handling for temperature-sensitive and perishable goods." },
       { name: "Financial Services", description: "Secure logistics for the banking and finance sector." },
       { name: "Retail", description: "End-to-end supply chain solutions for the retail industry." }
-    ],
-    memberships: [
-      { name: "Supply Chain Management Association of the Philippines (SCMAP)", role: "Active Logistics Service Provider member" },
-      { name: "Philippine Economic Zone Authority (PEZA)", role: "Accredited partner for PEZA facilitation services" },
-      { name: "JCtrans Network", role: "Premium Member providing global logistics connectivity" }
     ]
   },
 

@@ -722,9 +722,9 @@ export default function WhyBossCargo() {
         <AbstractBlob color={primaryMain} bottom="-15%" right="-15%" size="800px" opacity={isDark ? 0.04 : 0.07} />
 
         <PageContainer maxWidth="lg" disableVerticalPadding sx={{ width: '100%', position: 'relative', zIndex: 2 }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             {/* Brand Values */}
-            <Grid size={{ xs: 12, md: 7 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 component={motion.div}
                 variants={fadeUp()}
@@ -732,15 +732,15 @@ export default function WhyBossCargo() {
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
               >
-                <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}>
+                <Typography variant="h3" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', fontSize: { xs: '1.75rem', md: '2rem' } }}>
                   Our Brand Values
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
+                <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, fontSize: '0.95rem' }}>
                   Creating a strong and positive perception of our company in our customers' minds.
                 </Typography>
               </Box>
 
-              <Grid container spacing={2} alignItems="stretch">
+              <Grid container spacing={1.5} alignItems="stretch">
                 {values.map((value, index) => (
                   <Grid size={{ xs: 12, sm: 6 }} key={index} sx={{ display: 'flex' }}>
                     <Paper
@@ -752,7 +752,7 @@ export default function WhyBossCargo() {
                       whileHover={{ x: 8 }}
                       elevation={0}
                       sx={{
-                        p: 2.5,
+                        p: 1.75,
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -767,10 +767,10 @@ export default function WhyBossCargo() {
                         },
                       }}
                     >
-                      <Typography variant="subtitle1" sx={{ mb: 1, color: index % 2 === 0 ? 'primary.main' : 'text.primary', fontWeight: 700 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 0.75, color: index % 2 === 0 ? 'primary.main' : 'text.primary', fontWeight: 700, fontSize: '0.95rem' }}>
                         {value.title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
                         {value.description}
                       </Typography>
                     </Paper>
@@ -780,7 +780,7 @@ export default function WhyBossCargo() {
             </Grid>
 
             {/* Culture */}
-            <Grid size={{ xs: 12, md: 5 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box
                 component={motion.div}
                 variants={fadeRight}
@@ -789,19 +789,19 @@ export default function WhyBossCargo() {
                 viewport={{ once: true, amount: 0.3 }}
                 sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
               >
-                <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: 'secondary.main' }}>
+                <Typography variant="h3" sx={{ mb: 1, fontWeight: 700, color: 'secondary.main', fontSize: { xs: '1.75rem', md: '2rem' } }}>
                   Our Culture
                 </Typography>
                 <Paper elevation={0} sx={{
-                  p: 3,
-                  mb: 3,
+                  p: 2,
+                  mb: 2,
                   bgcolor: isDark ? 'action.hover' : 'action.selected',
-                  borderRadius: 4,
+                  borderRadius: 3,
                   position: 'relative',
                   overflow: 'hidden',
                   borderLeft: `2px solid ${tertiaryMain}`,
                 }}>
-                  <Typography variant="body2" sx={{ lineHeight: 1.7, fontStyle: 'italic', position: 'relative', zIndex: 1 }}>
+                  <Typography variant="caption" sx={{ lineHeight: 1.6, fontStyle: 'italic', position: 'relative', zIndex: 1, fontSize: '0.9rem' }}>
                     "{SITE_CONTENT.missionVision.culture}"
                   </Typography>
                   {/* Static decorative circle – removed the Infinity animate */}
@@ -816,17 +816,19 @@ export default function WhyBossCargo() {
                     borderRadius: '50%',
                   }} />
                 </Paper>
-                <DecorativeImageFrame theme={theme}>
-                  <ImageWithFallback
-                    src={IMAGE_URLS.WHY_US_CULTURE}
-                    alt={getImageMetadata(IMAGE_URLS.WHY_US_CULTURE).alt}
-                    layout="responsive"
-                    aspectRatio="16:9"
-                    sizes="(max-width: 900px) 100vw, 50vw"
-                    rounded={0}
-                    shadow={0}
-                  />
-                </DecorativeImageFrame>
+                <Box sx={{ maxWidth: '280px', mx: 'auto' }}>
+                  <DecorativeImageFrame theme={theme}>
+                    <ImageWithFallback
+                      src={IMAGE_URLS.WHY_US_CULTURE}
+                      alt={getImageMetadata(IMAGE_URLS.WHY_US_CULTURE).alt}
+                      layout="responsive"
+                      aspectRatio="1:1"
+                      sizes="(max-width: 900px) 100vw, 50vw"
+                      rounded={0}
+                      shadow={0}
+                    />
+                  </DecorativeImageFrame>
+                </Box>
               </Box>
             </Grid>
           </Grid>

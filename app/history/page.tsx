@@ -282,7 +282,7 @@ export default function HistoryPage() {
                   src={IMAGE_URLS.HISTORY_CARGO_TRUCK}
                   alt={getImageMetadata(IMAGE_URLS.HISTORY_CARGO_TRUCK).alt}
                   layout="responsive"
-                  aspectRatio="4:3"
+                  aspectRatio="auto"
                   rounded={0}
                   shadow={0}
                   hoverZoom

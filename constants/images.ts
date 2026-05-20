@@ -7,12 +7,9 @@ import HomeTeamCollaboration from '@/assets/images/home/HOME_TEAM_COLLABORATION.
 
 import AboutWarehouseTeam from '@/assets/images/about-us/ABOUT_WAREHOUSE_TEAM.jpg';
 
-import HistoryCargoTruck from '@/assets/images/history/HISTORY_CARGO_TRUCK.jpg';
+import HistoryCargoTruck from '@/assets/images/history/HISTORY_CARGO_TRUCK.png';
 
 import PartnershipsHandshake from '@/assets/images/partnerships/PARTNERSHIPS_HANDSHAKE.jpg';
-import MembershipSCMAP from '@/assets/images/partnerships/SCMAP_LOGO.png';
-import MembershipPEZA from '@/assets/images/partnerships/PEZA_LOGO.svg';
-import MembershipJCTRANS from '@/assets/images/partnerships/JCTRANS_LOGO.png';
 
 import JobsCareerGrowth from '@/assets/images/careers/JOBS_CAREER_GROWTH.jpg';
 import JobsOfficeEnvironment from '@/assets/images/careers/JOBS_OFFICE_ENVIRONMENT.jpg';
@@ -49,11 +46,6 @@ export const IMAGE_URLS = {
 
   // Partnerships Page
   PARTNERSHIPS_HANDSHAKE: PartnershipsHandshake,
-
-  // Memberships & Accreditations
-  MEMBERSHIP_SCMAP: MembershipSCMAP,
-  MEMBERSHIP_PEZA: MembershipPEZA,
-  MEMBERSHIP_JCTRANS: MembershipJCTRANS,
 
   // Home Page
   HOME_LOGISTICS_SERVICES: HomeLogisticsServices,
@@ -119,18 +111,6 @@ export const IMAGE_METADATA = {
   [(IMAGE_URLS.WHY_US_CULTURE as any).src || IMAGE_URLS.WHY_US_CULTURE]: {
     alt: 'Company culture',
     description: 'Team culture and collaboration',
-  },
-  [(IMAGE_URLS.MEMBERSHIP_SCMAP as any).src || IMAGE_URLS.MEMBERSHIP_SCMAP]: {
-    alt: 'SCMAP Logo',
-    description: 'Supply Chain Management Association of the Philippines logo',
-  },
-  [(IMAGE_URLS.MEMBERSHIP_PEZA as any).src || IMAGE_URLS.MEMBERSHIP_PEZA]: {
-    alt: 'PEZA Logo',
-    description: 'Philippine Economic Zone Authority logo',
-  },
-  [(IMAGE_URLS.MEMBERSHIP_JCTRANS as any).src || IMAGE_URLS.MEMBERSHIP_JCTRANS]: {
-    alt: 'JCtrans Logo',
-    description: 'JCtrans Network-International Freight Forwarders Network logo',
   },
   [(IMAGE_URLS.PH_MAP as any).src || IMAGE_URLS.PH_MAP]: {
     alt: 'Philippine Map',
