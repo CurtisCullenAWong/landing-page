@@ -287,12 +287,15 @@ const MapDot = memo(({
           zIndex: 20,
           pointerEvents: 'none',
           // Keep badge visible when parent is in `selected` state even without hover.
-          // Decrease scale upon zoom (since map scales 3x) to keep readability
-          ...(isSelected && { 
+          // Decrease scale to avoid overlapping and visual bloat.
+          ...(isSelected ? { 
             opacity: '1 !important', 
             transform: 'scale(0.4) !important',
             transformOrigin: anchorAbove ? 'bottom center' : 'top center'
-          }),
+          } : isHovered ? {
+            transform: `scale(${isZoomedOut ? 0.64 : 0.75}) !important`,
+            transformOrigin: anchorAbove ? 'bottom center' : 'top center'
+          } : {}),
         }}
       >
         {/* Icon circle */}
@@ -377,7 +380,7 @@ export default function WhyBossCargo() {
   // Map pan/zoom spring config defined once
   const mapSpring = useMemo(() => ({ type: 'spring' as const, stiffness: 120, damping: 22 }), []);
   const mapAnimate = useMemo(() => selectedPoint
-    ? { scale: 3, x: `${-3 * (selectedPoint.x - 50)}%`, y: `${-50 - 3 * (selectedPoint.y - 50)}%` }
+    ? { scale: 3, x: `${-3 * (selectedPoint.x - 50)}%`, y: `${-3 * (selectedPoint.y - 50)}%` }
     : { scale: 1, x: '0%', y: '0%' },
     [selectedPoint]);
 

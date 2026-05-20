@@ -236,6 +236,17 @@ export const getThemeOptions = (mode: "light" | "dark"): ThemeOptions => {
           },
         },
       },
+      MuiTooltip: {
+        defaultProps: {
+          slotProps: {
+            popper: {
+              sx: {
+                zIndex: 12000,
+              },
+            },
+          },
+        },
+      },
     },
   };
 };

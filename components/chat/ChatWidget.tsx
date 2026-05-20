@@ -20,7 +20,6 @@ import {
   Send,
   Minimize2,
   Maximize2,
-  Bot,
   User,
   StopCircle,
 } from 'lucide-react';
@@ -30,6 +29,39 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Volume2, VolumeX, UserCircle, UserCircle2 } from 'lucide-react';
+
+import femaleDefault from '@/assets/mascot/female/female_default.png';
+import femaleTalk1 from '@/assets/mascot/female/female_talk_1.png';
+import femaleTalk2 from '@/assets/mascot/female/female_talk_2.png';
+import femaleTalk3 from '@/assets/mascot/female/female_talk_3.png';
+import femaleTalk4 from '@/assets/mascot/female/female_talk_4.png';
+import femaleTalk5 from '@/assets/mascot/female/female_talk_5.png';
+
+import maleDefault from '@/assets/mascot/male/male_default.png';
+import maleTalk1 from '@/assets/mascot/male/male_talk_1.png';
+import maleTalk2 from '@/assets/mascot/male/male_talk_2.png';
+import maleTalk3 from '@/assets/mascot/male/male_talk_3.png';
+import maleTalk4 from '@/assets/mascot/male/male_talk_4.png';
+import maleTalk5 from '@/assets/mascot/male/male_talk_5.png';
+
+const MASCOTS = {
+  female: {
+    default: femaleDefault,
+    1: femaleTalk1,
+    2: femaleTalk2,
+    3: femaleTalk3,
+    4: femaleTalk4,
+    5: femaleTalk5,
+  },
+  male: {
+    default: maleDefault,
+    1: maleTalk1,
+    2: maleTalk2,
+    3: maleTalk3,
+    4: maleTalk4,
+    5: maleTalk5,
+  },
+};
 
 export const ChatWidget = ({
   isOpen,
@@ -54,15 +86,45 @@ export const ChatWidget = ({
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Speech State
-  const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
   const [isSpeechLoading, setIsSpeechLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [mascotFrame, setMascotFrame] = useState<'default' | 1 | 2 | 3 | 4 | 5>('default');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ttsAbortControllerRef = useRef<AbortController | null>(null);
   const lastSpokenRef = useRef<{ text: string; voice: string } | null>(null);
 
   const [serviceMode, setServiceMode] = useState<'local' | 'cloud' | 'offline' | 'checking'>('checking');
 
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMascotFrame('default');
+      return;
+    }
+
+    const availableFrames: (1 | 2 | 3 | 4 | 5)[] = [1, 2, 3, 4, 5];
+    setMascotFrame((prev) => {
+      const filteredFrames = prev !== 'default'
+        ? availableFrames.filter((f) => f !== prev)
+        : availableFrames;
+      const randomIndex = Math.floor(Math.random() * filteredFrames.length);
+      return filteredFrames[randomIndex];
+    });
+  }, [messages.length]);
+
+  const getMascotSrc = () => {
+    const currentMascot = MASCOTS[gender] || MASCOTS.female;
+    if (messages.length === 0) {
+      return currentMascot.default;
+    }
+    if (mascotFrame === 'default') {
+      return currentMascot.default;
+    }
+    return currentMascot[mascotFrame];
+  };
+
   const cancelSpeech = (keepCache = false) => {
+    setIsSpeaking(false);
     if (ttsAbortControllerRef.current) {
       ttsAbortControllerRef.current.abort();
       ttsAbortControllerRef.current = null;
@@ -94,10 +156,12 @@ export const ChatWidget = ({
 
   // Fetch initial greeting on mount if we don't have messages yet
   useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+
     if (isOpen && messages.length === 0 && !isPreloading) {
       const fetchGreeting = async () => {
         setIsPreloading(true);
-        const controller = new AbortController();
         abortControllerRef.current = controller;
 
         try {
@@ -105,30 +169,41 @@ export const ChatWidget = ({
             prompt: "Generate a short, professional greeting for a customer visiting the Boss Cargo Express website. Keep it under 20 words. Do not double quote the content of your response in the greeting."
           }, controller.signal);
 
-          if (response && (response.response || response.content || response.message?.content)) {
+          if (active && response && (response.response || response.content || response.message?.content)) {
             const greeting = response.response || response.content || response.message?.content;
             setMessages([{ role: 'assistant', content: greeting }]);
             if (isSpeechEnabled) speak(greeting);
           }
         } catch (error: any) {
-          console.error('Greeting error:', error);
-          const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
-          if (isFetchError) {
-            const errorMsg = "**Connection Error**: I'm unable to reach my AI service. Please try again later.";
-            setMessages([{
-              role: 'assistant',
-              content: errorMsg
-            }]);
-            if (isSpeechEnabled) speak(errorMsg);
+          if (active && error.name !== 'AbortError') {
+            console.error('Greeting error:', error);
+            const isFetchError = error.message?.includes('Failed to fetch') || error.toString().includes('Failed to fetch');
+            if (isFetchError) {
+              const errorMsg = "**Connection Error**: I'm unable to reach my AI service. Please try again later.";
+              setMessages([{
+                role: 'assistant',
+                content: errorMsg
+              }]);
+              if (isSpeechEnabled) speak(errorMsg);
+            }
           }
         } finally {
-          setIsPreloading(false);
-          abortControllerRef.current = null;
+          if (active) {
+            setIsPreloading(false);
+            if (abortControllerRef.current === controller) {
+              abortControllerRef.current = null;
+            }
+          }
         }
       };
 
       fetchGreeting();
     }
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [isOpen]);
 
   // Dictate latest message if speech is enabled or toggled on/changed
@@ -170,7 +245,7 @@ export const ChatWidget = ({
 
     if (!cleanText) return;
 
-    const voice = activeGender === 'male' ? 'bm_daniel' : 'bf_emma';
+    const voice = activeGender === 'male' ? 'bm_fable' : 'bf_v0isabella';
 
     // Avoid redundant POST methods: check if this is the exact same text and voice already loaded
     if (lastSpokenRef.current?.text === cleanText && lastSpokenRef.current?.voice === voice) {
@@ -181,10 +256,12 @@ export const ChatWidget = ({
         }
         try {
           audioRef.current.currentTime = 0;
+          setIsSpeaking(true);
           await audioRef.current.play();
           return;
         } catch (e) {
           console.error("Failed to replay cached audio, refetching...", e);
+          setIsSpeaking(false);
         }
       }
     }
@@ -225,20 +302,33 @@ export const ChatWidget = ({
       audioRef.current = audio;
       lastSpokenRef.current = { text: cleanText, voice };
 
+      setIsSpeaking(true);
+
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
         if (audioRef.current === audio) {
           audioRef.current = null;
+          setIsSpeaking(false);
         }
       };
 
-      await audio.play();
+      audio.onpause = () => {
+        setIsSpeaking(false);
+      };
+
+      try {
+        await audio.play();
+      } catch (playError) {
+        console.error("Audio play failed:", playError);
+        setIsSpeaking(false);
+      }
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('TTS playback/fetch aborted');
       } else {
         console.error('Error in Kokoro TTS:', error);
       }
+      setIsSpeaking(false);
     } finally {
       if (ttsAbortControllerRef.current === controller) {
         ttsAbortControllerRef.current = null;
@@ -428,16 +518,29 @@ export const ChatWidget = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
-                  width: 40,
-                  height: 40,
+                  width: 64,
+                  height: 64,
                   borderRadius: '50%',
-                  bgcolor: 'rgba(255,255,255,0.2)',
+                  overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 }}
               >
-                <Bot size={24} />
+                <Box
+                  component="img"
+                  src={getMascotSrc().src}
+                  alt={`${gender} Mascot`}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    transform: 'scale(1.05)',
+                  }}
+                />
               </Box>
               <Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
@@ -466,10 +569,7 @@ export const ChatWidget = ({
                       e.stopPropagation();
                       const nextEnabled = !isSpeechEnabled;
                       setIsSpeechEnabled(nextEnabled);
-                      if (nextEnabled) {
-                        const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
-                        if (lastMsg) speak(lastMsg.content, gender, true);
-                      } else {
+                      if (!nextEnabled) {
                         cancelSpeech(true); // Keep cache to avoid redundant POST when toggled back on
                       }
                     }}
@@ -497,12 +597,6 @@ export const ChatWidget = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       onGenderToggle();
-                      if (isSpeechEnabled) {
-                        const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
-                        // Use the next gender for immediate feedback
-                        const nextGender = gender === 'female' ? 'male' : 'female';
-                        if (lastMsg) speak(lastMsg.content, nextGender, true);
-                      }
                     }}
                     sx={{ color: 'inherit', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
                   >
@@ -689,11 +783,6 @@ export const ChatWidget = ({
                       title={isLoading ? "Stop Generating" : "Send Message"}
                       placement="top"
                       arrow
-                      slotProps={{
-                        popper: {
-                          sx: { zIndex: 10001 }
-                        }
-                      }}
                     >
                       <span>
                         <IconButton
@@ -724,7 +813,7 @@ export const ChatWidget = ({
       </Zoom>
 
       {/* Floating Button */}
-      <Tooltip title={isOpen ? "Close Chat" : "Chat with Boss AI"} placement="left">
+      <Tooltip title={isOpen ? "Close Chat" : "Chat with Boss AI"} placement="top">
         <span>
           <Fab
             color="primary"

@@ -116,7 +116,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                     isOpen={isChatOpen}
                     onToggle={setIsChatOpen}
                     gender={gender}
-                    onGenderToggle={() => setGender(prev => prev === 'male' ? 'male' : 'female')}
+                    onGenderToggle={() => setGender(prev => prev === 'male' ? 'female' : 'male')}
                   />
                   <AvatarOverlay
                     gender={gender}
@@ -136,7 +136,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                     gap: 1.5,
                   }}
                 >
-                  <Tooltip title="Chat with Boss AI" placement="left">
+                  <Tooltip title="Chat with Boss AI" placement="top">
                     <span>
                       <Fab
                         color="primary"
@@ -204,7 +204,8 @@ function MainContainer({ children }: { children: React.ReactNode }) {
         flexGrow: 1,
         scrollSnapAlign: pathname === '/' ? 'start' : 'none',
         minHeight: '100vh',
-        pt: pathname === '/' ? 0 : '80px'
+        pt: pathname === '/' ? 0 : '80px',
+        overflowX: 'hidden',
       }}
       data-initial-module="true"
       data-href={pathname}
