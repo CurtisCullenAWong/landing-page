@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useMemo } from 'react';
+import { useState, useEffect, memo, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { ImageWithFallback } from '../../components/layout/ImageWithFallback';
 import { IMAGE_URLS, getImageMetadata } from '../../constants/images';
-import { COVERAGE_POINTS } from '../../constants/coverage-points';
+import { createClient } from '../../lib/supabase/client';
 import { PageContainer } from '../../components/layout';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
@@ -158,6 +158,15 @@ const fadeRight = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.75, delay: 0.15 } },
 };
 
+interface CoveragePoint {
+  id?: string;
+  name: string;
+  x: number;
+  y: number;
+  description: string;
+  delay?: number;
+}
+
 // ─── Ocean exclusion: points whose (x, y) fall entirely outside the PH
 //     landmass SVG mask. Coordinates are percentages of the map container.
 //     These were identified visually from the COVERAGE_POINTS list – any dot
@@ -183,14 +192,14 @@ const MapDot = memo(({
   secondaryMain,
   onSelect,
 }: {
-  point: typeof COVERAGE_POINTS[0];
+  point: CoveragePoint;
   isSelected: boolean;
   isZoomedOut: boolean;
   isDark: boolean;
   primaryMain: string;
   tertiaryMain: string;
   secondaryMain: string;
-  onSelect: (p: typeof COVERAGE_POINTS[0] | null) => void;
+  onSelect: (p: CoveragePoint | null) => void;
 }) => {
   // Render tooltip below if dot is in upper half to avoid clipping top viewport; above if in lower half.
   // If selected, the point is pushed to the top of the viewport, so always render tooltip below.
@@ -422,7 +431,64 @@ export default function WhyBossCargo() {
   usePageTitle('Why Us');
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const [selectedPoint, setSelectedPoint] = useState<typeof COVERAGE_POINTS[0] | null>(null);
+  const [points, setPoints] = useState<CoveragePoint[]>([]);
+  const [selectedPoint, setSelectedPoint] = useState<CoveragePoint | null>(null);
+
+  const loadPoints = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('coverage_points')
+        .select('*')
+        .order('name', { ascending: true });
+      if (error) throw error;
+      if (data) {
+        const mappedPoints = data.map((p: any, i: number) => ({
+          id: p.id as string,
+          name: p.name as string,
+          x: Number(p.x),
+          y: Number(p.y),
+          description: p.description as string,
+          delay: (i % 30) * 0.03
+        }));
+        setPoints(mappedPoints);
+        
+        setSelectedPoint((prevSelected) => {
+          if (!prevSelected) return null;
+          const match = mappedPoints.find((p: any) => p.name === prevSelected.name || p.id === (prevSelected as any).id);
+          return match || null;
+        });
+      } else {
+        setPoints([]);
+      }
+    } catch (e) {
+      console.error('Error fetching coverage points:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadPoints();
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel('coverage-points-client-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'coverage_points',
+        },
+        () => {
+          loadPoints();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const primaryMain = theme.palette.primary?.main || '#00A39D';
   const secondaryMain = theme.palette.secondary?.main || '#202945';
@@ -589,7 +655,7 @@ export default function WhyBossCargo() {
               }}
             />
 
-            {COVERAGE_POINTS
+            {points
               .filter((point) => !OCEAN_POINTS.has(point.name))
               .map((point) => (
                 <MapDot

@@ -58,6 +58,7 @@ import {
   X,
   Loader2,
   ExternalLink,
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePageTitle } from '@/lib/usePageTitle';
@@ -90,6 +91,15 @@ interface Milestone {
   created_at: string;
 }
 
+interface CoveragePoint {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  description: string;
+  created_at: string;
+}
+
 export default function AdminContentManagerPage() {
   usePageTitle('Content Manager');
   const theme = useTheme();
@@ -102,6 +112,7 @@ export default function AdminContentManagerPage() {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingPartners, setIsLoadingPartners] = useState(true);
   const [isLoadingMilestones, setIsLoadingMilestones] = useState(true);
+  const [isLoadingCoveragePoints, setIsLoadingCoveragePoints] = useState(true);
 
   // Unified Snackbar State
   const [snackbar, setSnackbar] = useState({
@@ -175,6 +186,17 @@ export default function AdminContentManagerPage() {
         },
         () => {
           loadMilestones();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'coverage_points',
+        },
+        () => {
+          loadCoveragePoints();
         }
       )
       .subscribe();
@@ -633,10 +655,167 @@ export default function AdminContentManagerPage() {
     }
   };
 
+  // --- COVERAGE POINTS STATE & HANDLERS ---
+  const [coveragePoints, setCoveragePoints] = useState<CoveragePoint[]>([]);
+  const [coverageSearchTerm, setCoverageSearchTerm] = useState('');
+  const [coverageDialogOpen, setCoverageDialogOpen] = useState(false);
+  const [confirmCoverageDeleteOpen, setConfirmCoverageDeleteOpen] = useState(false);
+  const [activeCoveragePoint, setActiveCoveragePoint] = useState<CoveragePoint | null>(null);
+  const [coverageFormData, setCoverageFormData] = useState({
+    name: '',
+    x: 50.0,
+    y: 50.0,
+    description: '',
+  });
+
+  const loadCoveragePoints = async () => {
+    setIsLoadingCoveragePoints(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('coverage_points')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setCoveragePoints(data || []);
+    } catch (error: any) {
+      console.error('Error loading coverage points:', error);
+      showSnackbar(error.message || 'Failed to load coverage points.', 'error');
+    } finally {
+      setIsLoadingCoveragePoints(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCoveragePoints();
+  }, []);
+
+  const filteredCoveragePoints = useMemo(() => {
+    return coveragePoints.filter((cp) => {
+      return (
+        cp.name.toLowerCase().includes(coverageSearchTerm.toLowerCase()) ||
+        cp.description.toLowerCase().includes(coverageSearchTerm.toLowerCase())
+      );
+    });
+  }, [coveragePoints, coverageSearchTerm]);
+
+  const handleOpenCoverageDialog = (point: CoveragePoint | null = null) => {
+    if (point) {
+      setActiveCoveragePoint(point);
+      setCoverageFormData({
+        name: point.name,
+        x: Number(point.x),
+        y: Number(point.y),
+        description: point.description,
+      });
+    } else {
+      setActiveCoveragePoint(null);
+      setCoverageFormData({
+        name: '',
+        x: 50.0,
+        y: 50.0,
+        description: '',
+      });
+    }
+    setCoverageDialogOpen(true);
+  };
+
+  const handleCloseCoverageDialog = () => {
+    setCoverageDialogOpen(false);
+    setActiveCoveragePoint(null);
+  };
+
+  const handleCoverageInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCoverageFormData((prev) => ({
+      ...prev,
+      [name]: name === 'x' || name === 'y' ? (value === '' ? '' : Number(value)) : value,
+    }));
+  };
+
+  const handleSaveCoveragePoint = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!coverageFormData.name.trim()) {
+      showSnackbar('Location name is required.', 'error');
+      return;
+    }
+    const xNum = Number(coverageFormData.x);
+    const yNum = Number(coverageFormData.y);
+    if (isNaN(xNum) || xNum < 0 || xNum > 100) {
+      showSnackbar('X coordinate must be between 0 and 100.', 'error');
+      return;
+    }
+    if (isNaN(yNum) || yNum < 0 || yNum > 100) {
+      showSnackbar('Y coordinate must be between 0 and 100.', 'error');
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const payload = {
+        name: coverageFormData.name.trim(),
+        x: xNum,
+        y: yNum,
+        description: coverageFormData.description.trim(),
+      };
+
+      if (activeCoveragePoint) {
+        const { error } = await supabase
+          .from('coverage_points')
+          .update(payload)
+          .eq('id', activeCoveragePoint.id);
+
+        if (error) throw error;
+        showSnackbar('Coverage point updated successfully!');
+      } else {
+        const { error } = await supabase
+          .from('coverage_points')
+          .insert(payload);
+
+        if (error) throw error;
+        showSnackbar('New coverage point created successfully!');
+      }
+
+      handleCloseCoverageDialog();
+      loadCoveragePoints();
+    } catch (error: any) {
+      console.error('Error saving coverage point:', error);
+      showSnackbar(error.message || 'Failed to save coverage point.', 'error');
+    }
+  };
+
+  const handleOpenCoverageDelete = (point: CoveragePoint) => {
+    setActiveCoveragePoint(point);
+    setConfirmCoverageDeleteOpen(true);
+  };
+
+  const handleDeleteCoveragePoint = async () => {
+    if (!activeCoveragePoint) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('coverage_points')
+        .delete()
+        .eq('id', activeCoveragePoint.id);
+
+      if (error) throw error;
+      showSnackbar('Coverage point deleted successfully!');
+      setConfirmCoverageDeleteOpen(false);
+      setActiveCoveragePoint(null);
+      loadCoveragePoints();
+    } catch (error: any) {
+      console.error('Error deleting coverage point:', error);
+      showSnackbar(error.message || 'Failed to delete coverage point.', 'error');
+    }
+  };
+
   // Clear search on tab change
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setMainTab(newValue);
     setPartnerSearchTerm('');
+    setCoverageSearchTerm('');
   };
 
   // Dynamic header button renderer
@@ -676,7 +855,6 @@ export default function AdminContentManagerPage() {
           </Button>
         );
       case 3:
-      default:
         return (
           <Button
             variant="contained"
@@ -685,6 +863,18 @@ export default function AdminContentManagerPage() {
             sx={{ borderRadius: 2, px: 3, py: 1.5, fontWeight: 700, boxShadow: theme.shadows[4] }}
           >
             Add Milestone
+          </Button>
+        );
+      case 4:
+      default:
+        return (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            onClick={() => handleOpenCoverageDialog(null)}
+            sx={{ borderRadius: 2, px: 3, py: 1.5, fontWeight: 700, boxShadow: theme.shadows[4] }}
+          >
+            Add Coverage Point
           </Button>
         );
     }
@@ -733,6 +923,7 @@ export default function AdminContentManagerPage() {
         <Tab icon={<Building size={18} style={{ marginRight: 8 }} />} label="Industries Served" iconPosition="start" />
         <Tab icon={<Award size={18} style={{ marginRight: 8 }} />} label="Accreditations & Networks" iconPosition="start" />
         <Tab icon={<History size={18} style={{ marginRight: 8 }} />} label="Company Timeline" iconPosition="start" />
+        <Tab icon={<MapPin size={18} style={{ marginRight: 8 }} />} label="Map Coverage" iconPosition="start" />
       </Tabs>
 
       {/* Tab Contents */}
@@ -1134,6 +1325,96 @@ export default function AdminContentManagerPage() {
         </Box>
       )}
 
+      {/* Tab 4: Map Coverage */}
+      {mainTab === 4 && (
+        <Box>
+          <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ px: 3, py: 2.5, borderBottom: `1px solid ${theme.palette.divider}`, bgcolor: 'background.paper', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Map Coverage Points ({filteredCoveragePoints.length})
+              </Typography>
+              <TextField
+                size="small"
+                placeholder="Search points..."
+                value={coverageSearchTerm}
+                onChange={(e) => setCoverageSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={16} style={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  width: 220,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Box>
+
+            {isLoadingCoveragePoints ? (
+              <Box sx={{ p: 4 }}>
+                <AdminTableSkeleton />
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Location Name</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>X Coordinate (%)</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Y Coordinate (%)</TableCell>
+                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Description</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, py: 2 }}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredCoveragePoints.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                          <Typography variant="body1" color="text.secondary">
+                            No coverage points found.
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredCoveragePoints.map((point) => (
+                        <TableRow key={point.id} sx={{ '&:hover': { bgcolor: alpha(theme.palette.action.hover, 0.5) } }}>
+                          <TableCell sx={{ fontWeight: 700, py: 2 }}>{point.name}</TableCell>
+                          <TableCell sx={{ py: 2 }}>{point.x}%</TableCell>
+                          <TableCell sx={{ py: 2 }}>{point.y}%</TableCell>
+                          <TableCell sx={{ maxWidth: 300, py: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {point.description}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right" sx={{ py: 2 }}>
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <Tooltip title="Edit">
+                                <IconButton size="small" onClick={() => handleOpenCoverageDialog(point)} color="primary">
+                                  <Edit2 size={16} />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete">
+                                <IconButton size="small" onClick={() => handleOpenCoverageDelete(point)} color="error">
+                                  <Trash2 size={16} />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Card>
+        </Box>
+      )}
+
       {/* Save Partner Modal Dialog */}
       <Dialog open={partnerDialogOpen} onClose={handleClosePartnerDialog} maxWidth="sm" fullWidth>
         <form onSubmit={handleSavePartner}>
@@ -1392,6 +1673,91 @@ export default function AdminContentManagerPage() {
             Cancel
           </Button>
           <Button onClick={handleDeleteMilestone} variant="contained" color="error" sx={{ borderRadius: 2, px: 3 }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Save Coverage Point Modal Dialog */}
+      <Dialog open={coverageDialogOpen} onClose={handleCloseCoverageDialog} maxWidth="sm" fullWidth>
+        <form onSubmit={handleSaveCoveragePoint}>
+          <DialogTitle sx={{ fontWeight: 800 }}>
+            {activeCoveragePoint ? 'Edit Coverage Point' : 'Add Coverage Point'}
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={3} sx={{ mt: 1 }}>
+              <TextField
+                name="name"
+                label="Location Name"
+                fullWidth
+                required
+                value={coverageFormData.name}
+                onChange={handleCoverageInputChange}
+                inputProps={{ maxLength: 100 }}
+              />
+
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  name="x"
+                  label="X Coordinate (%)"
+                  type="number"
+                  fullWidth
+                  required
+                  value={coverageFormData.x}
+                  onChange={handleCoverageInputChange}
+                  inputProps={{ step: 'any', min: 0, max: 100 }}
+                  helperText="Horizontal position on map (0-100)"
+                />
+                <TextField
+                  name="y"
+                  label="Y Coordinate (%)"
+                  type="number"
+                  fullWidth
+                  required
+                  value={coverageFormData.y}
+                  onChange={handleCoverageInputChange}
+                  inputProps={{ step: 'any', min: 0, max: 100 }}
+                  helperText="Vertical position on map (0-100)"
+                />
+              </Stack>
+
+              <TextField
+                name="description"
+                label="Description"
+                fullWidth
+                required
+                multiline
+                rows={3}
+                value={coverageFormData.description}
+                onChange={handleCoverageInputChange}
+                inputProps={{ maxLength: 500 }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5 }}>
+            <Button onClick={handleCloseCoverageDialog} variant="outlined" sx={{ borderRadius: 2 }}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" sx={{ borderRadius: 2, px: 3 }}>
+              Save Coverage Point
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Coverage Point Delete Confirmation Modal Dialog */}
+      <Dialog open={confirmCoverageDeleteOpen} onClose={() => setConfirmCoverageDeleteOpen(false)}>
+        <DialogTitle sx={{ fontWeight: 800 }}>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete <strong>{activeCoveragePoint?.name}</strong>? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setConfirmCoverageDeleteOpen(false)} variant="outlined" sx={{ borderRadius: 2 }}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteCoveragePoint} variant="contained" color="error" sx={{ borderRadius: 2, px: 3 }}>
             Delete
           </Button>
         </DialogActions>

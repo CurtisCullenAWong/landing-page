@@ -750,6 +750,20 @@ export default function HomePage() {
             </Grid>
           </Grid>
         </Container>
+
+        {/* Smooth transition to next section */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '15dvh',
+            background: `linear-gradient(to bottom, transparent, ${theme.palette.background.paper})`,
+            pointerEvents: 'none',
+            zIndex: 3,
+          }}
+        />
       </Box> {/* Closes inner background Box */}
 
     {/* Slide 2: News & Events */}
