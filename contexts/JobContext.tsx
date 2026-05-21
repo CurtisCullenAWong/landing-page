@@ -140,7 +140,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
 
     const jobsChannel = supabase
-      .channel('jobs-realtime')
+      .channel(`jobs-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -172,7 +172,7 @@ export function JobProvider({ children }: { children: ReactNode }) {
       .subscribe();
 
     const departmentsChannel = supabase
-      .channel('departments-realtime')
+      .channel(`departments-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

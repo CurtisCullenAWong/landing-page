@@ -193,7 +193,11 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
   };
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = async (showLoading = false) => {
+      if (showLoading) {
+        setIsLoading(true);
+      }
+
       try {
         const supabase = createClient();
 
@@ -205,26 +209,38 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
 
         if (error) {
           console.error('Error loading job applicants:', error);
-          setJobApplicants([]);
+          if (showLoading) {
+            setJobApplicants([]);
+          }
         } else if (data) {
           setJobApplicants(data);
+          setEditingApplicant((prev) => {
+            if (!prev) return prev;
+            return data.find((applicant: { id: string; }) => applicant.id === prev.id) ?? null;
+          });
         } else {
-          setJobApplicants([]);
+          if (showLoading) {
+            setJobApplicants([]);
+          }
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        setJobApplicants([]);
+        if (showLoading) {
+          setJobApplicants([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (showLoading) {
+          setIsLoading(false);
+        }
       }
     };
 
-    loadData();
+    loadData(true);
 
     // Set up realtime subscription for job_applicants table
     const supabase = createClient();
     const applicantsChannel = supabase
-      .channel('job-applicants-realtime')
+      .channel(`job-applicants-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -232,40 +248,9 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
           schema: 'public',
           table: 'job_applicants',
         },
-        (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+        async (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
           console.log('Realtime event received for job_applicants:', payload.eventType, payload);
-
-          if (payload.eventType === 'INSERT') {
-            const newApplicant = payload.new as unknown as JobApplicant;
-            setJobApplicants((prevApplicants) => {
-              if (prevApplicants.find(applicant => applicant.id === newApplicant.id)) {
-                return prevApplicants;
-              }
-              return [newApplicant, ...prevApplicants].sort((a, b) => {
-                const dateA = a.applied_at ? new Date(a.applied_at).getTime() : 0;
-                const dateB = b.applied_at ? new Date(b.applied_at).getTime() : 0;
-                return dateB - dateA;
-              });
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            const updatedApplicant = payload.new as unknown as JobApplicant;
-            setJobApplicants((prevApplicants) =>
-              prevApplicants.map((applicant) =>
-                applicant.id === updatedApplicant.id ? updatedApplicant : applicant
-              )
-            );
-            setEditingApplicant((prev) =>
-              prev && prev.id === updatedApplicant.id ? updatedApplicant : prev
-            );
-          } else if (payload.eventType === 'DELETE') {
-            const deletedId = (payload.old as { id: string }).id;
-            setJobApplicants((prevApplicants) =>
-              prevApplicants.filter((applicant) => applicant.id !== deletedId)
-            );
-            setEditingApplicant((prev) =>
-              prev && prev.id === deletedId ? null : prev
-            );
-          }
+          await loadData(false);
         }
       )
       .subscribe();
@@ -653,22 +638,22 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
                       <TableRow>
                         <TableCell colSpan={9} sx={{ py: 0, borderBottom: expandedRows.has(applicant.id) ? undefined : 'none' }}>
                           <Collapse in={expandedRows.has(applicant.id)} timeout="auto" unmountOnExit>
-                            <Box sx={{ py: 3, px: 2, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
-                              <Grid container spacing={4}>
+                            <Box sx={{ py: 1.5, px: 1.5, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+                              <Grid container spacing={2}>
                                 <Grid size={{ xs: 12, md: 7 }}>
-                                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                  <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                                     Cover Letter
                                   </Typography>
-                                  <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.paper', whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}>
-                                    <Typography variant="body2">
+                                  <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'background.paper', whiteSpace: 'pre-wrap' }}>
+                                    <Typography variant="body2" sx={{ fontSize: '0.85rem', lineHeight: 1.55, overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
                                       {applicant.cover_letter || 'No cover letter provided.'}
                                     </Typography>
                                   </Paper>
                                 </Grid>
                                 <Grid size={{ xs: 12, md: 5 }}>
-                                  <Stack spacing={3}>
+                                  <Stack spacing={1.5}>
                                     <Box>
-                                      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                      <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                                         Portfolio / Links
                                       </Typography>
                                       {applicant.portfolio_url ? (
@@ -684,6 +669,7 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
                                             textDecoration: 'none',
                                             color: 'primary.main',
                                             fontWeight: 500,
+                                            fontSize: '0.85rem',
                                             wordBreak: 'break-all',
                                             '&:hover': { textDecoration: 'underline' },
                                           }}
@@ -691,20 +677,20 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
                                           {formatLinkPreview(applicant.portfolio_url)}
                                         </Typography>
                                       ) : (
-                                        <Typography variant="body2" color="text.secondary">No portfolio link provided.</Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>No portfolio link provided.</Typography>
                                       )}
                                     </Box>
                                     <Box>
-                                      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                      <Typography variant="caption" sx={{ mb: 0.75, display: 'block', fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                                         Documents
                                       </Typography>
                                       {applicant.resume_url && (
                                         <Button
-                                          variant="contained"
+                                          variant="outlined"
                                           size="small"
                                           onClick={() => handleViewPDF(applicant.resume_url)}
                                           startIcon={<Eye size={16} />}
-                                          fullWidth
+                                          sx={{ py: 0.5, minHeight: 30 }}
                                         >
                                           View Resume
                                         </Button>
@@ -840,8 +826,8 @@ export default function JobApplicationsTab({ jobs }: JobApplicationsTabProps) {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
                               Cover Letter:
                             </Typography>
-                            <Paper variant="outlined" sx={{ p: 1, bgcolor: 'action.hover', maxHeight: 100, overflow: 'auto' }}>
-                              <Typography variant="caption" sx={{ whiteSpace: 'pre-wrap' }}>
+                            <Paper variant="outlined" sx={{ p: 1, bgcolor: 'action.hover' }}>
+                              <Typography variant="caption" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
                                 {applicant.cover_letter}
                               </Typography>
                             </Paper>

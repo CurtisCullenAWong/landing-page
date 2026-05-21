@@ -471,7 +471,7 @@ export default function WhyBossCargo() {
 
     const supabase = createClient();
     const channel = supabase
-      .channel('coverage-points-client-realtime')
+      .channel(`coverage-points-client-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

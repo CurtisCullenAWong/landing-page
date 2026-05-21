@@ -155,7 +155,7 @@ export default function AdminContentManagerPage() {
     const supabase = createClient();
 
     const channel = supabase
-      .channel('admin-content-realtime')
+      .channel(`admin-content-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

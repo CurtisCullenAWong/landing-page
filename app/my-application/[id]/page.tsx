@@ -28,7 +28,6 @@ import { PDFViewer } from '@/components/pdf-viewer';
 import { formatStatus } from '@/lib/utils';
 import { useRef } from 'react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { PDFDocument } from 'pdf-lib';
 import { Printer, Download as DownloadIcon } from 'lucide-react';
 
@@ -120,6 +119,60 @@ export default function MyApplicationPage() {
 
     const supabase = createClient();
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let isCancelled = false;
+
+    const refreshApplicationsForEmail = async (email: string) => {
+      const { data: refreshedApplications, error: refreshedError } = await supabase
+        .from('job_applicants')
+        .select('*, jobs(title)')
+        .ilike('email', email)
+        .order('applied_at', { ascending: false });
+
+      if (isCancelled) return;
+
+      if (refreshedError) {
+        console.error('Error refreshing applications list:', refreshedError);
+        return;
+      }
+
+      if (!refreshedApplications || refreshedApplications.length === 0) {
+        setApplicationsList(null);
+        setError('No applications found for this email address.');
+        return;
+      }
+
+      if (refreshedApplications.length === 1) {
+        router.replace(`/my-application/${refreshedApplications[0].id}`);
+        return;
+      }
+
+      setError(null);
+      setApplicationsList(refreshedApplications);
+    };
+
+    const refreshApplication = async (applicationId: string) => {
+      const { data: refreshedApplication, error: refreshedError } = await supabase
+        .from('job_applicants')
+        .select('*')
+        .eq('id', applicationId)
+        .maybeSingle();
+
+      if (isCancelled) return;
+
+      if (refreshedError) {
+        console.error('Error refreshing application:', refreshedError);
+        return;
+      }
+
+      if (!refreshedApplication) {
+        setApplication(null);
+        setError('Application not found');
+        return;
+      }
+
+      setError(null);
+      setApplication(refreshedApplication);
+    };
 
     const loadApplication = async () => {
       const decodedId = decodeURIComponent(id);
@@ -139,11 +192,14 @@ export default function MyApplicationPage() {
 
       try {
         if (isEmail) {
+          const normalizedEmail = decodedId.toLowerCase();
           const { data: applicationsData, error: applicationsError } = await supabase
             .from('job_applicants')
             .select('*, jobs(title)')
-            .ilike('email', decodedId)
+            .ilike('email', normalizedEmail)
             .order('applied_at', { ascending: false });
+
+          if (isCancelled) return;
 
           if (applicationsError) throw applicationsError;
 
@@ -157,31 +213,32 @@ export default function MyApplicationPage() {
             router.replace(`/my-application/${applicationsData[0].id}`);
             return;
           } else {
+            setError(null);
             setApplicationsList(applicationsData);
+            const subscriptionEmail = applicationsData[0].email;
 
             // Set up realtime subscription for the list of applications
             channel = supabase
-              .channel(`applications-email-${decodedId}-changes`)
+              .channel(`applications-email-${subscriptionEmail}-changes-${crypto.randomUUID()}`)
               .on(
                 'postgres_changes',
                 {
-                  event: 'UPDATE',
+                  event: '*',
                   schema: 'public',
                   table: 'job_applicants',
-                  filter: `email=eq.${decodedId}`,
+                  filter: `email=eq.${subscriptionEmail}`,
                 },
-                (payload: { new: JobApplicant; }) => {
+                async (payload: { eventType: string; new: JobApplicant; old: { id: string } | null; }) => {
                   console.log('Realtime event received for applications list:', payload);
-                  if (payload.new) {
-                    setApplicationsList((prev) =>
-                      prev ? prev.map(app =>
-                        app.id === payload.new.id ? { ...app, ...payload.new } : app
-                      ) : null
-                    );
-                  }
+                  await refreshApplicationsForEmail(subscriptionEmail);
                 }
               )
               .subscribe();
+
+            if (isCancelled && channel) {
+              supabase.removeChannel(channel);
+              return;
+            }
 
             setIsLoading(false);
             return;
@@ -194,6 +251,8 @@ export default function MyApplicationPage() {
           .select('*')
           .eq('id', decodedId)
           .maybeSingle();
+
+        if (isCancelled) return;
 
         if (applicationError) {
           console.error('Error loading application:', applicationError);
@@ -208,6 +267,7 @@ export default function MyApplicationPage() {
           return;
         }
 
+        setError(null);
         setApplication(applicationData);
 
         // Load job details
@@ -219,6 +279,8 @@ export default function MyApplicationPage() {
             .eq('id', applicationData.job_id)
             .maybeSingle();
 
+          if (isCancelled) return;
+
           if (jobError) {
             console.error('Error loading job:', jobError);
           } else if (jobData) {
@@ -228,26 +290,30 @@ export default function MyApplicationPage() {
 
         // Set up realtime subscription for this specific application
         channel = supabase
-          .channel(`application-${id}-changes`)
+          .channel(`application-${id}-changes-${crypto.randomUUID()}`)
           .on(
             'postgres_changes',
             {
-              event: 'UPDATE',
+              event: '*',
               schema: 'public',
               table: 'job_applicants',
               filter: `id=eq.${decodedId}`,
             },
-            (payload: { new: JobApplicant; }) => {
+            async (payload: { eventType: string; new: JobApplicant; old: { id: string } | null; }) => {
               console.log('Realtime event received for application:', payload);
-              if (payload.new) {
-                setApplication(payload.new as JobApplicant);
-              }
+              await refreshApplication(decodedId);
             }
           )
           .subscribe();
 
+        if (isCancelled && channel) {
+          supabase.removeChannel(channel);
+          return;
+        }
+
         setIsLoading(false);
       } catch (error) {
+        if (isCancelled) return;
         console.error('Error loading application:', {
           error,
           message: error instanceof Error ? error.message : String(error),
@@ -263,6 +329,7 @@ export default function MyApplicationPage() {
 
     // Cleanup subscription on unmount
     return () => {
+      isCancelled = true;
       if (channel) {
         supabase.removeChannel(channel);
       }
@@ -310,6 +377,24 @@ export default function MyApplicationPage() {
         return 'Your application has been withdrawn.';
       default:
         return '';
+    }
+  };
+
+  const getStatusIndicatorColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'reviewing':
+        return theme.palette.info.main;
+      case 'interviewing':
+        return theme.palette.warning.main;
+      case 'offer':
+      case 'hired':
+        return theme.palette.success.main;
+      case 'rejected':
+        return theme.palette.error.main;
+      case 'pending':
+      case 'withdrawn':
+      default:
+        return theme.palette.text.disabled;
     }
   };
 
@@ -615,19 +700,28 @@ export default function MyApplicationPage() {
             bgcolor: isDark ? alpha(theme.palette.primary.main, 0.05) : alpha(theme.palette.primary.main, 0.02),
           }}
         >
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: `${getStatusColor(application.status)}.main` }} />
+          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                justifyContent: 'space-between',
+                gap: 1.5,
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1.5, lineHeight: 1.3 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: getStatusIndicatorColor(application.status), flexShrink: 0 }} />
                 Current Status
               </Typography>
               <Chip
                 label={formatStatus(application.status)}
                 color={getStatusColor(application.status) as any}
-                sx={{ fontWeight: 700, px: 1 }}
+                sx={{ fontWeight: 700, px: 1, alignSelf: { xs: 'flex-start', sm: 'center' } }}
               />
             </Box>
-            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 0 }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary', mb: 0, lineHeight: 1.7 }}>
               {getStatusMessage(application.status)}
             </Typography>
           </CardContent>
@@ -688,7 +782,16 @@ export default function MyApplicationPage() {
                         Cover Letter
                       </Typography>
                       <Paper variant="outlined" sx={{ p: 3, borderRadius: '12px', bgcolor: isDark ? 'action.hover' : 'grey.50', border: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line', lineHeight: 1.7, color: 'text.secondary' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            whiteSpace: 'pre-wrap',
+                            lineHeight: 1.7,
+                            color: 'text.secondary',
+                            overflowWrap: 'anywhere',
+                            wordBreak: 'break-word',
+                          }}
+                        >
                           {application.cover_letter}
                         </Typography>
                       </Paper>
@@ -840,18 +943,43 @@ export default function MyApplicationPage() {
                         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
                           Portfolio
                         </Typography>
-                        <Button
+                        <Box
                           component="a"
                           href={application.portfolio_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          variant="outlined"
-                          size="small"
-                          startIcon={<LinkIcon size={16} />}
                           data-html2canvas-ignore
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.25,
+                            px: 1.5,
+                            py: 1.25,
+                            borderRadius: '10px',
+                            border: `1px solid ${alpha(theme.palette.info.main, 0.25)}`,
+                            bgcolor: alpha(theme.palette.info.main, 0.06),
+                            color: 'info.main',
+                            textDecoration: 'none',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              bgcolor: alpha(theme.palette.info.main, 0.12),
+                              borderColor: 'info.main',
+                            },
+                          }}
                         >
-                          Visit Portfolio
-                        </Button>
+                          <LinkIcon size={16} />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {application.portfolio_url}
+                          </Typography>
+                        </Box>
                       </Box>
                     )}
                   </Stack>

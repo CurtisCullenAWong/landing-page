@@ -176,7 +176,7 @@ export default function HistoryPage() {
 
     const supabase = createClient();
     const channel = supabase
-      .channel('history-milestones-realtime')
+      .channel(`history-milestones-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

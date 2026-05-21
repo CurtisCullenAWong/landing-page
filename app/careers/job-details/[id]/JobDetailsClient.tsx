@@ -144,7 +144,7 @@ export default function JobDetailsClient() {
 
     const supabase = createClient();
     const channel = supabase
-      .channel(`job-${id}-changes`)
+      .channel(`job-${id}-changes-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

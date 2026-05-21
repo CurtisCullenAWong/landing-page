@@ -107,7 +107,7 @@ export default function HomePage() {
     // Implement Realtime updates for Posts
     const supabase = createClient();
     const channel = supabase
-      .channel('posts-realtime')
+      .channel(`posts-realtime-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'posts' },
