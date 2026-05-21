@@ -88,6 +88,8 @@ export function ImageWithFallback({
   const intrinsicHeight = typeof src === 'object' ? (src as any)?.height : undefined
   const hasIntrinsicDimensions = !!(intrinsicWidth && intrinsicHeight)
   const useFill = layout === 'fill' || (layout === 'responsive' && !hasIntrinsicDimensions)
+  const isSupabaseStorageUrl =
+    typeof normalizedSrc === 'string' && normalizedSrc.includes('/storage/v1/object/public/')
 
   // Calculate aspect ratio padding
   const aspectRatioValue =
@@ -245,15 +247,24 @@ export function ImageWithFallback({
         />
       )}
       {/* Use Next.js Image to leverage built-in optimization when possible */}
-      {(() => {
+      {isSupabaseStorageUrl ? (
+        <Box
+          component="img"
+          src={normalizedSrc}
+          alt={alt || 'Image'}
+          loading={lazy && !priority ? 'lazy' : 'eager'}
+          sx={getImageStyles()}
+          onError={handleError}
+          onLoad={handleLoad}
+          {...rest}
+        />
+      ) : (() => {
         try {
           const sizes = useFill ? (rest['sizes'] as string | undefined) || '100vw' : (rest['sizes'] as string | undefined)
 
-          // Prepare styles for Next/Image. When using `fill`, Next/Image manages width/height.
           const rawStyles = getImageStyles()
           const cleanedStyles: React.CSSProperties = { ...rawStyles }
           if (useFill) {
-            // Remove properties that conflict with fill
             delete (cleanedStyles as any).width
             delete (cleanedStyles as any).height
             delete (cleanedStyles as any).position
@@ -261,7 +272,6 @@ export function ImageWithFallback({
             delete (cleanedStyles as any).left
           }
 
-          // Next/Image expects numeric width/height when not using fill.
           const widthProp = !useFill && hasIntrinsicDimensions ? { width: intrinsicWidth as number } : (!useFill && typeof rawStyles.width === 'number' ? { width: rawStyles.width } : {})
           const heightProp = !useFill && hasIntrinsicDimensions ? { height: intrinsicHeight as number } : (!useFill && typeof rawStyles.height === 'number' ? { height: rawStyles.height } : {})
 
@@ -278,7 +288,6 @@ export function ImageWithFallback({
             />
           )
         } catch (e) {
-          // Fallback to native img if Next/Image can't handle src
           return (
             <Box
               component="img"

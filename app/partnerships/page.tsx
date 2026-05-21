@@ -24,6 +24,7 @@ import { usePageTitle } from '../../lib/usePageTitle';
 import { SITE_CONTENT } from '../../constants/site-content';
 import { SECTION_SPACING } from '@/constants/layout';
 import React, { useState, useEffect } from 'react';
+import { toSupabasePublicUrl } from '@/lib/supabase/storage-url';
 
 // Abstract squiggly shapes for background variety
 const BLOB_PATHS = [
@@ -206,7 +207,7 @@ export default function PartnershipsPage() {
       name: m.name,
       fullName: m.name,
       description: m.description || '',
-      image: m.image_url || '',
+      image: toSupabasePublicUrl(m.image_url, 'posts'),
       whiteBackground: m.white_background
     };
   });

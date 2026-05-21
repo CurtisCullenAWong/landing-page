@@ -63,6 +63,7 @@ import {
 import Link from 'next/link';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { createClient } from '@/lib/supabase/client';
+import { toSupabaseObjectPath, toSupabasePublicUrl } from '@/lib/supabase/storage-url';
 import { postService, Post, PostType } from '@/lib/services/post-service';
 import PostTable from '@/components/admin/PostTable';
 import PostDialog from '@/components/admin/PostDialog';
@@ -307,15 +308,14 @@ export default function AdminContentManagerPage() {
       .from('posts')
       .getPublicUrl(filePath);
 
-    return publicUrl;
+    return toSupabasePublicUrl(publicUrl, 'posts');
   };
 
   const deletePartnerImage = async (url: string) => {
     const supabase = createClient();
-    const parts = url.split('/storage/v1/object/public/posts/');
-    if (parts.length < 2) return;
+    const filePath = toSupabaseObjectPath(url, 'posts');
+    if (!filePath) return;
 
-    const filePath = parts[1];
     const { error } = await supabase.storage
       .from('posts')
       .remove([filePath]);
@@ -1171,7 +1171,7 @@ export default function AdminContentManagerPage() {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                 <Box
                                   component="img"
-                                  src={partner.image_url}
+                                  src={toSupabasePublicUrl(partner.image_url, 'posts')}
                                   alt={partner.name}
                                   sx={{
                                     width: 36,
@@ -1184,7 +1184,7 @@ export default function AdminContentManagerPage() {
                                   }}
                                 />
                                 <MuiLink
-                                  href={partner.image_url}
+                                  href={toSupabasePublicUrl(partner.image_url, 'posts')}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   sx={{
@@ -1488,7 +1488,7 @@ export default function AdminContentManagerPage() {
                   {partnerFormData.image_url ? (
                     <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: `1px solid ${theme.palette.divider}`, width: '100%', height: 140, bgcolor: alpha(theme.palette.background.paper, 0.5), display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
                       <img
-                        src={partnerFormData.image_url}
+                        src={toSupabasePublicUrl(partnerFormData.image_url, 'posts')}
                         alt="Logo Preview"
                         style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                       />
