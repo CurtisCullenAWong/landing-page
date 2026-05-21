@@ -40,6 +40,21 @@ interface AnalyticsChartsProps {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
+// Decode base64 encoded IP address or return formatted hash/raw value
+const decodeIP = (ip: string | null): string => {
+  if (!ip) return '-';
+  if (/^[0-9a-f]{64}$/i.test(ip)) {
+    return `hashed: ${ip.substring(0, 8)}`;
+  }
+  try {
+    const decoded = atob(ip);
+    if (/^(\d{1,3}\.){3}\d{1,3}$/.test(decoded) || decoded.includes(':')) {
+      return decoded;
+    }
+  } catch {}
+  return ip;
+};
+
 export default function AnalyticsCharts({ metrics }: AnalyticsChartsProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -238,7 +253,7 @@ export default function AnalyticsCharts({ metrics }: AnalyticsChartsProps) {
                           <TableCell sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {visit.referrer || '-'}
                           </TableCell>
-                          <TableCell>{visit.ip_address || '-'}</TableCell>
+                          <TableCell>{decodeIP(visit.ip_address)}</TableCell>
                           <TableCell sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={visit.user_agent || ''}>
                             {visit.user_agent || '-'}
                           </TableCell>

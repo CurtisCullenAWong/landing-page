@@ -65,7 +65,13 @@ export async function fetchAnalyticsMetrics(
     const referrerMap = new Map<string, number>();
     visits.forEach((v: any) => {
       if (v.referrer) {
-        const domain = new URL(v.referrer).hostname;
+        let domain = v.referrer;
+        try {
+          const url = new URL(v.referrer);
+          domain = url.hostname || v.referrer;
+        } catch {
+          // Keep raw referrer (e.g. "direct" or plain text) if not a valid URL
+        }
         referrerMap.set(domain, (referrerMap.get(domain) || 0) + 1);
       }
     });
