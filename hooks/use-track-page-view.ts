@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
  */
 export function useTrackPageView() {
   const pathname = usePathname();
+  const prevPathnameRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Disable visit tracking for local development environments
@@ -27,6 +28,9 @@ export function useTrackPageView() {
       return;
     }
 
+    // Determine the referrer: use previous SPA pathname if available, otherwise document.referrer
+    const referrer = prevPathnameRef.current || (typeof document !== 'undefined' ? document.referrer : '');
+
     // Track the page view
     fetch('/api/analytics/track', {
       method: 'POST',
@@ -35,12 +39,15 @@ export function useTrackPageView() {
       },
       body: JSON.stringify({
         pagePath: pathname,
-        referrer: document.referrer,
+        referrer: referrer || null,
         sessionId,
       }),
     }).catch(err => {
       // Silently fail if tracking fails
       console.debug('Analytics tracking failed:', err);
     });
+
+    // Update the previous pathname ref for the next navigation
+    prevPathnameRef.current = pathname;
   }, [pathname]);
 }
